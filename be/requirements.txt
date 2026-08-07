@@ -2,10 +2,30 @@ fastapi
 uvicorn
 pydantic
 pydantic-settings
-langchain-core
-langchain-openai
-langchain-chroma
-langchain-community
-ddgs
 python-dotenv
-rank_bm25
+python-multipart
+
+# Database (Supabase Postgres + pgvector)
+sqlalchemy[asyncio]
+asyncpg
+alembic
+pgvector
+
+# File storage (Cloudflare R2, S3-compatible)
+boto3
+
+# Auth
+passlib[bcrypt]
+python-jose[cryptography]
+
+# LLM + embeddings
+anthropic
+openai
+
+# Document parsing (PDF/PPTX ingestion)
+pypdf
+python-pptx
+pdf2image
+
+# Web search fallback (kept from prior RAG service)
+ddgs
