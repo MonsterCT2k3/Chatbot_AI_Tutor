@@ -1,1 +1,4 @@
 be/.env
+be/.venv
+**/__pycache__/
+*.pyc

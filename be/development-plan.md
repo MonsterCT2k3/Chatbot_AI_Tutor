@@ -2,23 +2,26 @@
 
 > Dựa trên `ai-tutor-implementation-guide.md` (kiến trúc đã chốt) và `schema.sql` (schema đã thiết kế). Tài liệu này chia nhỏ thành các phase có thể làm tuần tự, mỗi phase có: mục tiêu, việc cần làm, file đụng tới, tiêu chí hoàn thành (Definition of Done).
 >
-> Trạng thái hiện tại (2026-08-07): mới có skeleton (`app/main.py`, `app/config.py`, `app/database.py`, `app/models/*`, router/service rỗng). Chưa có Postgres thật, chưa có R2, chưa có auth, chưa có ingestion, chưa có RAG.
+> Trạng thái hiện tại (2026-08-07): **Phase 0 hoàn thành.** Supabase Postgres + R2 + Alembic đã kết nối và verify thật. Chưa có auth, chưa có ingestion, chưa có RAG — đó là Phase 1 trở đi.
 
 ---
 
-## Phase 0 — Hạ tầng & môi trường (làm trước tiên, không viết code)
+## Phase 0 — Hạ tầng & môi trường ✅ HOÀN THÀNH
 
 **Mục tiêu:** có đủ tài khoản/kết nối để mọi phase sau chạy được thật, không chỉ chạy trên giấy.
 
-- [ ] Tạo project Supabase (free tier) → bật extension `vector` + `uuid-ossp` → chạy `schema.sql` trong SQL Editor
-- [ ] Lấy connection string (dùng **pooler port 6543** cho `DATABASE_URL` nếu định deploy, port 5432 cho dev local cũng được)
-- [ ] Tạo bucket Cloudflare R2 + API token (Access Key ID/Secret) → điền vào `.env`
-- [ ] Lấy `ANTHROPIC_API_KEY` (console.anthropic.com)
-- [ ] Sinh `JWT_SECRET` ngẫu nhiên đủ mạnh (vd `openssl rand -hex 32`) → điền `.env`
-- [ ] Điền toàn bộ biến còn thiếu trong `be/.env` (đối chiếu với `app/config.py`)
-- [ ] Cài `alembic` (đã có trong `requirements.txt`) và init: `alembic init migrations` — dùng để quản lý migration về sau thay vì chạy tay `schema.sql` mỗi lần
+- [x] Tạo project Supabase (free tier) → bật extension `vector` + `uuid-ossp` → chạy `schema.sql` trong SQL Editor (bật RLS, không viết policy — chỉ khoá đường PostgREST/anon key, backend vẫn dùng role `postgres` nên bypass RLS)
+- [x] Lấy connection string — dùng **Transaction pooler (port 6543)**
+- [x] Tạo bucket Cloudflare R2 (`ai-tutor-documents`) + API token → verify bằng upload/read/delete object thật qua `boto3`
+- [x] ~~Lấy `ANTHROPIC_API_KEY`~~ — đã đổi sang dùng `gpt-4o-mini` (OpenAI), tái sử dụng `OPENAI_API_KEY` đã có sẵn, không cần thêm vendor mới
+- [x] Sinh `JWT_SECRET` bằng `openssl rand -hex 32` → điền `.env`
+- [x] Điền toàn bộ biến trong `be/.env` (đối chiếu với `app/config.py`)
+- [x] `alembic init -t async migrations`, wire `env.py` dùng chung `app.database.engine` (không tạo engine riêng), `target_metadata = Base.metadata` (import `app.models` để đăng ký hết model)
+- [x] Migration baseline (`338222d0bfcf`) — autogenerate không còn diff nhờ siết lại type trong ORM models cho khớp 100% với `schema.sql` (Text, TIMESTAMP(timezone=True), BigInteger, Index/CheckConstraint tường minh) → `alembic stamp head`
 
-**DoD:** `python -c "from app.database import engine"` kết nối được tới Supabase (test bằng 1 script nhỏ `SELECT 1`).
+**Lưu ý quan trọng phát sinh khi làm:** Supabase transaction pooler (6543) không hỗ trợ prepared statements — asyncpg mặc định có dùng, gây lỗi `DuplicatePreparedStatementError`. Đã fix bằng `connect_args={"statement_cache_size": 0}` trong `create_async_engine` ở `app/database.py`. Nếu sau này đổi sang session pooler hay direct connection thì có thể bỏ dòng này, nhưng để nguyên cũng không hại gì.
+
+**DoD:** ✅ `SELECT 1` qua `app.database.engine` chạy được, `alembic current` trả về `338222d0bfcf (head)`, R2 upload/read/delete pass.
 
 ---
 
@@ -110,7 +113,7 @@ select count(*) from document_chunks where document_id = '...';
 - `app/services/rag_service.py`:
   - `similarity_search(document_id, query_embedding, k=6) -> list[DocumentChunk]` — query pgvector: `order by embedding <=> :query_embedding limit :k`, filter `document_id`
   - `build_prompt(chunks, question) -> str` — system prompt yêu cầu chỉ trả lời dựa trên context, kèm tag `[Trang X]` để model tự trích dẫn
-  - `ask(document_id, question) -> AnswerResult` — embed câu hỏi → similarity search → build prompt → gọi Claude API (`anthropic` SDK, `stream=False` ở phase này) → parse citation từ response (regex tìm `[Trang X]` khớp với `page_number` của chunk đã dùng)
+  - `ask(document_id, question) -> AnswerResult` — embed câu hỏi → similarity search → build prompt → gọi OpenAI Chat Completions API (`openai` SDK, model `gpt-4o-mini`, `stream=False` ở phase này) → parse citation từ response (regex tìm `[Trang X]` khớp với `page_number` của chunk đã dùng)
 - Endpoint tạm để test: `POST /api/sessions/{id}/messages` (non-streaming trước, trả JSON thường)
 
 **DoD:** hỏi 1 câu về nội dung file đã ingest ở Phase 3 → nhận câu trả lời đúng, có trích dẫn số trang hợp lệ.
@@ -120,7 +123,7 @@ select count(*) from document_chunks where document_id = '...';
 ## Phase 6 — Chuyển sang streaming (SSE)
 
 **Việc cần làm:**
-- Đổi `rag_service.ask()` thành generator/async generator dùng `client.messages.stream(...)` của Anthropic SDK
+- Đổi `rag_service.ask()` thành generator/async generator dùng `client.chat.completions.create(..., stream=True)` của OpenAI SDK
 - `app/routers/messages.py`: trả `StreamingResponse(media_type="text/event-stream")`, emit theo đúng format đã chốt trong guide:
   ```
   event: token     { "delta": "..." }
@@ -171,7 +174,7 @@ select count(*) from document_chunks where document_id = '...';
 
 ## Phase 10 — Hardening & vận hành
 
-- [ ] Rate limit route `/api/sessions/{id}/messages` (tránh spam Claude API tốn tiền)
+- [ ] Rate limit route `/api/sessions/{id}/messages` (tránh spam OpenAI API tốn tiền)
 - [ ] Giới hạn dung lượng/số file upload mỗi user (free tier Supabase 500MB, R2 10GB)
 - [ ] Log lỗi ingestion rõ ràng (`error_message`) để debug khi parser fail với PPTX lạ
 - [ ] GitHub Action ping định kỳ (tránh Supabase free tier tự pause sau 7 ngày không request)

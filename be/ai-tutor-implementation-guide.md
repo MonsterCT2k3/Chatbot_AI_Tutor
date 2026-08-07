@@ -24,7 +24,7 @@ Giai đoạn hiện tại: **dự án cá nhân / MVP**, ưu tiên chạy đư�
 | Database | **Supabase Postgres** (pgvector enabled) | SQL quan hệ (JOIN sessions/messages/chunks) + vector search cùng 1 chỗ, không cần vector DB riêng |
 | File storage (PDF/PPTX gốc + thumbnail ảnh) | **Cloudflare R2** | Egress miễn phí vĩnh viễn — quan trọng vì viewer sẽ load lại file/thumbnail liên tục; 10GB free tier |
 | Auth | **Tự viết trong FastAPI** (JWT + passlib/bcrypt) | KHÔNG dùng Supabase Auth, không dùng Supabase RLS — mọi kiểm soát quyền truy cập nằm trong code backend |
-| LLM | Claude API (Anthropic) | Model chính cho RAG + streaming response |
+| LLM | OpenAI `gpt-4o-mini` | Model chính cho RAG + streaming response — cùng vendor với embedding, dùng chung 1 API key |
 | Embedding model | OpenAI `text-embedding-3-small` hoặc tương đương (1536 chiều) | Đã fix cứng chiều vector trong schema; nếu đổi model sau này, thêm cột `embedding_v2`, không sửa cột cũ |
 | Ingestion (giai đoạn MVP) | `BackgroundTasks` của FastAPI | Chưa cần Celery/Redis queue riêng — chỉ thêm khi có traffic thật |
 
@@ -49,7 +49,7 @@ FastAPI Backend
    ├── Ingestion Worker      (parse PDF/PPTX → chunk → embed → lưu Postgres/pgvector)
    ├── Session Service       (CRUD chat sessions)
    ├── Message Service       (nhận câu hỏi, gọi RAG, stream response)
-   └── RAG Orchestrator      (similarity search trong pgvector → build prompt → gọi Claude API, stream)
+   └── RAG Orchestrator      (similarity search trong pgvector → build prompt → gọi OpenAI Chat API, stream)
    │
    ├──▶ Supabase Postgres (metadata, chunks, embeddings, sessions, messages, citations)
    └──▶ Cloudflare R2 (file gốc PDF/PPTX, thumbnail ảnh từng trang/slide)
@@ -63,7 +63,7 @@ FastAPI Backend
 **Luồng chat (RAG + streaming + citation highlight):**
 1. User gửi câu hỏi trong 1 session gắn với `document_id` cụ thể.
 2. FastAPI lưu user message → RAG Orchestrator similarity-search trong `document_chunks` (filter theo `document_id`) → lấy top-k chunk liên quan.
-3. Build prompt: system prompt (chỉ được trả lời dựa trên context) + các chunk retrieved + câu hỏi → gọi Claude API với `stream=true`.
+3. Build prompt: system prompt (chỉ được trả lời dựa trên context) + các chunk retrieved + câu hỏi → gọi OpenAI Chat Completions API (`gpt-4o-mini`) với `stream=true`.
 4. Response stream về frontend qua SSE: event `token` (từng phần text) → event `citation` (page_number, chunk_id, snippet) → event `done` (lưu message + citations vào Postgres).
 5. Frontend nhận event `citation` → gọi `highlightRegion(page_number)` trên document viewer để tự động cuộn/highlight đúng trang.
 
@@ -144,7 +144,7 @@ event: done
 ```
 app/
 ├── main.py                  # FastAPI app entrypoint
-├── config.py                 # env vars (Supabase URL, R2 keys, Claude API key...)
+├── config.py                 # env vars (Supabase URL, R2 keys, OpenAI API key...)
 ├── database.py               # SQLAlchemy async engine + session
 ├── models/                   # SQLAlchemy ORM models (map với schema.sql)
 │   ├── user.py
@@ -162,7 +162,7 @@ app/
 │   ├── auth_service.py       # JWT, hash password
 │   ├── storage_service.py    # boto3 wrapper cho R2 (upload/download/presigned URL)
 │   ├── ingestion_service.py  # parse PDF/PPTX, chunk, embed
-│   └── rag_service.py        # retrieval + prompt + gọi Claude API + stream
+│   └── rag_service.py        # retrieval + prompt + gọi OpenAI Chat API + stream
 └── workers/
     └── ingestion_worker.py   # background task xử lý ingestion
 ```
@@ -182,11 +182,9 @@ R2_SECRET_ACCESS_KEY=
 R2_BUCKET_NAME=
 R2_ENDPOINT_URL=https://[account_id].r2.cloudflarestorage.com
 
-# Anthropic (Claude API)
-ANTHROPIC_API_KEY=
-
-# Embedding
-EMBEDDING_API_KEY=
+# OpenAI (LLM gpt-4o-mini + embedding, dùng chung 1 key)
+OPENAI_API_KEY=
+CHAT_MODEL=gpt-4o-mini
 EMBEDDING_MODEL=text-embedding-3-small
 
 # Auth
@@ -203,7 +201,7 @@ JWT_EXPIRE_MINUTES=
 3. Document upload flow: FastAPI → R2 → tạo record `documents` (status=pending).
 4. Ingestion worker: parse PDF/PPTX → chunk → embed → lưu `document_chunks` → update status=ready. Test kỹ bước này riêng trước khi làm chat.
 5. Document viewer API: trả presigned URL cho thumbnail từng trang từ R2.
-6. RAG orchestrator: similarity search trong pgvector + gọi Claude API (chưa cần stream, test non-streaming trước).
+6. RAG orchestrator: similarity search trong pgvector + gọi OpenAI Chat API (chưa cần stream, test non-streaming trước).
 7. Chuyển sang streaming (SSE) sau khi RAG chạy đúng.
 8. Chat session CRUD (multi-session).
 9. Citation resolver + frontend highlight logic — nối `event: citation` với `highlightRegion()` trên viewer.

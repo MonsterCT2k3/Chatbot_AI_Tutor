@@ -18,8 +18,7 @@ boto3
 passlib[bcrypt]
 python-jose[cryptography]
 
-# LLM + embeddings
-anthropic
+# LLM (gpt-4o-mini) + embeddings
 openai
 
 # Document parsing (PDF/PPTX ingestion)

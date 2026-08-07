@@ -14,11 +14,9 @@ class Settings(BaseSettings):
     R2_BUCKET_NAME: str = ""
     R2_ENDPOINT_URL: str = ""
 
-    # Anthropic Claude API
-    ANTHROPIC_API_KEY: str = ""
-
-    # Embedding model (uses OPENAI_API_KEY)
+    # OpenAI: chat model (RAG generation) + embedding model, share one key
     OPENAI_API_KEY: str = ""
+    CHAT_MODEL: str = "gpt-4o-mini"
     EMBEDDING_MODEL: str = "text-embedding-3-small"
 
     # Auth
