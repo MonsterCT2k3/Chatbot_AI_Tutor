@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-pydantic
+pydantic[email]
 pydantic-settings
 python-dotenv
 python-multipart
@@ -15,7 +15,7 @@ pgvector
 boto3
 
 # Auth
-passlib[bcrypt]
+bcrypt
 python-jose[cryptography]
 
 # LLM (gpt-4o-mini) + embeddings

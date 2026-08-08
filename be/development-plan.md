@@ -2,7 +2,7 @@
 
 > Dựa trên `ai-tutor-implementation-guide.md` (kiến trúc đã chốt) và `schema.sql` (schema đã thiết kế). Tài liệu này chia nhỏ thành các phase có thể làm tuần tự, mỗi phase có: mục tiêu, việc cần làm, file đụng tới, tiêu chí hoàn thành (Definition of Done).
 >
-> Trạng thái hiện tại (2026-08-07): **Phase 0 hoàn thành.** Supabase Postgres + R2 + Alembic đã kết nối và verify thật. Chưa có auth, chưa có ingestion, chưa có RAG — đó là Phase 1 trở đi.
+> Trạng thái hiện tại (2026-08-07): **Phase 0 + Phase 1 + Phase 2 hoàn thành.** Supabase Postgres (Singapore) + R2 + Alembic đã kết nối và verify thật. Auth (signup/login/me/logout) và document upload/list/get/delete chạy đầy đủ, đã test end-to-end với file PDF thật. Chưa có ingestion (parse/chunk/embed) hay RAG — đó là Phase 3 trở đi.
 
 ---
 
@@ -11,7 +11,7 @@
 **Mục tiêu:** có đủ tài khoản/kết nối để mọi phase sau chạy được thật, không chỉ chạy trên giấy.
 
 - [x] Tạo project Supabase (free tier) → bật extension `vector` + `uuid-ossp` → chạy `schema.sql` trong SQL Editor (bật RLS, không viết policy — chỉ khoá đường PostgREST/anon key, backend vẫn dùng role `postgres` nên bypass RLS)
-- [x] Lấy connection string — dùng **Transaction pooler (port 6543)**
+- [x] Lấy connection string — dùng **Transaction pooler (port 6543)**. ⚠️ Project ban đầu tạo ở Seoul (`ap-northeast-2`) — đo latency thấy quá chậm (cold connect ~2.2s, query ấm ~700ms) nên đã **tạo lại project mới ở Singapore (`ap-southeast-1`)** và chuyển hẳn sang (chạy lại `schema.sql`, `alembic stamp head`). Project Seoul cũ không còn dùng, có thể xoá.
 - [x] Tạo bucket Cloudflare R2 (`ai-tutor-documents`) + API token → verify bằng upload/read/delete object thật qua `boto3`
 - [x] ~~Lấy `ANTHROPIC_API_KEY`~~ — đã đổi sang dùng `gpt-4o-mini` (OpenAI), tái sử dụng `OPENAI_API_KEY` đã có sẵn, không cần thêm vendor mới
 - [x] Sinh `JWT_SECRET` bằng `openssl rand -hex 32` → điền `.env`
@@ -21,48 +21,53 @@
 
 **Lưu ý quan trọng phát sinh khi làm:** Supabase transaction pooler (6543) không hỗ trợ prepared statements — asyncpg mặc định có dùng, gây lỗi `DuplicatePreparedStatementError`. Đã fix bằng `connect_args={"statement_cache_size": 0}` trong `create_async_engine` ở `app/database.py`. Nếu sau này đổi sang session pooler hay direct connection thì có thể bỏ dòng này, nhưng để nguyên cũng không hại gì.
 
+**Lưu ý về performance:** Ban đầu có bật `pool_pre_ping=True` (khuyến nghị mặc định để tránh lỗi "connection đã chết") nhưng nó thêm 1 round-trip mạng phụ mỗi lần checkout connection — đo được làm chậm request gần gấp đôi (~700ms → ~300-400ms sau khi bỏ). Đã bỏ `pool_pre_ping` khỏi `app/database.py`. Đánh đổi: nếu Supabase tự đóng connection nhàn rỗi, request đó có thể lỗi 1 lần rồi các request sau tự ổn — chấp nhận được ở giai đoạn MVP.
+
 **DoD:** ✅ `SELECT 1` qua `app.database.engine` chạy được, `alembic current` trả về `338222d0bfcf (head)`, R2 upload/read/delete pass.
 
 ---
 
-## Phase 1 — Auth module
+## Phase 1 — Auth module ✅ HOÀN THÀNH
 
 **Vì sao làm trước:** mọi route khác đều cần `current_user`, làm sau sẽ phải sửa lại toàn bộ router.
 
-**Việc cần làm:**
-- `app/schemas/auth.py`: `SignupRequest`, `LoginRequest`, `TokenResponse` (access_token, token_type)
-- `app/services/auth_service.py`:
-  - `hash_password` / `verify_password` (passlib bcrypt)
-  - `create_access_token(user_id)` — JWT, hạn `JWT_EXPIRE_MINUTES`
-  - `decode_access_token(token)` — raise nếu hết hạn/sai chữ ký
-- `app/dependencies.py` (mới): `get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)) -> User` — dùng làm `Depends()` cho mọi route cần login
-- `app/routers/auth.py`:
-  - `POST /api/auth/signup` — check email trùng → hash password → insert `users` → trả JWT luôn (khỏi bắt login lại)
-  - `POST /api/auth/login` — verify password → trả JWT
-  - `POST /api/auth/logout` — MVP: stateless JWT nên chỉ cần frontend xóa token; nếu muốn revoke thật thì cần bảng `refresh_tokens` (chưa có trong schema hiện tại — thêm sau nếu cần)
-- Đăng ký `oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")`
+**9 bước, làm và test từng bước trước khi qua bước tiếp theo:**
 
-**DoD:** `curl -X POST /api/auth/signup` → nhận JWT → gọi 1 route bảo vệ thử (tạm thời thêm `GET /api/auth/me`) → trả đúng user.
+- [x] **1.1 Password hashing** — `hash_password`/`verify_password` trong `app/services/auth_service.py`. Ban đầu dùng `passlib[bcrypt]` theo kế hoạch nhưng **passlib không tương thích với bcrypt >=4** (thư viện passlib đã ngừng phát triển từ 2020) → đổi sang gọi thẳng package `bcrypt`, bỏ passlib khỏi `requirements.txt`.
+- [x] **1.2 JWT create/decode** — `create_access_token(user_id)`, `decode_access_token(token)` trong `auth_service.py`. Test: token hợp lệ, token hết hạn, token sai chữ ký đều raise đúng.
+- [x] **1.3 Pydantic schemas** — `app/schemas/auth.py`: `SignupRequest`, `LoginRequest`, `TokenResponse`, `UserResponse`. Cần thêm `pydantic[email]` (package `email-validator`) cho `EmailStr`.
+- [x] **1.4 `get_current_user` dependency** — `app/dependencies.py`: `OAuth2PasswordBearer` + `get_current_user(token, db) -> User`, raise 401 nếu token invalid/user không tồn tại.
+- [x] **1.5 `POST /api/auth/signup`**
+- [x] **1.6 `POST /api/auth/login`**
+- [x] **1.7 `GET /api/auth/me`** — route bảo vệ, verify dependency hoạt động đúng.
+- [x] **1.8 `POST /api/auth/logout`** — MVP stateless, chỉ cần token hợp lệ để gọi, không revoke gì server-side (token cũ vẫn dùng được tới khi hết hạn — đã verify đúng ý đồ thiết kế qua test).
+- [x] **1.9 Test end-to-end toàn bộ luồng** — 10 cases (signup, duplicate signup, login đúng/sai, /me có/không/sai token, logout có/không token, xác nhận token còn sống sau logout) — tất cả PASS.
+
+**Việc phát sinh ngoài 9 bước gốc (làm thêm trong Phase 1 vì cần thiết cho production-readiness):**
+- **Chuẩn hoá response envelope toàn cục** — mọi response (thành công lẫn lỗi) đều có dạng `{success, message, data, error, requestId}` (`app/middleware.py` + `app/exceptions.py`), áp dụng tự động cho mọi route hiện tại và tương lai.
+- **Tách logic nghiệp vụ khỏi router** — router chỉ lo HTTP (parse request, chọn status code), toàn bộ business logic + DB access nằm trong `auth_service.py` (mô hình gần giống Controller/Service của Spring, không có tầng Repository riêng vì `AsyncSession` của SQLAlchemy đã đóng vai trò đó).
+
+**DoD:** ✅ Toàn bộ 9 bước + test end-to-end đều pass qua HTTP thật (không chỉ test nội bộ).
 
 ---
 
-## Phase 2 — Document upload (chưa cần ingestion, chỉ upload + lưu metadata)
+## Phase 2 — Document upload ✅ HOÀN THÀNH
 
-**Việc cần làm:**
-- `app/schemas/document.py`: `DocumentResponse` (id, filename, status, page_count, created_at…)
-- `app/services/storage_service.py`:
-  - `upload_file(file_bytes, key) -> None` — dùng `boto3` client trỏ `R2_ENDPOINT_URL`
-  - `get_presigned_url(key, expires_in=3600) -> str`
-  - `delete_file(key)`
-- `app/routers/documents.py`:
-  - `POST /api/documents` — nhận `UploadFile`, validate `file_type` (pdf/pptx) bằng extension + content-type, tạo `storage_key = f"documents/{user_id}/{document_id}/original.{ext}"`, upload lên R2, insert record `documents(status='pending')`, trả `202` kèm `document_id`
-  - `GET /api/documents` — list theo `user_id`, `order by created_at desc`
-  - `GET /api/documents/{id}` — 404 nếu không thuộc user
-  - `DELETE /api/documents/{id}` — xóa record (cascade xóa pages/chunks) + xóa file trên R2
+**9 bước, làm và test từng bước trước khi qua bước tiếp theo (giống Phase 1):**
 
-**Lưu ý:** validate kích thước file (vd giới hạn 20–50MB) để tránh nuốt hết R2 free tier/timeout khi parse.
+- [x] **2.1 `storage_service.upload_file()`** — wrapper `boto3` upload lên R2. **Lưu ý quan trọng:** `boto3` là thư viện blocking (đồng bộ) — gọi trực tiếp trong route `async def` sẽ đứng hình toàn bộ event loop (mọi request khác cũng bị chặn). Đã bọc bằng `starlette.concurrency.run_in_threadpool`.
+- [x] **2.2 `storage_service.get_presigned_url()`** — sinh URL tạm thời để đọc file mà không cần public bucket. Đây chỉ là ký (sign) cục bộ, không gọi mạng tới R2 → không cần `run_in_threadpool`. Đã verify bucket KHÔNG public (URL không ký bị từ chối 400).
+- [x] **2.3 `storage_service.delete_file()`** — gọi mạng thật nên vẫn cần `run_in_threadpool`.
+- [x] **2.4 `schemas/document.py`: `DocumentResponse`** — không lộ `storage_key`/`user_id`/`metadata` (giống nguyên tắc không lộ `hashed_password` ở Phase 1).
+- [x] **2.5 `POST /api/documents`** — logic thật (validate + upload + insert) nằm trong `document_service.create_document()` (Service layer), không phải trong router. Thứ tự cố ý: upload R2 **trước**, insert DB **sau** — nếu upload lỗi thì không có row rác trong DB.
+- [x] **2.6 `GET /api/documents`** — chỉ query đơn giản (lọc + sắp xếp), không có logic quyết định → để thẳng trong router, không tạo service function (giống bài học "get_user_by_id là thừa" ở Phase 1).
+- [x] **2.7 `GET /api/documents/{id}`** — 404 giống hệt nhau (byte-for-byte, đã test) cho cả 2 trường hợp "không tồn tại" và "của người khác", tránh lộ thông tin.
+- [x] **2.8 `DELETE /api/documents/{id}`** — tách `get_owned_document()` dùng chung cho cả 2.7 và 2.8 (khác với `get_user_by_id`: ở đây có ≥2 nơi gọi thật nên tách ra là hợp lý, không phải abstraction thừa).
+- [x] **2.9 Test end-to-end** — 12 case, tất cả PASS, bao gồm test 2 user riêng biệt để xác nhận không lộ dữ liệu chéo.
 
-**DoD:** Upload 1 file PDF thật qua Postman/curl → thấy record trong bảng `documents` với `status=pending` và file thật xuất hiện trong R2 bucket.
+**Lưu ý:** giới hạn file 50MB, check cả extension lẫn `content_type` trước khi chấp nhận.
+
+**DoD:** ✅ Toàn bộ 9 bước pass qua HTTP thật (in-process test client gọi qua ASGI, tương đương HTTP thật), có test với PDF thật (`app/data/slide/b3.pdf`) upload lên R2 thật.
 
 ---
 
