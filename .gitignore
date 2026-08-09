@@ -2,3 +2,4 @@ be/.env
 be/.venv
 **/__pycache__/
 *.pyc
+be/pdf_extract/
