@@ -17,14 +17,22 @@ boto3
 # Auth
 bcrypt
 python-jose[cryptography]
+slowapi
 
 # LLM (gpt-4o-mini) + embeddings
 openai
 
-# Document parsing (PDF/PPTX ingestion)
+# OCR text extraction mode (alternative to pypdf, handles embedded images/diagrams)
+mistralai
+
+# Document parsing/chunking (PDF ingestion — PPTX is converted to PDF via
+# LibreOffice headless first, then goes through the same PDF pipeline)
 pypdf
+tiktoken
+
+# Only used to generate a throwaway .pptx test fixture in step 3.2's test —
+# not used for real parsing (PPTX is converted to PDF, not read directly)
 python-pptx
-pdf2image
 
 # Web search fallback (kept from prior RAG service)
 ddgs

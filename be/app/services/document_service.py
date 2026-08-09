@@ -31,6 +31,7 @@ async def create_document(
     filename: str,
     content_type: str | None,
     file_bytes: bytes,
+    extraction_mode: str = "pypdf",
 ) -> Document:
     extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
     expected_content_type = ALLOWED_CONTENT_TYPES.get(extension)
@@ -54,6 +55,7 @@ async def create_document(
         file_size_bytes=len(file_bytes),
         storage_key=storage_key,
         status="pending",
+        metadata_={"extraction_mode": extraction_mode},
     )
     db.add(document)
     await db.commit()

@@ -42,6 +42,8 @@ create table documents (
     storage_key     text not null,
     -- optional: object key of a lightweight preview asset if generated
     thumbnail_key   text,
+    -- only set for PPTX uploads: R2 key of the PDF LibreOffice converted it to
+    converted_pdf_key text,
 
     page_count      int,
 
@@ -177,6 +179,28 @@ create table message_citations (
 
 create index idx_citations_message on message_citations(message_id);
 create index idx_citations_document on message_citations(document_id);
+
+-- ------------------------------------------------------------
+-- 8. REFRESH TOKENS
+-- Backs real session revocation (logout, "log out this session") —
+-- access tokens are short-lived and stateless, refresh tokens are the
+-- only thing that can actually be killed server-side before it expires.
+-- ------------------------------------------------------------
+create table refresh_tokens (
+    id              uuid primary key default gen_random_uuid(),
+    user_id         uuid not null references users(id) on delete cascade,
+
+    -- SHA-256 of the raw token — random high-entropy string, so a fast
+    -- hash is enough (unlike passwords, which need slow hashing like bcrypt).
+    token_hash      text not null,
+    expires_at      timestamptz not null,
+    revoked         boolean not null default false,
+
+    created_at      timestamptz not null default now()
+);
+
+create index idx_refresh_tokens_user on refresh_tokens(user_id);
+create index idx_refresh_tokens_hash on refresh_tokens(token_hash);
 
 -- ------------------------------------------------------------
 -- updated_at auto-touch trigger (reused across tables)

@@ -29,6 +29,9 @@ class Document(Base):
 
     storage_key: Mapped[str] = mapped_column(Text, nullable=False)
     thumbnail_key: Mapped[str | None] = mapped_column(Text)
+    # Only set for PPTX uploads: R2 key of the PDF LibreOffice converted it to
+    # during ingestion, kept so a "download as PDF" feature is easy to add later.
+    converted_pdf_key: Mapped[str | None] = mapped_column(Text)
 
     page_count: Mapped[int | None]
 

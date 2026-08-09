@@ -19,6 +19,11 @@ async def upload_file(file_bytes: bytes, key: str, content_type: str | None = No
     await run_in_threadpool(_client.put_object, Bucket=settings.R2_BUCKET_NAME, Key=key, Body=file_bytes, **extra_args)
 
 
+async def download_file(key: str) -> bytes:
+    response = await run_in_threadpool(_client.get_object, Bucket=settings.R2_BUCKET_NAME, Key=key)
+    return await run_in_threadpool(response["Body"].read)
+
+
 def get_presigned_url(key: str, expires_in: int = 3600) -> str:
     # Local signing only, no network call to R2 — safe to call directly (no threadpool needed).
     return _client.generate_presigned_url(

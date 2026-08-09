@@ -3,6 +3,7 @@ from app.models.document import Document, DocumentPage
 from app.models.chunk import DocumentChunk
 from app.models.session import ChatSession
 from app.models.message import ChatMessage, MessageCitation
+from app.models.refresh_token import RefreshToken
 
 __all__ = [
     "User",
@@ -12,4 +13,5 @@ __all__ = [
     "ChatSession",
     "ChatMessage",
     "MessageCitation",
+    "RefreshToken",
 ]

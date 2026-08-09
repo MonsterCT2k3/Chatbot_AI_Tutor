@@ -16,3 +16,11 @@ class DocumentResponse(BaseModel):
     error_message: str | None
     created_at: datetime
     updated_at: datetime
+
+
+class DocumentStatusResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    status: str
+    error_message: str | None
+    page_count: int | None

@@ -19,9 +19,13 @@ class Settings(BaseSettings):
     CHAT_MODEL: str = "gpt-4o-mini"
     EMBEDDING_MODEL: str = "text-embedding-3-small"
 
+    # Mistral: OCR (mistral-ocr-latest) + vision image description (pixtral-12b-2409)
+    MISTRAL_API_KEY: str = ""
+
     # Auth
     JWT_SECRET: str = ""
-    JWT_EXPIRE_MINUTES: int = 60
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_file_encoding="utf-8")
 
