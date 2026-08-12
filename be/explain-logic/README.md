@@ -5,3 +5,5 @@ Mỗi phase (từ Phase 3 trở đi — Phase 0/1/2 không cần vì đã hiểu
 ## Các phase
 
 - [Phase 3 — Ingestion pipeline](phase-3-ingestion/README.md)
+- [Phase 4 — Document viewer API](phase-4-viewer-api/README.md)
+- [Phase 5 — RAG orchestrator](phase-5-rag-orchestrator/README.md)

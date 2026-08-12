@@ -2,9 +2,15 @@
 
 > Dựa trên `ai-tutor-implementation-guide.md` (kiến trúc đã chốt) và `schema.sql` (schema đã thiết kế). Mỗi phase là 1 file riêng trong thư mục này, làm tuần tự, mỗi phase có: mục tiêu, việc cần làm, file đụng tới, tiêu chí hoàn thành (Definition of Done).
 
-## Trạng thái hiện tại (2026-08-08)
+## Nguyên tắc xuyên suốt dự án
 
-**Phase 0 + Phase 1 + Phase 1.5 + Phase 2 hoàn thành.** Supabase Postgres (Singapore) + R2 + Alembic đã kết nối và verify thật. Auth đầy đủ (signup/login/refresh/logout/me) với refresh token thu hồi được thật + rate limit `/login`, và document upload/list/get/delete — cả 2 đã test end-to-end với dữ liệu thật. Quay lại **Phase 3 (ingestion)** tiếp theo.
+Đây là dự án học sâu về AI — không chỉ để "chạy được". **Mọi phần đụng trực tiếp tới chất lượng và độ an toàn của AI** (ingestion/embedding ở [Phase 3](phase-3-ingestion.md), RAG core + nâng cao ở [Phase 5](phase-5-rag-orchestrator.md)/[5.5](phase-5.5-advanced-rag.md), guardrail + observability ở [Phase 5.6](phase-5.6-guardrails-observability.md), multi-turn ở [Phase 6](phase-6-chat-sessions.md), streaming ở [Phase 7](phase-7-streaming.md), citation ở [Phase 8](phase-8-citation-highlight.md)) đều triển khai ở mức chuyên nghiệp đầy đủ, có đo lường/kiểm chứng thật (xem nguyên tắc "đo trước, tối ưu sau" ở Phase 5.5) — không rút gọn kiểu "tạm bợ chạy được". Chất lượng câu trả lời (5.5) và an toàn hệ thống (5.6) là 2 trụ cột riêng biệt, cả 2 đều bắt buộc — 1 hệ thống RAG trả lời hay nhưng không có guardrail vẫn không phải hệ thống chuyên nghiệp.
+
+Các phần hạ tầng thuần túy không trực tiếp quyết định chất lượng AI (auth, upload, vận hành...) vẫn áp dụng nguyên tắc "đủ dùng, không over-engineer" như đã làm có chủ đích ở JWT ([Phase 1.5](phase-1.5-jwt-hardening.md) có hẳn 1 bảng ghi lại những gì cố ý KHÔNG làm và lý do) — 2 nguyên tắc này không mâu thuẫn nhau, chỉ khác phạm vi áp dụng.
+
+## Trạng thái hiện tại (2026-08-09)
+
+**Phase 0 → Phase 5 hoàn thành.** Supabase Postgres (Singapore) + R2 + Alembic đã kết nối và verify thật. Auth đầy đủ (signup/login/refresh/logout/me) với refresh token thu hồi được thật + rate limit `/login`; document upload/list/get/delete/status/file — toàn bộ ingestion pipeline (pypdf/mistral_ocr/hybrid + PPTX→PDF) đã chạy end-to-end với dữ liệu thật. **Phase 5 (RAG baseline)** đã xong: retrieval bằng pgvector, prompt có trích dẫn, endpoint tạm `/ask` chạy thật qua HTTP, đã test cả case "biết mình không biết" (câu hỏi ngoài phạm vi, document 0 chunk) không hallucinate/không crash. Tiếp theo: **Phase 5.5 (Advanced RAG)**.
 
 ## Danh sách các phase
 
@@ -12,11 +18,13 @@
 - [Phase 1 — Auth module](phase-1-auth.md) ✅ Hoàn thành
 - [Phase 1.5 — JWT Hardening](phase-1.5-jwt-hardening.md) ✅ Hoàn thành
 - [Phase 2 — Document upload](phase-2-document-upload.md) ✅ Hoàn thành
-- [Phase 3 — Ingestion pipeline](phase-3-ingestion.md) ⏳ Đang làm
-- [Phase 4 — Document viewer API](phase-4-viewer-api.md)
-- [Phase 5 — RAG orchestrator](phase-5-rag-orchestrator.md)
-- [Phase 6 — Streaming (SSE)](phase-6-streaming.md)
-- [Phase 7 — Chat session CRUD](phase-7-chat-sessions.md)
+- [Phase 3 — Ingestion pipeline](phase-3-ingestion.md) ✅ Hoàn thành
+- [Phase 4 — Document viewer API](phase-4-viewer-api.md) ✅ Hoàn thành
+- [Phase 5 — RAG orchestrator (baseline)](phase-5-rag-orchestrator.md) ✅ Hoàn thành
+- [Phase 5.5 — Advanced RAG (retrieval quality, faithfulness & evaluation)](phase-5.5-advanced-rag.md)
+- [Phase 5.6 — Guardrails, Safety & Observability](phase-5.6-guardrails-observability.md)
+- [Phase 6 — Chat session CRUD + multi-turn](phase-6-chat-sessions.md)
+- [Phase 7 — Streaming (SSE)](phase-7-streaming.md)
 - [Phase 8 — Citation resolver + frontend highlight](phase-8-citation-highlight.md)
 - [Phase 9 — Frontend (React, 2 panel)](phase-9-frontend.md)
 - [Phase 10 — Hardening & vận hành](phase-10-hardening.md)
@@ -25,8 +33,11 @@
 
 ```
 Phase 0 (hạ tầng) → Phase 1 (auth) → Phase 2 (upload) → Phase 3 (ingestion, test riêng)
-→ Phase 4 (viewer) → Phase 5 (RAG non-stream) → Phase 6 (streaming)
-→ Phase 7 (session CRUD) → Phase 8 (citation highlight) → Phase 9 (frontend) → Phase 10 (hardening)
+→ Phase 4 (viewer) → Phase 5 (RAG baseline, non-stream) → Phase 5.5 (RAG nâng cao, có đo lường)
+→ Phase 5.6 (guardrail + observability) → Phase 6 (session CRUD + multi-turn) → Phase 7 (streaming)
+→ Phase 8 (citation highlight) → Phase 9 (frontend) → Phase 10 (hardening)
 ```
+
+**Lưu ý thứ tự Phase 6/7 đã đổi so với ban đầu** (session CRUD giờ đi TRƯỚC streaming, không phải sau) — lý do kỹ thuật cụ thể ghi ở đầu file [Phase 6](phase-6-chat-sessions.md).
 
 Mỗi phase nên merge/commit riêng, test bằng `curl`/Postman trước khi chuyển phase tiếp theo — đặc biệt Phase 3 (ingestion) nên test độc lập bằng script trước khi nối vào API, vì đây là phase dễ lỗi nhất (parser PDF/PPTX, LibreOffice, rate limit embedding API).

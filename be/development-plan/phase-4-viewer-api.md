@@ -10,10 +10,16 @@
 Nói cách khác: được cả 2 (copy text + highlight theo trang/vùng), không phải đánh đổi cái này lấy cái kia.
 
 **Việc cần làm:**
-- `GET /api/documents/{id}/file` — trả presigned URL của file PDF để frontend load vào PDF.js. Dùng `storage_key` (PDF gốc) nếu `file_type='pdf'`, dùng `converted_pdf_key` nếu `file_type='pptx'` (file PPTX gốc không tự hiển thị được trên browser).
+- [x] `GET /api/documents/{id}/file` — trả presigned URL của file PDF để frontend load vào PDF.js. Dùng `storage_key` (PDF gốc) nếu `file_type='pdf'`, dùng `converted_pdf_key` nếu `file_type='pptx'` (file PPTX gốc không tự hiển thị được trên browser). PPTX chưa convert xong (`converted_pdf_key` còn `null`) → trả lỗi `409 DOCUMENT_NOT_READY` rõ ràng, không trả URL rác.
 - Không cần endpoint theo từng trang nữa (`/pages/{n}` của bản kế hoạch trước đã bỏ) — PDF.js tải nguyên file 1 lần, tự xử lý phân trang/zoom ở client.
 
-**DoD:** gọi endpoint trả về URL, mở URL đó trên browser thấy đúng file PDF (hoặc bản PDF đã convert từ PPTX); test PDF.js ở frontend có thể nhảy tới trang bất kỳ và select được text.
+**Đã test thật (qua HTTP + tải thật presigned URL về, không chỉ kiểm tra response):**
+- PDF thường: `/file` trả URL, tải URL đó về ra đúng file PDF thật (header `%PDF-`).
+- PPTX chưa convert (`converted_pdf_key=null`): `/file` trả `409 DOCUMENT_NOT_READY`.
+- PPTX đã convert xong: `/file` trả URL trỏ tới bản PDF đã convert, tải về đúng file PDF thật.
+- Document không tồn tại → `404`. Không có token → `401`.
+
+**DoD:** gọi endpoint trả về URL, mở URL đó trên browser thấy đúng file PDF (hoặc bản PDF đã convert từ PPTX); test PDF.js ở frontend có thể nhảy tới trang bất kỳ và select được text (phần PDF.js ở frontend chưa làm, thuộc phạm vi FE — backend đã sẵn sàng cung cấp URL đúng).
 
 ---
 
