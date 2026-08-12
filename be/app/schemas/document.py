@@ -24,3 +24,7 @@ class DocumentStatusResponse(BaseModel):
     status: str
     error_message: str | None
     page_count: int | None
+
+
+class DocumentFileResponse(BaseModel):
+    url: str

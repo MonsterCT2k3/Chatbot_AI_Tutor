@@ -25,6 +25,10 @@ class DocumentNotFoundError(Exception):
     pass
 
 
+class DocumentNotReadyError(Exception):
+    pass
+
+
 async def create_document(
     db: AsyncSession,
     user_id: uuid.UUID,
@@ -71,6 +75,23 @@ async def get_owned_document(db: AsyncSession, document_id: uuid.UUID, user_id: 
     if document is None:
         raise DocumentNotFoundError()
     return document
+
+
+def get_viewable_pdf_key(document: Document) -> str:
+    # PPTX isn't renderable in a browser — PDF.js needs the LibreOffice-converted
+    # copy from ingestion (Phase 3), which only exists once ingestion has run.
+    if document.file_type == "pptx":
+        if document.converted_pdf_key is None:
+            raise DocumentNotReadyError()
+        return document.converted_pdf_key
+    return document.storage_key
+
+
+def ensure_document_ready(document: Document) -> None:
+    # Chunks/embeddings only exist once ingestion has fully finished — asking
+    # a question before that would just search against an empty/partial set.
+    if document.status != "ready":
+        raise DocumentNotReadyError()
 
 
 async def delete_document(db: AsyncSession, document_id: uuid.UUID, user_id: uuid.UUID) -> None:

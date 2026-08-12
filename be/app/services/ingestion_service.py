@@ -43,7 +43,7 @@ def extract_text_pypdf(pdf_bytes: bytes) -> list[tuple[int, str]]:
     return [(page_number, page.extract_text() or "") for page_number, page in enumerate(reader.pages, start=1)]
 
 
-async def _retry_async(fn, max_retries: int = 5, backoff_factor: int = 2):
+async def retry_async(fn, max_retries: int = 5, backoff_factor: int = 2):
     # External API calls (Mistral) can fail transiently on network/SSL — retry
     # with exponential backoff instead of failing the whole document ingestion.
     for attempt in range(1, max_retries + 1):
@@ -71,7 +71,7 @@ async def _describe_image_pixtral(image_base64: str, mime_type: str = "image/png
         )
         return response.choices[0].message.content
 
-    return await _retry_async(_call)
+    return await retry_async(_call)
 
 
 async def extract_text_mistral_ocr(document_url: str, pages: list[int] | None = None) -> list[tuple[int, str]]:
@@ -85,7 +85,7 @@ async def extract_text_mistral_ocr(document_url: str, pages: list[int] | None = 
             kwargs["pages"] = pages
         return await _mistral_client.ocr.process_async(**kwargs)
 
-    response = await _retry_async(_call)
+    response = await retry_async(_call)
 
     results = []
     for page in response.pages:
@@ -211,6 +211,6 @@ async def embed_chunks(chunks: list[str]) -> list[list[float]]:
     async def _call():
         return await _openai_client.embeddings.create(model=settings.EMBEDDING_MODEL, input=chunks)
 
-    response = await _retry_async(_call)
+    response = await retry_async(_call)
     ordered = sorted(response.data, key=lambda item: item.index)
     return [item.embedding for item in ordered]
