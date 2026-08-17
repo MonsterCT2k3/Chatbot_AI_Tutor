@@ -1,0 +1,107 @@
+[
+  {
+    "question": "Chủ đề chính (narrative spine) của Ngày 05 là gì?",
+    "expected_pages": [
+      1
+    ],
+    "expected_answer_summary": "Cách tư duy để một ý tưởng AI đủ thật, đủ rõ để build và chứng minh bằng prototype (không phải PM chung chung)"
+  },
+  {
+    "question": "Case \"Google Bard\" trong slide minh họa cho vấn đề gì?",
+    "expected_pages": [
+      2
+    ],
+    "expected_answer_summary": "Một câu trả lời sai (factual error) trước công chúng có thể trở thành rủi ro thương hiệu, cổ phiếu và niềm tin"
+  },
+  {
+    "question": "Case \"Air Canada\" minh họa cho bài học sản phẩm nào?",
+    "expected_pages": [
+      2
+    ],
+    "expected_answer_summary": "Chatbot bịa chính sách hoàn tiền, và công ty phải chịu trách nhiệm — bot trên website là một phần của hệ thống chịu trách nhiệm"
+  },
+  {
+    "question": "Vấn đề cốt lõi theo THESIS của bài là gì?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "Vấn đề không phải AI yếu, mà là ta đang đối xử AI như phần mềm thường"
+  },
+  {
+    "question": "\"Production gap\" nghĩa là gì theo slide?",
+    "expected_pages": [
+      4
+    ],
+    "expected_answer_summary": "Ngay cả khi không đổi code, product vẫn có thể đổi hành vi (do model update, context drift, user drift, prompt drift)"
+  },
+  {
+    "question": "Kể tên 4 loại \"drift\" được liệt kê trong slide Production Gap?",
+    "expected_pages": [
+      4
+    ],
+    "expected_answer_summary": "Model update (drift), Context drift, User drift, Prompt drift"
+  },
+  {
+    "question": "Vì sao AI product cần eval, version log và fallback ngay từ bản prototype đầu tiên?",
+    "expected_pages": [
+      4
+    ],
+    "expected_answer_summary": "Vì ngay cả khi không đổi code, hành vi sản phẩm vẫn có thể thay đổi (do các loại drift)"
+  },
+  {
+    "question": "Quyết định \"Automation hay augmentation\" phụ thuộc vào những yếu tố nào?",
+    "expected_pages": [
+      5
+    ],
+    "expected_answer_summary": "Quyền hành động, accountability, learning signal"
+  },
+  {
+    "question": "Theo \"Automation Ladder\", tại sao 99.5% độ chính xác vẫn có thể nguy hiểm?",
+    "expected_pages": [
+      6
+    ],
+    "expected_answer_summary": "Nếu AI tự động hành động sai (full-auto) thì vẫn nguy hiểm dù accuracy cao"
+  },
+  {
+    "question": "Nguyên tắc an toàn khi tăng mức tự động hóa là gì?",
+    "expected_pages": [
+      6
+    ],
+    "expected_answer_summary": "Nếu sai khó undo (hoàn tác), đừng full-auto"
+  },
+  {
+    "question": "\"AI Spec\" khác \"Spec thường\" ở điểm gì?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "AI Spec mô tả Outcome + threshold + fallback (đủ dữ liệu thì trả lời có nguồn, thiếu/dưới ngưỡng thì hỏi lại/chuyển người), còn spec thường chỉ nói \"user hỏi, chatbot trả lời\" là chưa đủ"
+  },
+  {
+    "question": "4 câu hỏi mà mỗi AI product phải trả lời về \"UX cho uncertainty\" là gì?",
+    "expected_pages": [
+      8
+    ],
+    "expected_answer_summary": "Khi đúng user thấy gì, khi không chắc hệ thống làm gì, khi sai user sửa thế nào, khi mất tin gỡ thế nào"
+  },
+  {
+    "question": "Vì sao Microsoft Tay được coi là \"phản ví dụ\" (counter-example)?",
+    "expected_pages": [
+      8
+    ],
+    "expected_answer_summary": "Vì không có recovery path (đường khôi phục) khi bị user tấn công hành vi"
+  },
+  {
+    "question": "Kể tên 5 nguyên tắc thiết kế sản phẩm AI ở phần Closing?",
+    "expected_pages": [
+      10
+    ],
+    "expected_answer_summary": "AI = uncertainty; Augment ≠ kém hơn automate; Lỗi nào đắt hơn; UX là safety net; SPEC rõ trước khi build"
+  },
+  {
+    "question": "Nguyên tắc thứ 2 trong phần Closing nói gì về Augment so với Automate?",
+    "expected_pages": [
+      10
+    ],
+    "expected_answer_summary": "Augment không phải là kém hơn automate — nó thường là điểm bắt đầu đúng"
+  }
+]

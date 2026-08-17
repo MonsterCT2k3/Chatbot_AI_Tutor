@@ -1,0 +1,265 @@
+{
+  "timestamp": "2026-08-13T14:19:35.445524+00:00",
+  "label": "b1-full-smoke15",
+  "k": 6,
+  "num_questions": 15,
+  "recall_at_k": 0.8666666666666667,
+  "mrr": 0.7277777777777777,
+  "per_question": [
+    {
+      "document": "b1-full.pdf",
+      "question": "Ai là giảng viên của khóa \"AI & LLM Foundation\" này?",
+      "expected_pages": [
+        1
+      ],
+      "retrieved_pages": [
+        1,
+        3,
+        7,
+        6,
+        5,
+        6
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Theo agenda, sau \"Lịch sử AI 70 năm\" là chủ đề gì?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        8,
+        3,
+        9,
+        1,
+        7,
+        12
+      ],
+      "hit": true,
+      "rank": 2
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Sau buổi học này, học viên sẽ \"Build được\" cái gì?",
+      "expected_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        4,
+        83,
+        72,
+        54,
+        75,
+        42
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Theo slide, có bao nhiêu nhóm AI chính, và đó là những nhóm nào?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        5,
+        6,
+        3,
+        7,
+        6,
+        9
+      ],
+      "hit": true,
+      "rank": 4
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Hành trình khóa học được mô tả theo thứ tự nào?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        27,
+        45,
+        26,
+        52,
+        81,
+        32
+      ],
+      "hit": false,
+      "rank": null
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "\"Artificial Intelligence\" ra đời chính thức vào năm nào, tại sự kiện gì?",
+      "expected_pages": [
+        10
+      ],
+      "retrieved_pages": [
+        10,
+        12,
+        3,
+        14,
+        15,
+        5
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Ai đã viết báo cáo năm 1973 dẫn tới mùa đông AI lần thứ nhất?",
+      "expected_pages": [
+        12
+      ],
+      "retrieved_pages": [
+        12,
+        9,
+        8,
+        3,
+        15,
+        5
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Mùa đông AI lần thứ nhất diễn ra trong khoảng thời gian nào?",
+      "expected_pages": [
+        13
+      ],
+      "retrieved_pages": [
+        15,
+        8,
+        9,
+        5,
+        12,
+        13
+      ],
+      "hit": true,
+      "rank": 6
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Hệ chuyên gia (expert system) ra đời vào năm nào?",
+      "expected_pages": [
+        14
+      ],
+      "retrieved_pages": [
+        14,
+        15,
+        9,
+        10,
+        8,
+        44
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Fei-Fei Li đã đóng góp gì cho làn sóng Deep Learning năm 2009?",
+      "expected_pages": [
+        17
+      ],
+      "retrieved_pages": [
+        17,
+        16,
+        6,
+        6,
+        83,
+        22
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "AlexNet chiến thắng ở cuộc thi nào vào năm 2012?",
+      "expected_pages": [
+        19
+      ],
+      "retrieved_pages": [
+        19,
+        17,
+        5,
+        20,
+        41,
+        62
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "AlphaGo ban đầu học từ bao nhiêu ván cờ của chuyên gia con người?",
+      "expected_pages": [
+        20
+      ],
+      "retrieved_pages": [
+        20,
+        41,
+        43,
+        42,
+        15,
+        18
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Transformer ra đời vào năm nào?",
+      "expected_pages": [
+        22
+      ],
+      "retrieved_pages": [
+        8,
+        28,
+        57,
+        61,
+        16,
+        9
+      ],
+      "hit": false,
+      "rank": null
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "ChatGPT xuất hiện như một trải nghiệm đại chúng vào năm nào?",
+      "expected_pages": [
+        23
+      ],
+      "retrieved_pages": [
+        23,
+        24,
+        48,
+        83,
+        61,
+        62
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "LLM là viết tắt của cụm từ gì?",
+      "expected_pages": [
+        27
+      ],
+      "retrieved_pages": [
+        27,
+        38,
+        51,
+        27,
+        26,
+        52
+      ],
+      "hit": true,
+      "rank": 1
+    }
+  ]
+}

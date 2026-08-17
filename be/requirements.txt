@@ -22,6 +22,9 @@ slowapi
 # LLM (gpt-4o-mini) + embeddings
 openai
 
+# Local reranker (cross-encoder, multilingual incl. Vietnamese) for RAG retrieval
+sentence-transformers
+
 # OCR text extraction mode (alternative to pypdf, handles embedded images/diagrams)
 mistralai
 

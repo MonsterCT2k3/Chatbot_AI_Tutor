@@ -1,0 +1,114 @@
+[
+  {
+    "question": "4 trụ cột được nhắc tới trong tiêu đề Day 04 là gì?",
+    "expected_pages": [
+      1
+    ],
+    "expected_answer_summary": "Prompt, Context, Tool, Control"
+  },
+  {
+    "question": "Theo slide, \"một agent tốt\" cần làm được điều gì ngoài việc gọi công cụ?",
+    "expected_pages": [
+      1
+    ],
+    "expected_answer_summary": "Gọi đúng, dùng đúng thông tin, và biết dừng khi cần kiểm soát"
+  },
+  {
+    "question": "Slide ví \"Context\" giống với cái gì của model?",
+    "expected_pages": [
+      2
+    ],
+    "expected_answer_summary": "Bàn làm việc của model"
+  },
+  {
+    "question": "Prompt chỉ là một phần của cái gì, theo slide?",
+    "expected_pages": [
+      2
+    ],
+    "expected_answer_summary": "Context (context packet)"
+  },
+  {
+    "question": "\"Bản đồ 4 lớp\" của AI app gồm những lớp nào?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "Control, Prompt, Context, Tool"
+  },
+  {
+    "question": "Lớp \"Control\" trong bản đồ 4 lớp chịu trách nhiệm về cơ chế vận hành nào?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "Phê duyệt, kiểm thử, ghi log, thử lại và giới hạn rủi ro"
+  },
+  {
+    "question": "Prompt được mô tả là lớp can thiệp như thế nào?",
+    "expected_pages": [
+      4
+    ],
+    "expected_answer_summary": "Lớp can thiệp đầu tiên, dễ chỉnh nhất để định hướng nhiệm vụ"
+  },
+  {
+    "question": "Trong ví dụ \"prompt mơ hồ\", câu prompt gốc mà người dùng đưa ra là gì?",
+    "expected_pages": [
+      6
+    ],
+    "expected_answer_summary": "\"Lên plan Đà Nẵng giúp tôi\""
+  },
+  {
+    "question": "Khi prompt mơ hồ, model phải tự đoán những gì?",
+    "expected_pages": [
+      6
+    ],
+    "expected_answer_summary": "Đi mấy ngày, đi với ai, ngân sách bao nhiêu, nghỉ dưỡng hay khám phá, cần lịch trình hay gợi ý, trả lời ngắn hay chi tiết"
+  },
+  {
+    "question": "Theo mô hình \"Calibrating the system prompt\", có 3 mức độ nào?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "Quá cụ thể, Vừa đủ, Quá mơ hồ"
+  },
+  {
+    "question": "Prompt \"quá cụ thể\" (nhồi nhiều rule chi tiết) có nhược điểm gì?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "Khó bảo trì, dễ sai khi bối cảnh thay đổi"
+  },
+  {
+    "question": "Kể tên ít nhất 3 nhãn (tag) phổ biến được dùng để cấu trúc prompt bằng delimiter?",
+    "expected_pages": [
+      8
+    ],
+    "expected_answer_summary": "system_role, instructions, context/documents, examples, user_input, output_format (bất kỳ 3 trong số này)"
+  },
+  {
+    "question": "Vì sao cần dùng XML tags/delimiters để tách các phần trong prompt?",
+    "expected_pages": [
+      8
+    ],
+    "expected_answer_summary": "Để tách instruction khỏi data (và các lý do liên quan khác)"
+  },
+  {
+    "question": "3 bước trong ví dụ Output Format là gì?",
+    "expected_pages": [
+      9
+    ],
+    "expected_answer_summary": "1. Understand → 2. Call tools → 3. Final answer"
+  },
+  {
+    "question": "Vì sao không nên \"nhồi một prompt khổng lồ\" theo slide cuối?",
+    "expected_pages": [
+      10
+    ],
+    "expected_answer_summary": "Vì khó debug, khó test; nên chia thành bước nhỏ hơn (prompt chain) để dễ debug từng bước dù đánh đổi thêm orchestration/latency"
+  },
+  {
+    "question": "Nguồn tham khảo cho phần \"Đừng nhồi một prompt khổng lồ\" là từ đâu?",
+    "expected_pages": [
+      10
+    ],
+    "expected_answer_summary": "Chip Huyen, AI Engineering, Chương 5 — Break Complex Tasks into Simpler Subtasks"
+  }
+]

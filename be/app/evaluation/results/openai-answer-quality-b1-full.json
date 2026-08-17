@@ -1,0 +1,193 @@
+{
+  "timestamp": "2026-08-14T02:40:37.734232+00:00",
+  "label": "openai-answer-quality-b1-full",
+  "num_questions": 15,
+  "failures": [],
+  "overall": {
+    "faithfulness": 0.9933333333333334,
+    "relevance": 1.0,
+    "correctness": 0.9066666666666666
+  },
+  "per_question": [
+    {
+      "document": "b1-full.pdf",
+      "question": "Ai là giảng viên của khóa \"AI & LLM Foundation\" này?",
+      "expected_answer_summary": "Mai Anh Nguyen (Blue)",
+      "answer": "Giảng viên của khóa \"AI & LLM Foundation\" là Mai Anh Nguyen [Trang 1].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn dựa trên thông tin có trong ngữ cảnh, nơi chỉ ra rằng giảng viên của khóa học \"AI & LLM Foundation\" là Mai Anh Nguyen. Không có bất kỳ thông tin nào bịa đặt hay không chính xác trong câu trả lời.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời đã cung cấp thông tin chính xác và trực tiếp về giảng viên của khóa học được hỏi, đáp ứng đúng trọng tâm câu hỏi.",
+      "correctness": 1.0,
+      "correctness_reasoning": "Câu trả lời đã cung cấp thông tin chính xác rằng giảng viên của khóa 'AI & LLM Foundation' là Mai Anh Nguyen, phù hợp với thông tin trong đáp án tham chiếu. Diễn đạt khác nhưng nội dung đúng hoàn toàn."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Theo agenda, sau \"Lịch sử AI 70 năm\" là chủ đề gì?",
+      "expected_answer_summary": "Bên trong LLM: cơ chế vận hành",
+      "answer": "Theo agenda, sau \"Lịch sử AI 70 năm\" là chủ đề \"Bên trong LLM: cơ chế vận hành\" [Trang 3].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời chính xác nêu ra thông tin có thể xác minh từ context, rằng sau phần \"Lịch sử AI 70 năm\" trong agenda là phần \"Bên trong LLM: cơ chế vận hành\". Không có thông tin nào bị thêm vào hay bịa đặt.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời đã cung cấp thông tin chính xác về chủ đề tiếp theo trong agenda sau \"Lịch sử AI 70 năm\", đó là \"Bên trong LLM: cơ chế vận hành\", và có định rõ trang để tham khảo.",
+      "correctness": 0.5,
+      "correctness_reasoning": "Câu trả lời đề cập đến chủ đề \"Bên trong LLM: cơ chế vận hành\" nhưng không làm rõ nội dung chính của đáp án tham chiếu. Nó chỉ ghi nhận tên chủ đề mà không cung cấp thêm thông tin về cơ chế vận hành của LLM."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Sau buổi học này, học viên sẽ \"Build được\" cái gì?",
+      "expected_answer_summary": "Một chatbot dòng lệnh đơn giản có streaming",
+      "answer": "Sau buổi học, học viên sẽ \"Build được\" một chatbot dòng lệnh đơn giản có streaming — sản phẩm của chính bạn [Trang 4].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn phù hợp với nội dung của ngữ cảnh. Nó xác nhận điều mà ngữ cảnh đã trình bày là học viên sẽ có khả năng xây dựng một chatbot dòng lệnh đơn giản sau buổi học, theo như thông tin đề cập ở Trang 4.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời trực tiếp giải quyết câu hỏi bằng cách nêu rõ điều mà học viên sẽ \"build\" được sau buổi học, đó là một chatbot dòng lệnh đơn giản có streaming. Thông tin cung cấp là chính xác và liên quan chặt chẽ đến câu hỏi.",
+      "correctness": 0.8,
+      "correctness_reasoning": "Câu trả lời đề cập đến việc xây dựng một chatbot dòng lệnh đơn giản có streaming, khớp với ý chính của đáp án tham chiếu. Tuy nhiên, câu trả lời không hoàn toàn nhấn mạnh vào việc đó là một chatbot mà lại đặt trọng tâm vào việc học viên sẽ \"Build được\" sản phẩm của chính mình, thậm chí có vẻ như đang nhấn mạnh vào khía cạnh học tập hơn là cấu trúc của chatbot như trong tham chiếu."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Theo slide, có bao nhiêu nhóm AI chính, và đó là những nhóm nào?",
+      "expected_answer_summary": "3 nhóm: Discriminative AI (phân loại), Generative AI (sinh nội dung), Agentic AI (hành động)",
+      "answer": "Theo slide, có ba nhóm AI chính, đó là: phân loại (Discriminative AI), sinh nội dung (Generative AI) và hành động (Agentic AI) [Trang 7].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn hợp lệ và trung thực vì nó chỉ tóm tắt lại thông tin từ ngữ cảnh mà không thêm hay bịa đặt thông tin nào. Các nhóm AI chính được nêu rõ trong ngữ cảnh và được phản ánh đầy đủ trong câu trả lời.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời đã nêu rõ số lượng nhóm AI chính là ba nhóm và cung cấp tên của từng nhóm, hoàn toàn giải quyết trọng tâm câu hỏi.",
+      "correctness": 1.0,
+      "correctness_reasoning": "Câu trả lời của AI hoàn toàn khớp với ý chính của đáp án tham chiếu, chỉ diễn đạt lại một cách ngắn gọn và rõ ràng. Các nhóm AI được liệt kê đúng thứ tự và cách diễn đạt có sự thay đổi nhỏ nhưng không làm mất đi ý nghĩa chính."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Hành trình khóa học được mô tả theo thứ tự nào?",
+      "expected_answer_summary": "LLM Foundation → Agent → Multi-Agent → Deploy → Evaluate",
+      "answer": "Hành trình khóa học được mô tả theo thứ tự: LLM Foundation → Agent → Multi-Agent → Deploy → Evaluate [Trang 7].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn phù hợp với thông tin trong ngữ cảnh, nêu rõ thứ tự trong hành trình khóa học được mô tả ở Trang 7 mà không thêm bớt thông tin nào.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời đã nêu rõ thứ tự các bước trong hành trình khóa học như đã được hỏi, do đó hoàn toàn liên quan và đáp ứng đúng trọng tâm của câu hỏi.",
+      "correctness": 1.0,
+      "correctness_reasoning": "Câu trả lời đã trình bày chính xác thứ tự các bước trong hành trình khóa học mà không thay đổi nội dung, chỉ thêm thông tin về trang số 7. Điều này đảm bảo rằng ý chính được khớp đúng."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "\"Artificial Intelligence\" ra đời chính thức vào năm nào, tại sự kiện gì?",
+      "expected_answer_summary": "Năm 1956, tại Dartmouth Workshop",
+      "answer": "\"Artificial Intelligence\" ra đời chính thức vào năm 1956, tại sự kiện Dartmouth Workshop [Trang 10].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn phù hợp với ngữ cảnh đã cho, thông tin chính xác và có thể suy ra trực tiếp từ trang 10.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời hoàn toàn phù hợp với câu hỏi, cung cấp thông tin chính xác về năm ra đời của trí tuệ nhân tạo cùng với sự kiện cụ thể (Dartmouth Workshop).",
+      "correctness": 1.0,
+      "correctness_reasoning": "Câu trả lời AI đã nêu ra năm 1956 và địa điểm tổ chức (Dartmouth Workshop), khớp chính xác với ý chính của đáp án tham chiếu, mặc dù có sử dụng một diễn đạt khác."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Ai đã viết báo cáo năm 1973 dẫn tới mùa đông AI lần thứ nhất?",
+      "expected_answer_summary": "James Lighthill",
+      "answer": "James Lighthill đã viết báo cáo năm 1973 dẫn tới mùa đông AI lần thứ nhất [Trang 12].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời chỉ đề cập đến thông tin có trong ngữ cảnh, cụ thể là việc James Lighthill đã viết báo cáo năm 1973 và báo cáo này dẫn tới mùa đông AI lần thứ nhất. Không có thông tin nào bị thêm vào hay bịa đặt.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời hoàn toàn phù hợp với câu hỏi, xác định đúng tác giả của báo cáo năm 1973 liên quan đến mùa đông AI lần thứ nhất.",
+      "correctness": 0.8,
+      "correctness_reasoning": "Câu trả lời đề cập đến James Lighthill và đóng góp quan trọng của ông với báo cáo năm 1973, người đã để lại ảnh hưởng đến AI. Tuy nhiên, câu trả lời không hoàn toàn khớp với ý chính của đáp án tham chiếu, vì nó chỉ đề cập đến một khía cạnh cụ thể mà không cung cấp thông tin chi tiết về vai trò hay tầm quan trọng của James Lighthill trong lĩnh vực AI."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Mùa đông AI lần thứ nhất diễn ra trong khoảng thời gian nào?",
+      "expected_answer_summary": "1974-1980",
+      "answer": "Mùa đông AI lần thứ nhất diễn ra trong khoảng thời gian từ 1974 đến 1980 [Trang 13].",
+      "faithfulness": 0.9,
+      "faithfulness_reasoning": "Câu trả lời cung cấp thông tin chính xác về khoảng thời gian diễn ra mùa đông AI lần thứ nhất, được nêu rõ trong ngữ cảnh. Tuy nhiên, câu trả lời chỉ đề cập đến một phần thông tin mà không nhắc đến nguyên nhân dẫn đến mùa đông AI đó, mặc dù thông tin này có trong ngữ cảnh. Do đó, nó không thể đạt điểm tối đa.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời đã cung cấp thông tin chính xác về thời gian diễn ra mùa đông AI lần thứ nhất, đúng trọng tâm câu hỏi.",
+      "correctness": 1.0,
+      "correctness_reasoning": "Câu trả lời AI đưa ra thông tin chính xác về khoảng thời gian diễn ra Mùa đông AI lần thứ nhất, khớp đúng với đáp án tham chiếu mặc dù diễn đạt có khác biệt một chút."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Hệ chuyên gia (expert system) ra đời vào năm nào?",
+      "expected_answer_summary": "1980",
+      "answer": "Hệ chuyên gia (expert system) ra đời vào năm 1980 [Trang 14].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn phù hợp với thông tin được cung cấp trong ngữ cảnh, nơi đề cập rằng hệ chuyên gia (expert system) ra đời vào năm 1980. Không có thêm thông tin nào được đưa vào cũng như không có bịa đặt.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời trực tiếp cung cấp thông tin về năm ra đời của hệ chuyên gia, đáp ứng đúng câu hỏi được đặt ra.",
+      "correctness": 1.0,
+      "correctness_reasoning": "Câu trả lời của AI hoàn toàn khớp đúng với ý chính của đáp án tham chiếu, đề cập rõ ràng đến năm 1980 mà không làm mất đi thông tin cốt lõi."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Fei-Fei Li đã đóng góp gì cho làn sóng Deep Learning năm 2009?",
+      "expected_answer_summary": "Xây dựng ImageNet — bộ dữ liệu 14 triệu ảnh gán nhãn tay, hơn 20.000 loại vật",
+      "answer": "Fei-Fei Li đã đóng góp bằng cách xây dựng bộ dữ liệu lớn ImageNet, bao gồm 14 triệu ảnh được gán nhãn tay, với hơn 20.000 loại vật. Bộ dữ liệu này đã trở thành nền tảng cho sự phát triển của các mô hình Deep Learning, đặc biệt là AlexNet vào năm 2012, làm nổi bật tầm quan trọng của dữ liệu trong việc cải thiện khả năng của các thuật toán [Trang 17].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn trung thực và chính xác, dựa trên thông tin được cung cấp trong ngữ cảnh. Nó nêu rõ đóng góp của Fei-Fei Li với ImageNet, số lượng ảnh và sự quan trọng của bộ dữ liệu trong việc phát triển các mô hình Deep Learning, đặc biệt là AlexNet, mà không thêm thông tin bịa đặt hay không được hỗ trợ từ ngữ cảnh.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời trực tiếp giải quyết câu hỏi về đóng góp của Fei-Fei Li vào làn sóng Deep Learning năm 2009 bằng cách nêu rõ việc xây dựng bộ dữ liệu ImageNet, có liên quan đến sự phát triển của các mô hình Deep Learning sau này.",
+      "correctness": 1.0,
+      "correctness_reasoning": "Câu trả lời AI đã chính xác đề cập đến việc xây dựng ImageNet với 14 triệu ảnh gán nhãn tay và hơn 20.000 loại vật, khớp đúng với ý chính của đáp án tham chiếu. Ngoài ra, nó cũng cung cấp bối cảnh thêm về tầm quan trọng của bộ dữ liệu trong phát triển mô hình Deep Learning, mặc dù đó không phải là phần thiết yếu của thông tin trong đáp án tham chiếu."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "AlexNet chiến thắng ở cuộc thi nào vào năm 2012?",
+      "expected_answer_summary": "ImageNet Large Scale Visual Recognition Challenge",
+      "answer": "AlexNet chiến thắng ở ImageNet Large Scale Visual Recognition Challenge vào năm 2012 [Trang 19].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn phù hợp với thông tin trong ngữ cảnh. Nó chỉ đơn giản lặp lại một câu đã được trình bày ở trang 19 mà không thêm bớt hay bịa đặt thông tin nào khác.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời trực tiếp trả lời câu hỏi về việc AlexNet chiến thắng ở cuộc thi nào vào năm 2012, và cung cấp thông tin cụ thể về tên cuộc thi là ImageNet Large Scale Visual Recognition Challenge.",
+      "correctness": 1.0,
+      "correctness_reasoning": "Câu trả lời đề cập rõ ràng đến ImageNet Large Scale Visual Recognition Challenge, đồng thời nêu chi tiết rằng AlexNet là người chiến thắng trong sự kiện này vào năm 2012. Đây là thông tin khớp chính xác với nội dung của đáp án tham chiếu."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "AlphaGo ban đầu học từ bao nhiêu ván cờ của chuyên gia con người?",
+      "expected_answer_summary": "Khoảng 150.000 ván",
+      "answer": "AlphaGo ban đầu học từ khoảng 150.000 ván cờ của chuyên gia con người [Trang 20].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn tương thích với thông tin có trong ngữ cảnh, cụ thể là thông tin về việc AlphaGo học từ 150.000 ván cờ của chuyên gia con người được nêu rõ trên Trang 20. Không có thông tin thêm hay bịa đặt nào được đưa ra trong câu trả lời.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời cung cấp thông tin chính xác về số lượng ván cờ mà AlphaGo đã học, giải quyết đúng trọng tâm câu hỏi.",
+      "correctness": 1.0,
+      "correctness_reasoning": "Câu trả lời đề cập chính xác đến số lượng ván cờ mà AlphaGo học, và mặc dù có thêm thông tin về việc đó là từ chuyên gia con người, nhưng nó vẫn khớp với ý chính trong câu trả lời tham chiếu."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Transformer ra đời vào năm nào?",
+      "expected_answer_summary": "2017",
+      "answer": "Transformer ra đời vào năm 2017 [Trang 22].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn chính xác và chỉ nêu thông tin có trong ngữ cảnh, cụ thể là thông tin về năm ra đời của Transformer.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời chính xác và trực tiếp đề cập đến năm mà Transformer ra đời, đúng trọng tâm câu hỏi.",
+      "correctness": 1.0,
+      "correctness_reasoning": "Câu trả lời của AI xác nhận chính xác thời gian ra đời của Transformer là năm 2017, khớp đúng với ý chính của đáp án tham chiếu."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "ChatGPT xuất hiện như một trải nghiệm đại chúng vào năm nào?",
+      "expected_answer_summary": "2022",
+      "answer": "ChatGPT xuất hiện như một trải nghiệm đại chúng vào năm 2022 [Trang 23].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn trung thực vì nó chỉ lặp lại thông tin đã có sẵn trong ngữ cảnh trên trang 23 mà không thêm thông tin nào khác.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời trực tiếp cung cấp thông tin chính xác về năm mà ChatGPT trở thành trải nghiệm đại chúng, phù hợp hoàn toàn với câu hỏi.",
+      "correctness": 0.5,
+      "correctness_reasoning": "Câu trả lời của AI đề cập đến năm 2022, nhưng không hoàn toàn tương đương với đáp án tham chiếu chỉ đơn giản là '2022'. Câu trả lời đã làm rõ hơn về ngữ cảnh mà năm này liên quan đến ChatGPT, nhưng không khớp hoàn toàn với phần ý chính mà đáp án tham chiếu cung cấp."
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "LLM là viết tắt của cụm từ gì?",
+      "expected_answer_summary": "Large Language Model",
+      "answer": "LLM là viết tắt của cụm từ \"Large Language Model\" [Trang 27].",
+      "faithfulness": 1.0,
+      "faithfulness_reasoning": "Câu trả lời hoàn toàn đúng với thông tin có trong context, nơi LLM được định nghĩa là viết tắt của 'Large Language Model' trên trang 27. Không có thông tin nào bị bịa đặt hay thêm thắt vào câu trả lời.",
+      "relevance": 1.0,
+      "relevance_reasoning": "Câu trả lời chính xác giải thích rõ ràng ý nghĩa của từ viết tắt LLM, đúng trọng tâm câu hỏi.",
+      "correctness": 1.0,
+      "correctness_reasoning": "Câu trả lời AI đã đúng về ý chính khi xác định LLM là viết tắt của \"Large Language Model\". Dù có thêm thông tin về trang sách, điều này không làm sai lệch ý chính của câu trả lời."
+    }
+  ]
+}

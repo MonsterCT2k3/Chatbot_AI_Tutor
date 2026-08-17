@@ -1,0 +1,114 @@
+[
+  {
+    "question": "Ai là giảng viên hướng dẫn khóa học \"AI & LLM Foundation\" này?",
+    "expected_pages": [
+      1
+    ],
+    "expected_answer_summary": "Mai Anh Nguyen (Blue)"
+  },
+  {
+    "question": "Giảng viên đã từng làm PM tại công ty nào trong lĩnh vực chăm sóc sức khỏe năm 2026?",
+    "expected_pages": [
+      2
+    ],
+    "expected_answer_summary": "FPT Long Châu (Healthcare Product)"
+  },
+  {
+    "question": "Giảng viên là đồng sáng lập (co-founder) của tổ chức nào vào năm 2025?",
+    "expected_pages": [
+      2
+    ],
+    "expected_answer_summary": "Thongtincuuho.org"
+  },
+  {
+    "question": "Trước đây giảng viên từng làm việc ở DYNO và Kalapa trong lĩnh vực gì?",
+    "expected_pages": [
+      2
+    ],
+    "expected_answer_summary": "OCR, eKYC, Credit Scoring"
+  },
+  {
+    "question": "Sau buổi học hôm nay, học viên sẽ \"Build được\" cái gì?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "Một chatbot dòng lệnh (command-line) đơn giản có streaming"
+  },
+  {
+    "question": "Theo bài học, có cần nền tảng toán học để học buổi này không?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "Không cần, chỉ cần tò mò và một chiếc máy tính"
+  },
+  {
+    "question": "Trong sơ đồ AI/ML/DL/GenAI/LLM, đâu là \"chiếc ô lớn nhất\"?",
+    "expected_pages": [
+      4
+    ],
+    "expected_answer_summary": "AI (Artificial Intelligence)"
+  },
+  {
+    "question": "Machine Learning khác với việc viết luật tay (rule-based) ở điểm nào?",
+    "expected_pages": [
+      4
+    ],
+    "expected_answer_summary": "Machine learning học từ dữ liệu thay vì con người viết luật tay"
+  },
+  {
+    "question": "Generative AI có khả năng sinh ra những loại nội dung nào?",
+    "expected_pages": [
+      4
+    ],
+    "expected_answer_summary": "Văn bản, ảnh, code"
+  },
+  {
+    "question": "Lịch sử AI đã trải qua bao nhiêu \"mùa đông\" (AI winter)?",
+    "expected_pages": [
+      5
+    ],
+    "expected_answer_summary": "2 lần"
+  },
+  {
+    "question": "Deep Learning khác Machine Learning truyền thống ở điểm nào?",
+    "expected_pages": [
+      6
+    ],
+    "expected_answer_summary": "Không cần con người thiết kế đặc trưng bằng tay, mạng sâu tự học đặc trưng từ dữ liệu thô"
+  },
+  {
+    "question": "LLM là viết tắt của cụm từ gì?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "Large Language Model"
+  },
+  {
+    "question": "LLM thường dựa trên kiến trúc nào?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "Kiến trúc Transformer"
+  },
+  {
+    "question": "Theo slide, chatbot là gì so với LLM?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "Chatbot chỉ là một dạng sản phẩm đóng gói quanh LLM (lớp áo bên ngoài), LLM mới là bộ não ngôn ngữ dùng chung"
+  },
+  {
+    "question": "Bên trong Transformer, đầu ra của model luôn có dạng gì?",
+    "expected_pages": [
+      8
+    ],
+    "expected_answer_summary": "Một phân bố xác suất (probability distribution) trên toàn bộ từ vựng"
+  },
+  {
+    "question": "Video tham khảo về cơ chế bên trong Transformer được nhắc tới ở cuối bài là của kênh nào?",
+    "expected_pages": [
+      8
+    ],
+    "expected_answer_summary": "3Blue1Brown"
+  }
+]

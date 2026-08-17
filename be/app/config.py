@@ -22,6 +22,16 @@ class Settings(BaseSettings):
     # Mistral: OCR (mistral-ocr-latest) + vision image description (pixtral-12b-2409)
     MISTRAL_API_KEY: str = ""
 
+    # Groq: free-tier inference for open-weight models (OpenAI-compatible API).
+    # Being trialed as the answer-generation model in ask() (Phase 5.5) — NOT
+    # used for embeddings (Groq has no embedding model; embeddings stay on
+    # OpenAI regardless, see EMBEDDING_DIM note in app/models/chunk.py).
+    GROQ_API_KEY: str = ""
+    # llama-3.3-70b-versatile bị Groq gỡ khỏi catalog (2026-08-17, xác nhận
+    # thật qua GET /v1/models — 404 not_found) → chuyển sang openai/gpt-oss-120b
+    # (model open-weight lớn nhất còn lại trong catalog hiện tại của Groq).
+    GROQ_CHAT_MODEL: str = "openai/gpt-oss-120b"
+
     # Auth
     JWT_SECRET: str = ""
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15

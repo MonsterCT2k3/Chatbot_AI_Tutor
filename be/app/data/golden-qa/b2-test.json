@@ -1,0 +1,121 @@
+[
+  {
+    "question": "Buổi sáng của Ngày 02 (4 tiếng) gồm những nội dung lý thuyết nào?",
+    "expected_pages": [
+      1
+    ],
+    "expected_answer_summary": "Problem Discovery (Double Diamond, HCD), Problem Statement & định lượng hóa, PAIR 1/2/3, AI sai & UX/HITL, PS hoàn chỉnh → Go/Not Yet/No-Go"
+  },
+  {
+    "question": "Buổi chiều (lab thực hành) yêu cầu mỗi cá nhân tìm bao nhiêu bài toán và điền bao nhiêu Problem Card?",
+    "expected_pages": [
+      1
+    ],
+    "expected_answer_summary": "Tìm 5 bài toán, điền 3 Problem Card"
+  },
+  {
+    "question": "Theo slide, sản phẩm AI (AI Product) có gì khác/giống so với sản phẩm truyền thống?",
+    "expected_pages": [
+      2
+    ],
+    "expected_answer_summary": "Vẫn là một sản phẩm hoàn chỉnh, kế thừa chứ không thay thế nguyên lý sản phẩm truyền thống"
+  },
+  {
+    "question": "Ba trụ cột nền tảng của AI Product là gì?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "AI Engineering, Product Thinking, Design Thinking"
+  },
+  {
+    "question": "AI Engineering trong 3 trụ cột bao gồm triển khai những gì?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "RAG, Agent, Guardrails, Evaluation, và vận hành hệ thống AI thực tế"
+  },
+  {
+    "question": "\"Product Thinking\" trong slide được lấy cảm hứng (Inspired) từ tác giả nào?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "Marty Cagan (sách Inspired)"
+  },
+  {
+    "question": "Cuốn sách giáo khoa chính được dùng trong buổi học hôm nay là gì?",
+    "expected_pages": [
+      4
+    ],
+    "expected_answer_summary": "People + AI Guidebook của Google PAIR"
+  },
+  {
+    "question": "People + AI Guidebook có bao nhiêu chương?",
+    "expected_pages": [
+      4
+    ],
+    "expected_answer_summary": "6 chương"
+  },
+  {
+    "question": "Theo bài đọc thêm của Anthropic \"Building effective agents\", nên chọn giải pháp nào trước khi dùng agent?",
+    "expected_pages": [
+      4
+    ],
+    "expected_answer_summary": "Chọn giải pháp đơn giản nhất — rule/workflow trước, agent chỉ khi thật sự cần"
+  },
+  {
+    "question": "Kể tên 2 nhóm bài toán chatbot chính được liệt kê trong slide?",
+    "expected_pages": [
+      5
+    ],
+    "expected_answer_summary": "Phục vụ khách hàng (FAQ, tư vấn, chăm sóc, upsell/cross-sell) và Hỗ trợ nội bộ (phân loại ticket, tra cứu, đề xuất phản hồi, chuyển tiếp câu hỏi phức tạp)"
+  },
+  {
+    "question": "Vì sao slide nói \"AI chatbot chưa phải là một bài toán\"?",
+    "expected_pages": [
+      5
+    ],
+    "expected_answer_summary": "Vì đối tượng khác nhau dẫn đến workflow, metric và rủi ro khác nhau"
+  },
+  {
+    "question": "Tình huống thực tế được đưa ra để thảo luận là gì?",
+    "expected_pages": [
+      6
+    ],
+    "expected_answer_summary": "Lớp học 1000 học viên (K3 & K4) nhưng số lượng trợ giảng có hạn, dùng AI giải quyết thế nào"
+  },
+  {
+    "question": "Trong mô hình Double Diamond, \"Discover\" và \"Define\" thuộc Diamond nào?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "Diamond 1 — tìm đúng vấn đề"
+  },
+  {
+    "question": "Ai là người đưa ra mô hình Double Diamond?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "Don Norman / British Design Council (2005)"
+  },
+  {
+    "question": "5 bước trong quy trình Design Thinking được liệt kê trong slide là gì?",
+    "expected_pages": [
+      8
+    ],
+    "expected_answer_summary": "Observation, Ideation, Prototype, Test, Iteration"
+  },
+  {
+    "question": "Câu chuyện về Isaac Newton trong slide đặt ra câu hỏi tò mò nào?",
+    "expected_pages": [
+      9
+    ],
+    "expected_answer_summary": "Quả táo rơi xuống đất — vậy Mặt Trăng có đang \"rơi\" tự do không?"
+  },
+  {
+    "question": "Ý tưởng ban đầu của Airbnb xuất phát từ câu hỏi tò mò nào?",
+    "expected_pages": [
+      9
+    ],
+    "expected_answer_summary": "Liệu không gian sống bỏ trống có thể dùng làm dịch vụ lưu trú?"
+  }
+]

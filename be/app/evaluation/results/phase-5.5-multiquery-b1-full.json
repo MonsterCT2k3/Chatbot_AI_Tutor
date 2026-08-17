@@ -1,0 +1,265 @@
+{
+  "timestamp": "2026-08-14T03:13:56.704242+00:00",
+  "label": "phase-5.5-multiquery-b1-full",
+  "k": 6,
+  "num_questions": 15,
+  "recall_at_k": 0.8666666666666667,
+  "mrr": 0.8666666666666667,
+  "per_question": [
+    {
+      "document": "b1-full.pdf",
+      "question": "Thí nghiệm Othello-GPT nhằm kiểm tra điều gì?",
+      "expected_pages": [
+        41
+      ],
+      "retrieved_pages": [
+        41,
+        83,
+        26,
+        43,
+        39,
+        48
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Trong thí nghiệm Othello-GPT, tỷ lệ model đi sai luật là bao nhiêu?",
+      "expected_pages": [
+        42
+      ],
+      "retrieved_pages": [
+        66,
+        72,
+        41,
+        37,
+        66,
+        83
+      ],
+      "hit": false,
+      "rank": null
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Nhóm nghiên cứu Othello-GPT đã gắn bao nhiêu \"que thử\" (probe) vào bên trong model?",
+      "expected_pages": [
+        43
+      ],
+      "retrieved_pages": [
+        43,
+        66,
+        41,
+        37,
+        83,
+        26
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Model GPT3 (2020) có bao nhiêu tỷ tham số?",
+      "expected_pages": [
+        37
+      ],
+      "retrieved_pages": [
+        37,
+        66,
+        62,
+        66,
+        37,
+        83
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "RLHF gồm mấy bước chính, và đó là những bước nào?",
+      "expected_pages": [
+        39
+      ],
+      "retrieved_pages": [
+        39,
+        38,
+        27,
+        26,
+        66,
+        21
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Ba giới hạn bẩm sinh của LLM được liệt kê trong slide là gì?",
+      "expected_pages": [
+        44
+      ],
+      "retrieved_pages": [
+        81,
+        52,
+        25,
+        28,
+        38,
+        26
+      ],
+      "hit": false,
+      "rank": null
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Chain-of-Thought Prompting làm gì để cải thiện độ chính xác của model trong ví dụ bài toán quả bóng tennis?",
+      "expected_pages": [
+        50
+      ],
+      "retrieved_pages": [
+        50,
+        50,
+        39,
+        44,
+        72,
+        81
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "5 bộ phận của một agent theo \"giải phẫu agent\" là gì?",
+      "expected_pages": [
+        53
+      ],
+      "retrieved_pages": [
+        53,
+        49,
+        54,
+        52,
+        76,
+        7
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Agent Voyager tích lũy kỹ năng vào đâu để tái sử dụng cho các nhiệm vụ sau?",
+      "expected_pages": [
+        54
+      ],
+      "retrieved_pages": [
+        54,
+        44,
+        49,
+        53,
+        8,
+        15
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Từ LLM đến agent có mấy mức độ (level) được mô tả trong slide?",
+      "expected_pages": [
+        52
+      ],
+      "retrieved_pages": [
+        52,
+        49,
+        53,
+        7,
+        27,
+        38
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Theo slide, giá của model cùng một mức năng lực giảm khoảng bao nhiêu lần mỗi năm?",
+      "expected_pages": [
+        57
+      ],
+      "retrieved_pages": [
+        57,
+        70,
+        56,
+        68,
+        37,
+        31
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Benchmark SWE-bench Verified tăng từ bao nhiêu % lên bao nhiêu % chỉ trong 20 tháng?",
+      "expected_pages": [
+        60
+      ],
+      "retrieved_pages": [
+        60,
+        72,
+        66,
+        71,
+        72,
+        57
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Claude Fable 5 gặp vấn đề gì sau khi ra mắt ngày 9/6/2026?",
+      "expected_pages": [
+        62
+      ],
+      "retrieved_pages": [
+        62,
+        65,
+        62,
+        83,
+        71,
+        42
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Kimi K3 (Moonshot, ra mắt 16/7/2026) có bao nhiêu tỷ tham số?",
+      "expected_pages": [
+        62
+      ],
+      "retrieved_pages": [
+        62,
+        37,
+        37,
+        83,
+        66,
+        71
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-full.pdf",
+      "question": "Theo framework chọn tầng model, tầng nào được khuyên \"mặc định thử trước\"?",
+      "expected_pages": [
+        65
+      ],
+      "retrieved_pages": [
+        65,
+        66,
+        62,
+        81,
+        66,
+        64
+      ],
+      "hit": true,
+      "rank": 1
+    }
+  ]
+}

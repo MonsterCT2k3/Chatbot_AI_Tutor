@@ -8,9 +8,9 @@
 
 Các phần hạ tầng thuần túy không trực tiếp quyết định chất lượng AI (auth, upload, vận hành...) vẫn áp dụng nguyên tắc "đủ dùng, không over-engineer" như đã làm có chủ đích ở JWT ([Phase 1.5](phase-1.5-jwt-hardening.md) có hẳn 1 bảng ghi lại những gì cố ý KHÔNG làm và lý do) — 2 nguyên tắc này không mâu thuẫn nhau, chỉ khác phạm vi áp dụng.
 
-## Trạng thái hiện tại (2026-08-09)
+## Trạng thái hiện tại (2026-08-14)
 
-**Phase 0 → Phase 5 hoàn thành.** Supabase Postgres (Singapore) + R2 + Alembic đã kết nối và verify thật. Auth đầy đủ (signup/login/refresh/logout/me) với refresh token thu hồi được thật + rate limit `/login`; document upload/list/get/delete/status/file — toàn bộ ingestion pipeline (pypdf/mistral_ocr/hybrid + PPTX→PDF) đã chạy end-to-end với dữ liệu thật. **Phase 5 (RAG baseline)** đã xong: retrieval bằng pgvector, prompt có trích dẫn, endpoint tạm `/ask` chạy thật qua HTTP, đã test cả case "biết mình không biết" (câu hỏi ngoài phạm vi, document 0 chunk) không hallucinate/không crash. Tiếp theo: **Phase 5.5 (Advanced RAG)**.
+**Phase 0 → Phase 5.5 hoàn thành.** Supabase Postgres (Singapore) + R2 + Alembic đã kết nối và verify thật. Auth đầy đủ (signup/login/refresh/logout/me) với refresh token thu hồi được thật + rate limit `/login`; document upload/list/get/delete/status/file — toàn bộ ingestion pipeline (pypdf/mistral_ocr/hybrid + PPTX→PDF) đã chạy end-to-end với dữ liệu thật. **Phase 5.5 (Advanced RAG)** đã xong toàn bộ 9 bước + 1 bước phát sinh, mỗi bước đều đo bằng dữ liệu thật trước khi quyết định đưa vào production hay không: **đã đưa vào `ask()`** — reranking (cross-encoder đa ngôn ngữ, cải thiện rõ trên tài liệu dài), chuyển sang Groq (miễn phí, chất lượng ngang OpenAI), grounding/faithfulness verification (guardrail thật, có retry + fallback an toàn), phòng vệ prompt injection gián tiếp; **đã thử nhưng KHÔNG đưa vào** (có số liệu chứng minh không đạt) — hybrid search, query transformation, semantic caching. Tiếp theo: **Phase 5.6 (Guardrails, Safety & Observability)**.
 
 ## Danh sách các phase
 
@@ -21,7 +21,7 @@ Các phần hạ tầng thuần túy không trực tiếp quyết định chất
 - [Phase 3 — Ingestion pipeline](phase-3-ingestion.md) ✅ Hoàn thành
 - [Phase 4 — Document viewer API](phase-4-viewer-api.md) ✅ Hoàn thành
 - [Phase 5 — RAG orchestrator (baseline)](phase-5-rag-orchestrator.md) ✅ Hoàn thành
-- [Phase 5.5 — Advanced RAG (retrieval quality, faithfulness & evaluation)](phase-5.5-advanced-rag.md)
+- [Phase 5.5 — Advanced RAG (retrieval quality, faithfulness & evaluation)](phase-5.5-advanced-rag.md) ✅ Hoàn thành
 - [Phase 5.6 — Guardrails, Safety & Observability](phase-5.6-guardrails-observability.md)
 - [Phase 6 — Chat session CRUD + multi-turn](phase-6-chat-sessions.md)
 - [Phase 7 — Streaming (SSE)](phase-7-streaming.md)

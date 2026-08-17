@@ -1,0 +1,108 @@
+[
+  {
+    "question": "Chủ đề chính của bài học Ngày 3 là gì?",
+    "expected_pages": [
+      1
+    ],
+    "expected_answer_summary": "Từ Chatbot Đến Agentic Agent, với Design Pattern ReAct"
+  },
+  {
+    "question": "Khóa học này được tổ chức tại trường đại học nào?",
+    "expected_pages": [
+      1
+    ],
+    "expected_answer_summary": "VinUniversity"
+  },
+  {
+    "question": "Vòng lặp ReAct gồm 3 bước nào theo đúng thứ tự?",
+    "expected_pages": [
+      2,
+      10
+    ],
+    "expected_answer_summary": "Thought → Action → Observation"
+  },
+  {
+    "question": "Theo slide, \"agent\" chỉ thực sự xuất hiện khi nào?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "Khi hệ thống phải quyết định, hành động, quan sát kết quả, rồi lặp lại"
+  },
+  {
+    "question": "Trong dải phổ Bot→Chatbot→Agent, \"Rule-based Bot\" có đặc điểm gì?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "If/else cứng, predictable (dễ đoán)"
+  },
+  {
+    "question": "\"Autonomous Agent\" khác \"Reactive Agent\" ở điểm nào?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "Autonomous Agent theo đuổi mục tiêu dài hạn (long-horizon goal) với nhiều quyết định liên tiếp, còn Reactive Agent dùng tools + vòng lặp quan sát theo từng bước"
+  },
+  {
+    "question": "Trong bảng so sánh 3 kiểu hệ thống AI, \"Cost\" của Agent được đánh giá thế nào so với Rule-based Bot và LLM Chatbot?",
+    "expected_pages": [
+      5
+    ],
+    "expected_answer_summary": "Agent có cost cao hơn do phải loop và gọi nhiều lần (nhiều calls)"
+  },
+  {
+    "question": "Với bài toán \"tìm vé HAN→HCM và gợi ý mang gì nếu trời mưa\", Reactive Agent xử lý khác Bot/Chatbot ở điểm nào?",
+    "expected_pages": [
+      6
+    ],
+    "expected_answer_summary": "Agent tách goal thành 2 việc (tìm vé + check thời tiết), gọi từng tool theo bước, rồi so sánh kết quả để trả lời gộp"
+  },
+  {
+    "question": "Vì sao câu trả lời của Chatbot trong ví dụ so sánh output bị đánh giá là \"không verifiable\"?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "Vì giá vé lấy từ training data cũ, không có nguồn (source)"
+  },
+  {
+    "question": "Câu trả lời của Agent trong ví dụ lấy dữ liệu từ đâu?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "Từ API search_flights và get_weather"
+  },
+  {
+    "question": "Theo Anthropic Agent Patterns, pattern nào là đơn giản nhất và pattern nào là mạnh/đắt nhất?",
+    "expected_pages": [
+      8
+    ],
+    "expected_answer_summary": "Augmented LLM đơn giản nhất, Agent là pattern mạnh nhưng đắt nhất (cost, eval, guardrails, vận hành)"
+  },
+  {
+    "question": "\"Tool Calling\" được ví như bộ phận gì của Agent?",
+    "expected_pages": [
+      9
+    ],
+    "expected_answer_summary": "Tay chân của agent"
+  },
+  {
+    "question": "Tool definitions cần phải rõ những gì?",
+    "expected_pages": [
+      9
+    ],
+    "expected_answer_summary": "Input, output, và error mode"
+  },
+  {
+    "question": "Vì sao ReAct giúp con người dễ debug hơn so với chỉ nhìn final answer?",
+    "expected_pages": [
+      10
+    ],
+    "expected_answer_summary": "Vì trace lý do hành động (Thought) được bộc lộ ra ngoài, giúp con người debug và can thiệp dễ hơn"
+  },
+  {
+    "question": "Trong vòng lặp ReAct, sau bước \"Action\" (gọi tool) là bước gì?",
+    "expected_pages": [
+      10
+    ],
+    "expected_answer_summary": "Observation (kết quả tool)"
+  }
+]

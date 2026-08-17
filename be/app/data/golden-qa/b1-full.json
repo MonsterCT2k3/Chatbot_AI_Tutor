@@ -1,0 +1,303 @@
+[
+  {
+    "question": "Ai là giảng viên của khóa \"AI & LLM Foundation\" này?",
+    "expected_pages": [
+      1
+    ],
+    "expected_answer_summary": "Mai Anh Nguyen (Blue)"
+  },
+  {
+    "question": "Theo agenda, sau \"Lịch sử AI 70 năm\" là chủ đề gì?",
+    "expected_pages": [
+      3
+    ],
+    "expected_answer_summary": "Bên trong LLM: cơ chế vận hành"
+  },
+  {
+    "question": "Sau buổi học này, học viên sẽ \"Build được\" cái gì?",
+    "expected_pages": [
+      4
+    ],
+    "expected_answer_summary": "Một chatbot dòng lệnh đơn giản có streaming"
+  },
+  {
+    "question": "Theo slide, có bao nhiêu nhóm AI chính, và đó là những nhóm nào?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "3 nhóm: Discriminative AI (phân loại), Generative AI (sinh nội dung), Agentic AI (hành động)"
+  },
+  {
+    "question": "Hành trình khóa học được mô tả theo thứ tự nào?",
+    "expected_pages": [
+      7
+    ],
+    "expected_answer_summary": "LLM Foundation → Agent → Multi-Agent → Deploy → Evaluate"
+  },
+  {
+    "question": "\"Artificial Intelligence\" ra đời chính thức vào năm nào, tại sự kiện gì?",
+    "expected_pages": [
+      10
+    ],
+    "expected_answer_summary": "Năm 1956, tại Dartmouth Workshop"
+  },
+  {
+    "question": "Ai đã viết báo cáo năm 1973 dẫn tới mùa đông AI lần thứ nhất?",
+    "expected_pages": [
+      12
+    ],
+    "expected_answer_summary": "James Lighthill"
+  },
+  {
+    "question": "Mùa đông AI lần thứ nhất diễn ra trong khoảng thời gian nào?",
+    "expected_pages": [
+      13
+    ],
+    "expected_answer_summary": "1974-1980"
+  },
+  {
+    "question": "Hệ chuyên gia (expert system) ra đời vào năm nào?",
+    "expected_pages": [
+      14
+    ],
+    "expected_answer_summary": "1980"
+  },
+  {
+    "question": "Fei-Fei Li đã đóng góp gì cho làn sóng Deep Learning năm 2009?",
+    "expected_pages": [
+      17
+    ],
+    "expected_answer_summary": "Xây dựng ImageNet — bộ dữ liệu 14 triệu ảnh gán nhãn tay, hơn 20.000 loại vật"
+  },
+  {
+    "question": "AlexNet chiến thắng ở cuộc thi nào vào năm 2012?",
+    "expected_pages": [
+      19
+    ],
+    "expected_answer_summary": "ImageNet Large Scale Visual Recognition Challenge"
+  },
+  {
+    "question": "AlphaGo ban đầu học từ bao nhiêu ván cờ của chuyên gia con người?",
+    "expected_pages": [
+      20
+    ],
+    "expected_answer_summary": "Khoảng 150.000 ván"
+  },
+  {
+    "question": "Transformer ra đời vào năm nào?",
+    "expected_pages": [
+      22
+    ],
+    "expected_answer_summary": "2017"
+  },
+  {
+    "question": "ChatGPT xuất hiện như một trải nghiệm đại chúng vào năm nào?",
+    "expected_pages": [
+      23
+    ],
+    "expected_answer_summary": "2022"
+  },
+  {
+    "question": "LLM là viết tắt của cụm từ gì?",
+    "expected_pages": [
+      27
+    ],
+    "expected_answer_summary": "Large Language Model"
+  },
+  {
+    "question": "Theo ví dụ trong slide, câu \"Xin chào\" có thể tốn tới bao nhiêu token?",
+    "expected_pages": [
+      30
+    ],
+    "expected_answer_summary": "Có thể tới 34 token"
+  },
+  {
+    "question": "128K token tương đương với khoảng bao nhiêu trang sách?",
+    "expected_pages": [
+      31
+    ],
+    "expected_answer_summary": "Một cuốn sách khoảng 300 trang"
+  },
+  {
+    "question": "Hiện tượng \"quên phần giữa\" khi context quá dài được nhắc tới qua tên nghiên cứu nào?",
+    "expected_pages": [
+      31
+    ],
+    "expected_answer_summary": "\"Lost in the Middle\" (Liu et al. 2023)"
+  },
+  {
+    "question": "Chữ T trong \"GPT\" tượng trưng cho cơ chế nào?",
+    "expected_pages": [
+      32
+    ],
+    "expected_answer_summary": "Attention (Transformer)"
+  },
+  {
+    "question": "Trong ví dụ câu \"Lan bỏ quyển sách vào túi vì nó quá dày\", từ \"nó\" được model chú ý mạnh nhất vào từ nào?",
+    "expected_pages": [
+      33
+    ],
+    "expected_answer_summary": "\"quyển\" và \"sách\", không phải \"túi\""
+  },
+  {
+    "question": "Thí nghiệm Othello-GPT nhằm kiểm tra điều gì?",
+    "expected_pages": [
+      41
+    ],
+    "expected_answer_summary": "Liệu model có tự xây dựng một \"bàn cờ ẩn\"/mô hình thế giới bên trong chỉ từ chuỗi ký tự nước đi, dù không được dạy luật chơi hay thấy bàn cờ"
+  },
+  {
+    "question": "Trong thí nghiệm Othello-GPT, tỷ lệ model đi sai luật là bao nhiêu?",
+    "expected_pages": [
+      42
+    ],
+    "expected_answer_summary": "Chỉ 0.01%"
+  },
+  {
+    "question": "Nhóm nghiên cứu Othello-GPT đã gắn bao nhiêu \"que thử\" (probe) vào bên trong model?",
+    "expected_pages": [
+      43
+    ],
+    "expected_answer_summary": "64 que thử"
+  },
+  {
+    "question": "Model GPT3 (2020) có bao nhiêu tỷ tham số?",
+    "expected_pages": [
+      37
+    ],
+    "expected_answer_summary": "175 tỷ"
+  },
+  {
+    "question": "RLHF gồm mấy bước chính, và đó là những bước nào?",
+    "expected_pages": [
+      39
+    ],
+    "expected_answer_summary": "3 bước: model viết nhiều câu trả lời, người chấm xếp hạng, huấn luyện theo điểm (reward model)"
+  },
+  {
+    "question": "Ba giới hạn bẩm sinh của LLM được liệt kê trong slide là gì?",
+    "expected_pages": [
+      44
+    ],
+    "expected_answer_summary": "Bong bóng thời gian (knowledge cutoff), nói chắc như đúng rồi (hallucination), bàn làm việc có hạn (context có trần)"
+  },
+  {
+    "question": "Chain-of-Thought Prompting làm gì để cải thiện độ chính xác của model trong ví dụ bài toán quả bóng tennis?",
+    "expected_pages": [
+      50
+    ],
+    "expected_answer_summary": "Cho phép model \"viết nháp\" từng bước thay vì trả lời ngay, giúp đáp án từ sai (27 quả) thành đúng (11 quả)"
+  },
+  {
+    "question": "5 bộ phận của một agent theo \"giải phẫu agent\" là gì?",
+    "expected_pages": [
+      53
+    ],
+    "expected_answer_summary": "Goal, Reasoning, Tools, Memory, Action"
+  },
+  {
+    "question": "Agent Voyager tích lũy kỹ năng vào đâu để tái sử dụng cho các nhiệm vụ sau?",
+    "expected_pages": [
+      54
+    ],
+    "expected_answer_summary": "Thư viện kỹ năng (skill library), lớn dần theo thời gian"
+  },
+  {
+    "question": "Từ LLM đến agent có mấy mức độ (level) được mô tả trong slide?",
+    "expected_pages": [
+      52
+    ],
+    "expected_answer_summary": "4 mức: Level 0 (bộ não suy luận), Level 1 (có kết nối/tools), Level 2 (biết lập kế hoạch), Level 3 (đội agent phối hợp)"
+  },
+  {
+    "question": "Theo slide, giá của model cùng một mức năng lực giảm khoảng bao nhiêu lần mỗi năm?",
+    "expected_pages": [
+      57
+    ],
+    "expected_answer_summary": "Khoảng 10 lần mỗi năm"
+  },
+  {
+    "question": "Benchmark SWE-bench Verified tăng từ bao nhiêu % lên bao nhiêu % chỉ trong 20 tháng?",
+    "expected_pages": [
+      60
+    ],
+    "expected_answer_summary": "Từ 33% lên 81%"
+  },
+  {
+    "question": "Claude Fable 5 gặp vấn đề gì sau khi ra mắt ngày 9/6/2026?",
+    "expected_pages": [
+      62
+    ],
+    "expected_answer_summary": "Bị Mỹ export-control tạm khóa toàn cầu chỉ 3 ngày sau khi ra mắt"
+  },
+  {
+    "question": "Kimi K3 (Moonshot, ra mắt 16/7/2026) có bao nhiêu tỷ tham số?",
+    "expected_pages": [
+      62
+    ],
+    "expected_answer_summary": "2.800 tỷ tham số (kiến trúc MoE)"
+  },
+  {
+    "question": "Theo framework chọn tầng model, tầng nào được khuyên \"mặc định thử trước\"?",
+    "expected_pages": [
+      65
+    ],
+    "expected_answer_summary": "Tầng 2 — Rẻ mà mạnh (VD Sonnet 4.6, Terra, Gemini 3.1 Pro, Kimi K3, Haiku, Flash)"
+  },
+  {
+    "question": "Trong thí nghiệm Chinchilla (2022), model nào thắng dù có ít tham số nhất?",
+    "expected_pages": [
+      66
+    ],
+    "expected_answer_summary": "Chinchilla (70B), thắng cả các model nhiều tham số hơn (MTNLG 530B, Gopher 280B, GPT3 175B)"
+  },
+  {
+    "question": "Token đầu vào (input) và đầu ra (output), cái nào đắt hơn và đắt hơn khoảng bao nhiêu lần?",
+    "expected_pages": [
+      68
+    ],
+    "expected_answer_summary": "Output đắt hơn input, khoảng 3-5 lần"
+  },
+  {
+    "question": "GPT4 đỗ Bar exam (kỳ thi luật sư Mỹ) ở mức nào, nhưng lại yếu ở kỳ thi nào?",
+    "expected_pages": [
+      72
+    ],
+    "expected_answer_summary": "Đỗ top 10% ở Bar exam nhưng dưới 5% ở Codeforces (thi lập trình thi đấu)"
+  },
+  {
+    "question": "Một prompt được chia thành mấy lớp theo \"giải phẫu một prompt\"?",
+    "expected_pages": [
+      75
+    ],
+    "expected_answer_summary": "4 lớp: System instruction, User input, Context bổ sung, Output mong muốn"
+  },
+  {
+    "question": "Trong request API mẫu, \"temperature\" được đặt bằng bao nhiêu để có kết quả ổn định?",
+    "expected_pages": [
+      76
+    ],
+    "expected_answer_summary": "0"
+  },
+  {
+    "question": "\"Trí nhớ\" của chatbot đến từ đâu, theo slide?",
+    "expected_pages": [
+      78
+    ],
+    "expected_answer_summary": "Từ việc ứng dụng tự gửi lại toàn bộ history mỗi lần gọi — bản thân model là stateless, không nhớ gì giữa 2 lần gọi"
+  },
+  {
+    "question": "Theo \"5 ý để mang về\" cuối bài, LLM về bản chất là gì?",
+    "expected_pages": [
+      81
+    ],
+    "expected_answer_summary": "Cỗ máy Transformer đoán token tiếp theo từ context"
+  },
+  {
+    "question": "Video \"Transformers, the tech behind LLMs\" được đề xuất xem trước là của kênh nào?",
+    "expected_pages": [
+      83
+    ],
+    "expected_answer_summary": "3Blue1Brown"
+  }
+]

@@ -1,0 +1,1354 @@
+{
+  "timestamp": "2026-08-13T01:15:14.033698+00:00",
+  "label": "phase-5-baseline",
+  "k": 6,
+  "num_questions": 79,
+  "recall_at_k": 1.0,
+  "mrr": 0.9143459915611815,
+  "per_question": [
+    {
+      "document": "b1-test.pdf",
+      "question": "Ai là giảng viên hướng dẫn khóa học \"AI & LLM Foundation\" này?",
+      "expected_pages": [
+        1
+      ],
+      "retrieved_pages": [
+        1,
+        4,
+        7,
+        4,
+        3,
+        7
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Giảng viên đã từng làm PM tại công ty nào trong lĩnh vực chăm sóc sức khỏe năm 2026?",
+      "expected_pages": [
+        2
+      ],
+      "retrieved_pages": [
+        2,
+        5,
+        1,
+        4,
+        4,
+        3
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Giảng viên là đồng sáng lập (co-founder) của tổ chức nào vào năm 2025?",
+      "expected_pages": [
+        2
+      ],
+      "retrieved_pages": [
+        2,
+        3,
+        1,
+        4,
+        4,
+        5
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Trước đây giảng viên từng làm việc ở DYNO và Kalapa trong lĩnh vực gì?",
+      "expected_pages": [
+        2
+      ],
+      "retrieved_pages": [
+        2,
+        7,
+        1,
+        8,
+        6,
+        5
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Sau buổi học hôm nay, học viên sẽ \"Build được\" cái gì?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        3,
+        1,
+        7,
+        7,
+        4,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Theo bài học, có cần nền tảng toán học để học buổi này không?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        3,
+        6,
+        7,
+        4,
+        7,
+        1
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Trong sơ đồ AI/ML/DL/GenAI/LLM, đâu là \"chiếc ô lớn nhất\"?",
+      "expected_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        4,
+        4,
+        7,
+        1,
+        6,
+        7
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Machine Learning khác với việc viết luật tay (rule-based) ở điểm nào?",
+      "expected_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        6,
+        4,
+        4,
+        7,
+        7,
+        3
+      ],
+      "hit": true,
+      "rank": 2
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Generative AI có khả năng sinh ra những loại nội dung nào?",
+      "expected_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        4,
+        4,
+        6,
+        7,
+        3,
+        1
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Lịch sử AI đã trải qua bao nhiêu \"mùa đông\" (AI winter)?",
+      "expected_pages": [
+        5
+      ],
+      "retrieved_pages": [
+        5,
+        4,
+        1,
+        4,
+        3,
+        2
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Deep Learning khác Machine Learning truyền thống ở điểm nào?",
+      "expected_pages": [
+        6
+      ],
+      "retrieved_pages": [
+        6,
+        4,
+        4,
+        8,
+        7,
+        1
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "LLM là viết tắt của cụm từ gì?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        7,
+        7,
+        4,
+        4,
+        3,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "LLM thường dựa trên kiến trúc nào?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        7,
+        7,
+        4,
+        4,
+        8,
+        6
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Theo slide, chatbot là gì so với LLM?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        7,
+        3,
+        7,
+        4,
+        1,
+        4
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Bên trong Transformer, đầu ra của model luôn có dạng gì?",
+      "expected_pages": [
+        8
+      ],
+      "retrieved_pages": [
+        8,
+        7,
+        4,
+        6,
+        7,
+        4
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b1-test.pdf",
+      "question": "Video tham khảo về cơ chế bên trong Transformer được nhắc tới ở cuối bài là của kênh nào?",
+      "expected_pages": [
+        8
+      ],
+      "retrieved_pages": [
+        8,
+        7,
+        6,
+        3,
+        4,
+        4
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Buổi sáng của Ngày 02 (4 tiếng) gồm những nội dung lý thuyết nào?",
+      "expected_pages": [
+        1
+      ],
+      "retrieved_pages": [
+        1,
+        1,
+        4,
+        7,
+        3,
+        9
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Buổi chiều (lab thực hành) yêu cầu mỗi cá nhân tìm bao nhiêu bài toán và điền bao nhiêu Problem Card?",
+      "expected_pages": [
+        1
+      ],
+      "retrieved_pages": [
+        1,
+        1,
+        6,
+        5,
+        4,
+        7
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Theo slide, sản phẩm AI (AI Product) có gì khác/giống so với sản phẩm truyền thống?",
+      "expected_pages": [
+        2
+      ],
+      "retrieved_pages": [
+        2,
+        3,
+        4,
+        5,
+        4,
+        1
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Ba trụ cột nền tảng của AI Product là gì?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        2,
+        3,
+        5,
+        4,
+        1,
+        7
+      ],
+      "hit": true,
+      "rank": 2
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "AI Engineering trong 3 trụ cột bao gồm triển khai những gì?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        3,
+        8,
+        2,
+        1,
+        5,
+        6
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "\"Product Thinking\" trong slide được lấy cảm hứng (Inspired) từ tác giả nào?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        3,
+        4,
+        7,
+        2,
+        8,
+        9
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Cuốn sách giáo khoa chính được dùng trong buổi học hôm nay là gì?",
+      "expected_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        4,
+        6,
+        5,
+        7,
+        9,
+        4
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "People + AI Guidebook có bao nhiêu chương?",
+      "expected_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        4,
+        4,
+        3,
+        2,
+        5,
+        1
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Theo bài đọc thêm của Anthropic \"Building effective agents\", nên chọn giải pháp nào trước khi dùng agent?",
+      "expected_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        4,
+        3,
+        4,
+        1,
+        8,
+        7
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Kể tên 2 nhóm bài toán chatbot chính được liệt kê trong slide?",
+      "expected_pages": [
+        5
+      ],
+      "retrieved_pages": [
+        5,
+        1,
+        4,
+        3,
+        1,
+        6
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Vì sao slide nói \"AI chatbot chưa phải là một bài toán\"?",
+      "expected_pages": [
+        5
+      ],
+      "retrieved_pages": [
+        5,
+        4,
+        1,
+        3,
+        2,
+        6
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Tình huống thực tế được đưa ra để thảo luận là gì?",
+      "expected_pages": [
+        6
+      ],
+      "retrieved_pages": [
+        7,
+        1,
+        9,
+        1,
+        8,
+        6
+      ],
+      "hit": true,
+      "rank": 6
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Trong mô hình Double Diamond, \"Discover\" và \"Define\" thuộc Diamond nào?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        7,
+        7,
+        1,
+        8,
+        3,
+        1
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Ai là người đưa ra mô hình Double Diamond?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        7,
+        1,
+        8,
+        7,
+        3,
+        4
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "5 bước trong quy trình Design Thinking được liệt kê trong slide là gì?",
+      "expected_pages": [
+        8
+      ],
+      "retrieved_pages": [
+        8,
+        7,
+        3,
+        1,
+        4,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Câu chuyện về Isaac Newton trong slide đặt ra câu hỏi tò mò nào?",
+      "expected_pages": [
+        9
+      ],
+      "retrieved_pages": [
+        9,
+        1,
+        6,
+        1,
+        4,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b2-test.pdf",
+      "question": "Ý tưởng ban đầu của Airbnb xuất phát từ câu hỏi tò mò nào?",
+      "expected_pages": [
+        9
+      ],
+      "retrieved_pages": [
+        9,
+        4,
+        5,
+        7,
+        8,
+        3
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Chủ đề chính của bài học Ngày 3 là gì?",
+      "expected_pages": [
+        1
+      ],
+      "retrieved_pages": [
+        2,
+        5,
+        10,
+        6,
+        9,
+        1
+      ],
+      "hit": true,
+      "rank": 6
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Khóa học này được tổ chức tại trường đại học nào?",
+      "expected_pages": [
+        1
+      ],
+      "retrieved_pages": [
+        6,
+        4,
+        5,
+        2,
+        8,
+        1
+      ],
+      "hit": true,
+      "rank": 6
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Vòng lặp ReAct gồm 3 bước nào theo đúng thứ tự?",
+      "expected_pages": [
+        2,
+        10
+      ],
+      "retrieved_pages": [
+        10,
+        2,
+        1,
+        8,
+        6,
+        3
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Theo slide, \"agent\" chỉ thực sự xuất hiện khi nào?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        8,
+        9,
+        1,
+        2,
+        3,
+        4
+      ],
+      "hit": true,
+      "rank": 5
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Trong dải phổ Bot→Chatbot→Agent, \"Rule-based Bot\" có đặc điểm gì?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        3,
+        5,
+        2,
+        4,
+        1,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "\"Autonomous Agent\" khác \"Reactive Agent\" ở điểm nào?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        3,
+        8,
+        1,
+        2,
+        4,
+        5
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Trong bảng so sánh 3 kiểu hệ thống AI, \"Cost\" của Agent được đánh giá thế nào so với Rule-based Bot và LLM Chatbot?",
+      "expected_pages": [
+        5
+      ],
+      "retrieved_pages": [
+        5,
+        3,
+        6,
+        2,
+        4,
+        7
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Với bài toán \"tìm vé HAN→HCM và gợi ý mang gì nếu trời mưa\", Reactive Agent xử lý khác Bot/Chatbot ở điểm nào?",
+      "expected_pages": [
+        6
+      ],
+      "retrieved_pages": [
+        7,
+        6,
+        2,
+        3,
+        1,
+        5
+      ],
+      "hit": true,
+      "rank": 2
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Vì sao câu trả lời của Chatbot trong ví dụ so sánh output bị đánh giá là \"không verifiable\"?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        7,
+        5,
+        6,
+        4,
+        3,
+        2
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Câu trả lời của Agent trong ví dụ lấy dữ liệu từ đâu?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        7,
+        8,
+        6,
+        2,
+        3,
+        9
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Theo Anthropic Agent Patterns, pattern nào là đơn giản nhất và pattern nào là mạnh/đắt nhất?",
+      "expected_pages": [
+        8
+      ],
+      "retrieved_pages": [
+        8,
+        1,
+        3,
+        9,
+        2,
+        5
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "\"Tool Calling\" được ví như bộ phận gì của Agent?",
+      "expected_pages": [
+        9
+      ],
+      "retrieved_pages": [
+        9,
+        8,
+        2,
+        3,
+        1,
+        5
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Tool definitions cần phải rõ những gì?",
+      "expected_pages": [
+        9
+      ],
+      "retrieved_pages": [
+        9,
+        10,
+        8,
+        5,
+        4,
+        6
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Vì sao ReAct giúp con người dễ debug hơn so với chỉ nhìn final answer?",
+      "expected_pages": [
+        10
+      ],
+      "retrieved_pages": [
+        10,
+        2,
+        9,
+        4,
+        6,
+        1
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b3-test.pdf",
+      "question": "Trong vòng lặp ReAct, sau bước \"Action\" (gọi tool) là bước gì?",
+      "expected_pages": [
+        10
+      ],
+      "retrieved_pages": [
+        10,
+        2,
+        1,
+        9,
+        8,
+        4
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "4 trụ cột được nhắc tới trong tiêu đề Day 04 là gì?",
+      "expected_pages": [
+        1
+      ],
+      "retrieved_pages": [
+        6,
+        1,
+        4,
+        5,
+        3,
+        9
+      ],
+      "hit": true,
+      "rank": 2
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Theo slide, \"một agent tốt\" cần làm được điều gì ngoài việc gọi công cụ?",
+      "expected_pages": [
+        1
+      ],
+      "retrieved_pages": [
+        1,
+        9,
+        3,
+        9,
+        10,
+        7
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Slide ví \"Context\" giống với cái gì của model?",
+      "expected_pages": [
+        2
+      ],
+      "retrieved_pages": [
+        2,
+        3,
+        3,
+        4,
+        5,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Prompt chỉ là một phần của cái gì, theo slide?",
+      "expected_pages": [
+        2
+      ],
+      "retrieved_pages": [
+        4,
+        8,
+        10,
+        9,
+        2,
+        6
+      ],
+      "hit": true,
+      "rank": 5
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "\"Bản đồ 4 lớp\" của AI app gồm những lớp nào?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        3,
+        1,
+        9,
+        5,
+        9,
+        4
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Lớp \"Control\" trong bản đồ 4 lớp chịu trách nhiệm về cơ chế vận hành nào?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        3,
+        1,
+        4,
+        5,
+        2,
+        10
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Prompt được mô tả là lớp can thiệp như thế nào?",
+      "expected_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        4,
+        3,
+        8,
+        8,
+        6,
+        9
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Trong ví dụ \"prompt mơ hồ\", câu prompt gốc mà người dùng đưa ra là gì?",
+      "expected_pages": [
+        6
+      ],
+      "retrieved_pages": [
+        6,
+        4,
+        7,
+        10,
+        8,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Khi prompt mơ hồ, model phải tự đoán những gì?",
+      "expected_pages": [
+        6
+      ],
+      "retrieved_pages": [
+        6,
+        4,
+        10,
+        7,
+        2,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Theo mô hình \"Calibrating the system prompt\", có 3 mức độ nào?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        7,
+        4,
+        10,
+        3,
+        8,
+        6
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Prompt \"quá cụ thể\" (nhồi nhiều rule chi tiết) có nhược điểm gì?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        7,
+        8,
+        10,
+        8,
+        4,
+        3
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Kể tên ít nhất 3 nhãn (tag) phổ biến được dùng để cấu trúc prompt bằng delimiter?",
+      "expected_pages": [
+        8
+      ],
+      "retrieved_pages": [
+        8,
+        8,
+        4,
+        10,
+        7,
+        9
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Vì sao cần dùng XML tags/delimiters để tách các phần trong prompt?",
+      "expected_pages": [
+        8
+      ],
+      "retrieved_pages": [
+        8,
+        8,
+        4,
+        10,
+        7,
+        9
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "3 bước trong ví dụ Output Format là gì?",
+      "expected_pages": [
+        9
+      ],
+      "retrieved_pages": [
+        9,
+        9,
+        8,
+        8,
+        4,
+        3
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Vì sao không nên \"nhồi một prompt khổng lồ\" theo slide cuối?",
+      "expected_pages": [
+        10
+      ],
+      "retrieved_pages": [
+        10,
+        4,
+        7,
+        8,
+        6,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b4-test.pdf",
+      "question": "Nguồn tham khảo cho phần \"Đừng nhồi một prompt khổng lồ\" là từ đâu?",
+      "expected_pages": [
+        10
+      ],
+      "retrieved_pages": [
+        10,
+        6,
+        4,
+        7,
+        8,
+        2
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Chủ đề chính (narrative spine) của Ngày 05 là gì?",
+      "expected_pages": [
+        1
+      ],
+      "retrieved_pages": [
+        1,
+        3,
+        2,
+        7,
+        10,
+        4
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Case \"Google Bard\" trong slide minh họa cho vấn đề gì?",
+      "expected_pages": [
+        2
+      ],
+      "retrieved_pages": [
+        2,
+        1,
+        4,
+        8,
+        2,
+        3
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Case \"Air Canada\" minh họa cho bài học sản phẩm nào?",
+      "expected_pages": [
+        2
+      ],
+      "retrieved_pages": [
+        2,
+        1,
+        4,
+        10,
+        6,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Vấn đề cốt lõi theo THESIS của bài là gì?",
+      "expected_pages": [
+        3
+      ],
+      "retrieved_pages": [
+        3,
+        4,
+        8,
+        10,
+        7,
+        1
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "\"Production gap\" nghĩa là gì theo slide?",
+      "expected_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        4,
+        1,
+        2,
+        3,
+        10,
+        5
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Kể tên 4 loại \"drift\" được liệt kê trong slide Production Gap?",
+      "expected_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        4,
+        1,
+        2,
+        10,
+        8,
+        6
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Vì sao AI product cần eval, version log và fallback ngay từ bản prototype đầu tiên?",
+      "expected_pages": [
+        4
+      ],
+      "retrieved_pages": [
+        4,
+        1,
+        10,
+        8,
+        3,
+        2
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Quyết định \"Automation hay augmentation\" phụ thuộc vào những yếu tố nào?",
+      "expected_pages": [
+        5
+      ],
+      "retrieved_pages": [
+        5,
+        6,
+        10,
+        7,
+        2,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Theo \"Automation Ladder\", tại sao 99.5% độ chính xác vẫn có thể nguy hiểm?",
+      "expected_pages": [
+        6
+      ],
+      "retrieved_pages": [
+        6,
+        8,
+        5,
+        10,
+        2,
+        2
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Nguyên tắc an toàn khi tăng mức tự động hóa là gì?",
+      "expected_pages": [
+        6
+      ],
+      "retrieved_pages": [
+        6,
+        5,
+        4,
+        8,
+        2,
+        10
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "\"AI Spec\" khác \"Spec thường\" ở điểm gì?",
+      "expected_pages": [
+        7
+      ],
+      "retrieved_pages": [
+        10,
+        2,
+        7,
+        2,
+        3,
+        1
+      ],
+      "hit": true,
+      "rank": 3
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "4 câu hỏi mà mỗi AI product phải trả lời về \"UX cho uncertainty\" là gì?",
+      "expected_pages": [
+        8
+      ],
+      "retrieved_pages": [
+        8,
+        10,
+        2,
+        7,
+        2,
+        9
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Vì sao Microsoft Tay được coi là \"phản ví dụ\" (counter-example)?",
+      "expected_pages": [
+        8
+      ],
+      "retrieved_pages": [
+        8,
+        2,
+        2,
+        1,
+        3,
+        7
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Kể tên 5 nguyên tắc thiết kế sản phẩm AI ở phần Closing?",
+      "expected_pages": [
+        10
+      ],
+      "retrieved_pages": [
+        10,
+        2,
+        2,
+        3,
+        1,
+        9
+      ],
+      "hit": true,
+      "rank": 1
+    },
+    {
+      "document": "b5-test.pdf",
+      "question": "Nguyên tắc thứ 2 trong phần Closing nói gì về Augment so với Automate?",
+      "expected_pages": [
+        10
+      ],
+      "retrieved_pages": [
+        10,
+        6,
+        5,
+        2,
+        3,
+        8
+      ],
+      "hit": true,
+      "rank": 1
+    }
+  ]
+}
