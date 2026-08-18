@@ -8,9 +8,9 @@
 
 Các phần hạ tầng thuần túy không trực tiếp quyết định chất lượng AI (auth, upload, vận hành...) vẫn áp dụng nguyên tắc "đủ dùng, không over-engineer" như đã làm có chủ đích ở JWT ([Phase 1.5](phase-1.5-jwt-hardening.md) có hẳn 1 bảng ghi lại những gì cố ý KHÔNG làm và lý do) — 2 nguyên tắc này không mâu thuẫn nhau, chỉ khác phạm vi áp dụng.
 
-## Trạng thái hiện tại (2026-08-14)
+## Trạng thái hiện tại (2026-08-18)
 
-**Phase 0 → Phase 5.5 hoàn thành.** Supabase Postgres (Singapore) + R2 + Alembic đã kết nối và verify thật. Auth đầy đủ (signup/login/refresh/logout/me) với refresh token thu hồi được thật + rate limit `/login`; document upload/list/get/delete/status/file — toàn bộ ingestion pipeline (pypdf/mistral_ocr/hybrid + PPTX→PDF) đã chạy end-to-end với dữ liệu thật. **Phase 5.5 (Advanced RAG)** đã xong toàn bộ 9 bước + 1 bước phát sinh, mỗi bước đều đo bằng dữ liệu thật trước khi quyết định đưa vào production hay không: **đã đưa vào `ask()`** — reranking (cross-encoder đa ngôn ngữ, cải thiện rõ trên tài liệu dài), chuyển sang Groq (miễn phí, chất lượng ngang OpenAI), grounding/faithfulness verification (guardrail thật, có retry + fallback an toàn), phòng vệ prompt injection gián tiếp; **đã thử nhưng KHÔNG đưa vào** (có số liệu chứng minh không đạt) — hybrid search, query transformation, semantic caching. Tiếp theo: **Phase 5.6 (Guardrails, Safety & Observability)**.
+**Phase 0 → Phase 5.6 hoàn thành.** Supabase Postgres (Singapore) + R2 + Alembic đã kết nối và verify thật. Auth đầy đủ (signup/login/refresh/logout/me) với refresh token thu hồi được thật + rate limit `/login`; document upload/list/get/delete/status/file — toàn bộ ingestion pipeline (pypdf/mistral_ocr/hybrid + PPTX→PDF) đã chạy end-to-end với dữ liệu thật. **Phase 5.5 (Advanced RAG)** đã xong toàn bộ 9 bước + 1 bước phát sinh, mỗi bước đều đo bằng dữ liệu thật trước khi quyết định đưa vào production hay không: **đã đưa vào `ask()`** — reranking (cross-encoder đa ngôn ngữ, cải thiện rõ trên tài liệu dài), chuyển sang Groq (miễn phí, chất lượng ngang OpenAI), grounding/faithfulness verification (guardrail thật, có retry + fallback an toàn), phòng vệ prompt injection gián tiếp; **đã thử nhưng KHÔNG đưa vào** (có số liệu chứng minh không đạt) — hybrid search, query transformation, semantic caching. **Phase 5.6 (Guardrails, Safety & Observability)** đã xong 12/12 mục bắt buộc: input/output moderation, phòng vệ jailbreak trực tiếp (2 vòng vá thật), scope enforcement (đo, không đạt), hành vi khi faithfulness fail, quota/budget/circuit breaker theo user và toàn hệ thống, structured logging + prompt versioning có enforcement tự động, structured citation (bỏ regex), feedback loop 👍/👎. Phát hiện phụ đáng chú ý: bug index ivfflat gây mất 14% kết quả retrieval (đã sửa), Groq đổi/gỡ model 2 lần giữa phiên (bằng chứng thật cho rủi ro single-provider). Tiếp theo: **Phase 6 (Chat session CRUD + multi-turn)**.
 
 ## Danh sách các phase
 
@@ -22,7 +22,7 @@ Các phần hạ tầng thuần túy không trực tiếp quyết định chất
 - [Phase 4 — Document viewer API](phase-4-viewer-api.md) ✅ Hoàn thành
 - [Phase 5 — RAG orchestrator (baseline)](phase-5-rag-orchestrator.md) ✅ Hoàn thành
 - [Phase 5.5 — Advanced RAG (retrieval quality, faithfulness & evaluation)](phase-5.5-advanced-rag.md) ✅ Hoàn thành
-- [Phase 5.6 — Guardrails, Safety & Observability](phase-5.6-guardrails-observability.md)
+- [Phase 5.6 — Guardrails, Safety & Observability](phase-5.6-guardrails-observability.md) ✅ Hoàn thành
 - [Phase 6 — Chat session CRUD + multi-turn](phase-6-chat-sessions.md)
 - [Phase 7 — Streaming (SSE)](phase-7-streaming.md)
 - [Phase 8 — Citation resolver + frontend highlight](phase-8-citation-highlight.md)

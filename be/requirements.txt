@@ -25,6 +25,12 @@ openai
 # Local reranker (cross-encoder, multilingual incl. Vietnamese) for RAG retrieval
 sentence-transformers
 
+# HTTP client for Voyage AI Rerank API (no official Python SDK dependency
+# wanted just for 1 endpoint — plain REST call is enough). Already an
+# installed transitive dep of openai/httpx-based SDKs; listed explicitly here
+# because rag_service.py now imports it directly.
+httpx
+
 # OCR text extraction mode (alternative to pypdf, handles embedded images/diagrams)
 mistralai
 

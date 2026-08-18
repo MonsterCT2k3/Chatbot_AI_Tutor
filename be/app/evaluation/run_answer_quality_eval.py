@@ -35,9 +35,9 @@ async def evaluate_one(document_id, question, generation_kwargs: dict) -> dict:
     result = await retry_async(_run_ask)
 
     context = format_context(result.chunks)
-    faithfulness = await score_faithfulness(result.answer, context)
-    relevance = await score_relevance(question.question, result.answer)
-    correctness = await score_correctness(result.answer, question.expected_answer_summary)
+    faithfulness, _ = await score_faithfulness(result.answer, context)
+    relevance, _ = await score_relevance(question.question, result.answer)
+    correctness, _ = await score_correctness(result.answer, question.expected_answer_summary)
 
     return {
         "document": question.document_filename,

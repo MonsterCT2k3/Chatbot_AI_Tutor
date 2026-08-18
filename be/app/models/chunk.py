@@ -16,13 +16,14 @@ class DocumentChunk(Base):
     __table_args__ = (
         Index("idx_chunks_document", "document_id"),
         Index("idx_chunks_page", "page_id"),
-        Index(
-            "idx_chunks_embedding",
-            "embedding",
-            postgresql_using="ivfflat",
-            postgresql_with={"lists": 100},
-            postgresql_ops={"embedding": "vector_cosine_ops"},
-        ),
+        # KHÔNG có index ANN (ivfflat/HNSW) trên `embedding` — có chủ đích.
+        # Từng có idx_chunks_embedding (ivfflat, lists=100) nhưng đã DROP ở
+        # migration 5e27bd66a382: với bảng nhỏ (~170 dòng) thì 100 cụm là quá
+        # nhiều, nhiều cụm rỗng, và probes=1 mặc định khiến truy vấn trả về 0
+        # dòng cho ~14% câu hỏi thật dù dữ liệu vẫn ở đó. Sequential scan ở quy
+        # mô này vừa nhanh vừa CHÍNH XÁC TUYỆT ĐỐI (không xấp xỉ). Nếu thêm lại
+        # ở đây, `alembic revision --autogenerate` sẽ đề xuất tạo lại đúng cái
+        # index đã gây lỗi. Xem explain-logic/phase-5.6-guardrails-observability/5.6.3.
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))

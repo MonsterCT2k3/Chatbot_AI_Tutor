@@ -13,7 +13,7 @@ _RELEVANCE_SYSTEM_PROMPT = (
 )
 
 
-async def score_relevance(question: str, answer: str) -> JudgeScore:
+async def score_relevance(question: str, answer: str):
     user_prompt = f"<question>\n{question}\n</question>\n\n<answer>\n{answer}\n</answer>"
     return await _judge(_RELEVANCE_SYSTEM_PROMPT, user_prompt)
 
@@ -25,6 +25,6 @@ _CORRECTNESS_SYSTEM_PROMPT = (
 )
 
 
-async def score_correctness(answer: str, expected_answer_summary: str) -> JudgeScore:
+async def score_correctness(answer: str, expected_answer_summary: str):
     user_prompt = f"<reference_answer>\n{expected_answer_summary}\n</reference_answer>\n\n<answer>\n{answer}\n</answer>"
     return await _judge(_CORRECTNESS_SYSTEM_PROMPT, user_prompt)
