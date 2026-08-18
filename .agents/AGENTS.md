@@ -1,3 +1,3 @@
 # Behavioral Rules
 
-- SUPREME RULE (Luật tối cao): Always reply to the user in English. Prioritize simple and easy-to-understand words. If you use difficult or specialized technical terms, you MUST put the Vietnamese translation in parentheses, like this (ý nghĩa tiếng Việt). DO NOT forget this rule.
+- SUPREME RULE: Always reply to the user in Vietnamese (tiếng Việt). Difficult, complex, uncommon, or specialized/technical terms may be kept in English inline, without needing a Vietnamese translation alongside them. Do not forget this rule, even in long or technical explanations.

@@ -60,6 +60,19 @@ async def score_faithfulness(answer: str, context: str) -> JudgeScore:
     return await _judge(_FAITHFULNESS_SYSTEM_PROMPT, user_prompt)
 
 
+async def moderate_input(text: str) -> bool:
+    # Endpoint /v1/moderations không tính phí theo token (khác chat completions/
+    # embeddings) — dùng lại đúng _openai_client/OPENAI_API_KEY đã có, không cần
+    # thêm provider mới. Gọi TRƯỚC embed_chunks/retrieval trong ask() để chặn
+    # sớm nhất có thể, tránh tốn 1 lệnh gọi LLM sinh câu trả lời cho input chắc
+    # chắn sẽ bị chặn.
+    async def _call():
+        return await _openai_client.moderations.create(model="omni-moderation-latest", input=text)
+
+    response = await retry_async(_call)
+    return response.results[0].flagged
+
+
 async def similarity_search(
     db: AsyncSession, document_id: uuid.UUID, query_embedding: list[float], k: int = 6
 ) -> list[DocumentChunk]:
@@ -71,6 +84,20 @@ async def similarity_search(
     )
     result = await db.scalars(stmt)
     return list(result.all())
+
+
+async def top_similarity_score(db: AsyncSession, document_id: uuid.UUID, query_embedding: list[float]) -> float | None:
+    # NOT wired into ask() — thử ở 5.6.3 làm tín hiệu chặn sớm câu hỏi ngoài
+    # phạm vi tài liệu, đo bằng dữ liệu thật cho thấy cosine similarity KHÔNG
+    # tách biệt an toàn (câu ngoài phạm vi như "1+1 bằng mấy?" có similarity
+    # CAO HƠN cả câu hỏi hợp lệ thật) — cùng kiểu rủi ro đã gặp ở 5.5.9. Giữ
+    # hàm làm nền tảng tham khảo/dùng ở nơi khác nếu cần độ tương đồng thô,
+    # không dùng làm cổng chặn. Xem explain-logic/phase-5.6-guardrails-
+    # observability/5.6.3 để biết số liệu cụ thể (cả cosine lẫn rerank score).
+    distance_col = DocumentChunk.embedding.cosine_distance(query_embedding)
+    stmt = select(distance_col).where(DocumentChunk.document_id == document_id).order_by(distance_col).limit(1)
+    distance = (await db.execute(stmt)).scalar()
+    return None if distance is None else 1 - distance
 
 
 # Postgres has no Vietnamese ts_config (no stemming, no stopword list) — without
@@ -307,6 +334,7 @@ class AnswerResult:
     answer: str
     chunks: list[DocumentChunk]
     grounded: bool  # False nếu phải fallback về REFUSAL_SENTENCE sau khi retry vẫn không đạt ngưỡng faithfulness
+    blocked_reason: str | None = None  # "moderation" nếu bị chặn ở 5.6.1, None nếu đi qua bình thường
 
 
 # NOT wired into ask() — thử ở Phase 5.5.9, đo bằng embedding thật cho thấy
@@ -374,6 +402,14 @@ async def ask(
     # for a fair head-to-head, without duplicating this function.
     call_client = client or _groq_client
     call_model = model or settings.GROQ_CHAT_MODEL
+
+    # 5.6.1: chặn ngay từ đầu, trước cả embed_chunks/retrieval — nếu input vi
+    # phạm, không tốn thêm 1 lệnh gọi LLM sinh câu trả lời nào nữa. Trả về
+    # ĐÚNG câu REFUSAL_SENTENCE như mọi trường hợp từ chối khác (không có
+    # thông báo riêng kiểu "bị chặn vì vi phạm chính sách") — cố ý không tiết
+    # lộ LÝ DO bị chặn cho người dùng, tránh gợi ý cách diễn đạt lại để né.
+    if await moderate_input(question):
+        return AnswerResult(answer=REFUSAL_SENTENCE, chunks=[], grounded=False, blocked_reason="moderation")
 
     query_embedding = (await embed_chunks([question]))[0]
 

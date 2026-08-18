@@ -114,11 +114,15 @@ create table document_chunks (
 create index idx_chunks_document on document_chunks(document_id);
 create index idx_chunks_page on document_chunks(page_id);
 
--- ivfflat index for cosine similarity search.
--- lists=100 is a reasonable default for tens of thousands of rows;
--- retune (and REINDEX) as the table grows.
-create index idx_chunks_embedding on document_chunks
-    using ivfflat (embedding vector_cosine_ops) with (lists = 100);
+-- No ivfflat/HNSW index on embedding on purpose: an ivfflat index with
+-- lists=100 was tried and dropped (migration 5e27bd66a382) after it was
+-- found to silently return ZERO rows for ~14% of real queries on a table
+-- this small (~170 rows) -- too many lists for too little data, some
+-- clusters ended up empty and the default probes=1 missed them entirely.
+-- Plain sequential scan is fast AND exact (no ANN approximation) at this
+-- scale. Revisit only once a document's chunk count is large enough
+-- (thousands+) that an ANN index is actually justified -- see
+-- explain-logic/phase-5.6-guardrails-observability/5.6.3.
 
 -- ------------------------------------------------------------
 -- 5. CHAT SESSIONS

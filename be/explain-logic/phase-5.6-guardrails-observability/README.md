@@ -6,4 +6,6 @@ Mỗi bước nhỏ (5.6.1, 5.6.2...) có 1 file riêng trong folder này — d�
 
 ## Các bước
 
+- [x] [5.6.1 — Content moderation trên câu hỏi người dùng](5.6.1-input-content-moderation.md)
 - [x] [5.6.2 — Direct prompt injection / jailbreak defense](5.6.2-direct-prompt-injection.md)
+- [x] [5.6.3 — Scope enforcement (không đạt) + bug ivfflat index nghiêm trọng phát hiện giữa chừng](5.6.3-scope-enforcement.md)
