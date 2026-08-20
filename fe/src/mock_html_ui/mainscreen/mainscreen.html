@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Tutor K3 — Course Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #F6F2EB;
+    color: #1C1916;
+    min-height: 100vh;
+    padding: 20px 28px 60px;
+    display: flex;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 1280px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* ── NAVBAR ────────────────────────────── */
+  .navbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .logo-link {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+    color: #1C1916;
+    flex-shrink: 0;
+  }
+
+  .logo-link span {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 23px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 340px;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8E8780;
+    pointer-events: none;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #1C1916;
+    background: #fff;
+    border: 1px solid #DDD8CF;
+    border-radius: 9999px;
+    padding: 8px 14px 8px 36px;
+    outline: none;
+  }
+
+  .search-wrap input::placeholder { color: #8E8780; }
+  .search-wrap input:focus { border-color: #B03408; }
+
+  .filter-pills {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .fpill {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #4E4840;
+    cursor: pointer;
+    transition: 0.15s;
+    white-space: nowrap;
+  }
+  .fpill:hover { background: rgba(255,255,255,0.5); }
+  .fpill.active {
+    background: #EBE5D8;
+    border-color: #D0C6B3;
+    color: #1C1916;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .bell-btn {
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1C1916;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+  }
+
+  .bell-btn .rdot {
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #B03408;
+  }
+
+  .user-block {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+    color: #1C1916;
+  }
+
+  .user-block img {
+    width: 33px; height: 33px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .user-block .uname { font-size: 13px; font-weight: 600; line-height: 1.2; }
+  .user-block .urole { font-size: 11.5px; color: #6B645A; }
+
+  .nav-divider {
+    border: none;
+    border-top: 1px solid #DDD8CF;
+    margin: 0;
+    width: 100%;
+  }
+
+  /* ── HERO ────────────────────────────── */
+  .hero-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 4px;
+    gap: 16px;
+  }
+
+  .hero-left h1 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 38px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: #1C1916;
+  }
+
+  .hero-left p {
+    font-size: 14px;
+    color: #5A534B;
+    margin-top: 5px;
+    margin-bottom: 10px;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .stat-chip {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #1C1916;
+    background: #fff;
+    border: 1px solid #DDD8CF;
+    border-radius: 9999px;
+    padding: 5px 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+
+  .upload-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #fff;
+    background: #B03408;
+    border: none;
+    border-radius: 9999px;
+    padding: 11px 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(176,52,8,0.28);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: 0.15s;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .upload-btn:hover { background: #962D06; }
+
+  /* ── CARDS GRID ────────────────────────────── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid #E3DDD4;
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.07); }
+
+  /* Slide Preview Canvas */
+  .preview-box {
+    background: #FFFFFF;
+    border: 1px solid #E8E2D7;
+    border-radius: 8px;
+    height: 168px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
+    overflow: hidden;
+    margin-bottom: 13px;
+    position: relative;
+  }
+
+  .preview-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #1C1916;
+    text-align: center;
+    margin-bottom: 3px;
+  }
+
+  .formula-hl {
+    background: #FEF08A;
+    border: 1px solid #FDE047;
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-family: 'Times New Roman', serif;
+    font-size: 11px;
+    font-style: italic;
+    color: #1C1916;
+    margin-top: 3px;
+  }
+
+  /* Card info */
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1C1916;
+    line-height: 1.3;
+    margin-bottom: 5px;
+    min-height: 40px;
+  }
+
+  .card-meta {
+    font-size: 12px;
+    color: #5A534B;
+    margin-bottom: 6px;
+  }
+
+  .meta-badge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #5A534B;
+    margin-bottom: 7px;
+  }
+
+  .rag-badge-green {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #065F46;
+    background: #ECFDF5;
+    border-radius: 9999px;
+    padding: 2px 8px;
+  }
+
+  .rag-standalone {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #065F46;
+    margin-bottom: 7px;
+  }
+
+  .gdot {
+    width: 5.5px; height: 5.5px;
+    border-radius: 50%;
+    background: #10B981;
+  }
+
+  .progress-section { margin-bottom: 13px; }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .progress-label {
+    font-size: 11.5px;
+    color: #6B645A;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 5px;
+    background: #EAE3D7;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: #B03408;
+    border-radius: 999px;
+  }
+
+  .progress-pct {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #1C1916;
+    flex-shrink: 0;
+  }
+
+  /* Card button */
+  .card-btn {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: #B03408;
+    border: none;
+    border-radius: 7px;
+    padding: 9px 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    width: 100%;
+  }
+  .card-btn:hover { background: #962D06; }
+
+  /* Dropzone card */
+  .dropzone-card {
+    background: #EFE9DD;
+    border: 2px dashed #C9B99E;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.18s;
+  }
+  .dropzone-card:hover {
+    border-color: #B03408;
+    background: #F0E9DE;
+    transform: translateY(-2px);
+  }
+
+  .dropzone-card svg { margin-bottom: 14px; }
+
+  .dropzone-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #4E4840;
+    line-height: 1.4;
+    max-width: 180px;
+  }
+
+  /* ── THREADS ────────────────────────────── */
+  .threads-section { margin-top: 8px; }
+
+  .threads-section h2 {
+    font-family: 'Newsreader', Georgia, serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #1C1916;
+    margin-bottom: 10px;
+  }
+
+  .thread-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .thread-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #fff;
+    border: 1px solid #DDD8CF;
+    border-radius: 9999px;
+    padding: 7px 16px;
+    font-size: 13px;
+    color: #1C1916;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    transition: 0.15s;
+  }
+  .thread-badge:hover { border-color: #B03408; color: #B03408; transform: translateY(-1px); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══════════ NAVBAR ══════════ -->
+  <header class="navbar">
+
+    <!-- Logo -->
+    <a href="#" class="logo-link">
+      <!-- Book & pen icon -->
+      <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
+        <path d="M20 7 L23.5 17 H16.5 Z" stroke="#1C1916" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M20 7 V17" stroke="#1C1916" stroke-width="1.8"/>
+        <circle cx="20" cy="14" r="1" fill="#B03408"/>
+        <path d="M8 26 C12 24.5 16.5 24.5 20 27 C23.5 24.5 28 24.5 32 26 V33 C28 31.5 23.5 31.5 20 34 C16.5 31.5 12 31.5 8 33 Z" stroke="#1C1916" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M20 27 V34" stroke="#1C1916" stroke-width="2"/>
+      </svg>
+      <span>AI Tutor K3</span>
+    </a>
+
+    <!-- Search box -->
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search lecture slides, formulas, or concepts..." />
+    </div>
+
+    <!-- Filter pills -->
+    <div class="filter-pills">
+      <button class="fpill active">All</button>
+      <button class="fpill">Machine Learning</button>
+      <button class="fpill">Mathematics</button>
+      <button class="fpill">NLP</button>
+    </div>
+
+    <!-- Right side -->
+    <div class="nav-right">
+      <button class="bell-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="rdot"></span>
+      </button>
+      <a href="#" class="user-block">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces" alt="Alex" />
+        <div>
+          <div class="uname">Alex •</div>
+          <div class="urole">Student Fellow</div>
+        </div>
+      </a>
+    </div>
+
+  </header>
+
+  <hr class="nav-divider" />
+
+  <!-- ══════════ HERO ══════════ -->
+  <section class="hero-row">
+    <div class="hero-left">
+      <h1>Welcome back, Alex.</h1>
+      <p>You have 4 active courses and 142 indexed lecture slides ready for AI study.</p>
+      <div class="stats-row">
+        <span class="stat-chip">14.5 Study Hours</span>
+        <span class="stat-chip">92% Quiz Accuracy</span>
+        <span class="stat-chip">142 Chunks Indexed</span>
+      </div>
+    </div>
+    <a href="#" class="upload-btn">+ Upload New Lecture (PDF / PPTX) →</a>
+  </section>
+
+  <!-- ══════════ CARDS GRID ══════════ -->
+  <main class="cards-grid">
+
+    <!-- ── CARD 1: Deep Neural Networks ── -->
+    <div class="card">
+      <div class="preview-box">
+        <div class="preview-label">Neural network computation graph</div>
+        <!-- Neural net SVG (matches reference image exactly) -->
+        <svg width="148" height="86" viewBox="0 0 160 90" fill="none">
+          <!-- node labels -->
+          <text x="5"  y="24" font-family="Times New Roman" font-size="10" font-style="italic" fill="#1C1916">x</text>
+          <text x="3"  y="47" font-family="Times New Roman" font-size="10" font-style="italic" fill="#1C1916">y₁</text>
+          <text x="4"  y="71" font-family="Times New Roman" font-size="10" font-style="italic" fill="#1C1916">z₁</text>
+          <!-- layer 1 -->
+          <circle cx="22" cy="21" r="5" stroke="#1C1916" stroke-width="1.2" fill="#fff"/>
+          <circle cx="22" cy="44" r="5" stroke="#1C1916" stroke-width="1.2" fill="#fff"/>
+          <circle cx="22" cy="67" r="5" stroke="#1C1916" stroke-width="1.2" fill="#fff"/>
+          <!-- hidden layer -->
+          <circle cx="66" cy="16" r="5" stroke="#1C1916" stroke-width="1.2" fill="#fff"/>
+          <circle cx="66" cy="34" r="5" stroke="#1C1916" stroke-width="1.2" fill="#fff"/>
+          <circle cx="66" cy="52" r="5" stroke="#1C1916" stroke-width="1.2" fill="#fff"/>
+          <circle cx="66" cy="70" r="5" stroke="#1C1916" stroke-width="1.2" fill="#fff"/>
+          <!-- output layer (amber) -->
+          <circle cx="108" cy="34" r="5.5" stroke="#BF7B00" stroke-width="1.3" fill="#FEF3C7"/>
+          <circle cx="108" cy="54" r="5.5" stroke="#BF7B00" stroke-width="1.3" fill="#FEF3C7"/>
+          <!-- connections -->
+          <line x1="27" y1="21" x2="61" y2="16" stroke="#C5BEB3" stroke-width="0.8"/>
+          <line x1="27" y1="21" x2="61" y2="34" stroke="#C5BEB3" stroke-width="0.8"/>
+          <line x1="27" y1="44" x2="61" y2="34" stroke="#C5BEB3" stroke-width="0.8"/>
+          <line x1="27" y1="44" x2="61" y2="52" stroke="#C5BEB3" stroke-width="0.8"/>
+          <line x1="27" y1="67" x2="61" y2="52" stroke="#C5BEB3" stroke-width="0.8"/>
+          <line x1="27" y1="67" x2="61" y2="70" stroke="#C5BEB3" stroke-width="0.8"/>
+          <line x1="71" y1="34" x2="102" y2="34" stroke="#BF7B00" stroke-width="0.9"/>
+          <line x1="71" y1="52" x2="102" y2="54" stroke="#BF7B00" stroke-width="0.9"/>
+          <!-- right side annotations -->
+          <text x="120" y="30" font-family="Times New Roman" font-size="7" fill="#1C1916">x'₁₁ = x₁</text>
+          <text x="120" y="44" font-family="Times New Roman" font-size="7" fill="#1C1916">y'₁₁ = z_{x1}</text>
+          <text x="120" y="58" font-family="Times New Roman" font-size="7" fill="#1C1916">x_{01} = x_{1/2}</text>
+        </svg>
+        <div class="formula-hl">f(z) = ∂/∂t f(x<sub>n1</sub>, ..., x<sub>k</sub>)</div>
+      </div>
+
+      <div class="card-title">Deep Neural Networks &amp; Backpropagation</div>
+      <div class="card-meta">PPTX • 48 Slides • Studied 2h ago</div>
+      <div class="rag-standalone">
+        <span class="gdot"></span>
+        <span>RAG Ready</span>
+      </div>
+      <div class="progress-section">
+        <div class="progress-row">
+          <div class="progress-track" style="flex:1">
+            <div class="progress-fill" style="width:75%"></div>
+          </div>
+          <span class="progress-pct">75%</span>
+        </div>
+      </div>
+      <a href="#" class="card-btn">Continue Study Session →</a>
+    </div>
+
+    <!-- ── CARD 2: Linear Algebra ── -->
+    <div class="card">
+      <div class="preview-box">
+        <div class="preview-label">Matrix eigenvalues and Vectors</div>
+        <!-- Matrix & vectors SVG -->
+        <svg width="150" height="90" viewBox="0 0 165 92" fill="none">
+          <!-- Eigenvalues text block -->
+          <text x="6"  y="15" font-family="Times New Roman" font-size="8" fill="#1C1916">Eigenvalues: c₀ =</text>
+          <!-- Matrix bracket area -->
+          <text x="80" y="13" font-family="Times New Roman" font-size="8" fill="#1C1916">[ 3  1  0 ]</text>
+          <text x="80" y="23" font-family="Times New Roman" font-size="8" fill="#1C1916">[ 0  0  0 ]</text>
+          <text x="80" y="33" font-family="Times New Roman" font-size="8" fill="#1C1916">[ 0  1  0 ]</text>
+
+          <text x="6"  y="47" font-family="Times New Roman" font-size="8" fill="#1C1916">Vectors =</text>
+          <text x="52" y="44" font-family="Times New Roman" font-size="8" fill="#1C1916">[ x₁ ] = [ 0 ] + [ 0 ]</text>
+          <text x="52" y="54" font-family="Times New Roman" font-size="8" fill="#1C1916">[ x₂ ]   [ 0 ]   [ 1 ]</text>
+
+          <text x="6"  y="68" font-family="Times New Roman" font-size="8" fill="#1C1916">Eigenvalues and vectors:</text>
+          <text x="6"  y="78" font-family="Times New Roman" font-size="7.5" fill="#1C1916">v' = [ v₁ ] = a₁₁ + a₁₂ x₂</text>
+
+          <!-- Right: 2D vector axis -->
+          <line x1="120" y1="80" x2="160" y2="80" stroke="#1C1916" stroke-width="0.9"/>
+          <line x1="120" y1="80" x2="120" y2="30" stroke="#1C1916" stroke-width="0.9"/>
+          <text x="156" y="87" font-size="7" font-family="Times New Roman">x</text>
+          <text x="114" y="33" font-size="7" font-family="Times New Roman">y</text>
+          <!-- vector u (terracotta) -->
+          <line x1="120" y1="80" x2="150" y2="48" stroke="#B03408" stroke-width="1.7"/>
+          <polygon points="150,48 143,51 146,56" fill="#B03408"/>
+          <text x="153" y="49" font-size="7.5" font-weight="700" fill="#B03408">u</text>
+          <!-- vector v (amber) -->
+          <line x1="120" y1="80" x2="155" y2="65" stroke="#BF7B00" stroke-width="1.4"/>
+          <polygon points="155,65 148,64 151,70" fill="#BF7B00"/>
+          <text x="157" y="67" font-size="7.5" font-weight="700" fill="#BF7B00">v</text>
+          <!-- theta arc -->
+          <path d="M134 80 A14 14 0 0 0 130 70" stroke="#7A7264" stroke-width="0.7" fill="none"/>
+          <text x="134" y="74" font-size="6" font-family="Times New Roman">θ</text>
+        </svg>
+      </div>
+
+      <div class="card-title">Linear Algebra for Machine Learning</div>
+      <div class="meta-badge-row">
+        <span>PDF • 36 Pages</span>
+        <span class="rag-badge-green"><span class="gdot"></span>RAG Ready</span>
+      </div>
+      <div class="progress-section">
+        <div class="progress-row">
+          <span class="progress-label">Progress</span>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:40%"></div>
+          </div>
+          <span class="progress-pct">40%</span>
+        </div>
+      </div>
+      <a href="#" class="card-btn">Open Workspace</a>
+    </div>
+
+    <!-- ── CARD 3: Attention & Transformers ── -->
+    <div class="card">
+      <div class="preview-box">
+        <div class="preview-label">Transformer Multi-Head Attention</div>
+        <!-- Transformer architecture blocks SVG -->
+        <svg width="140" height="88" viewBox="0 0 140 92" fill="none">
+          <!-- Encoder (left) column -->
+          <rect x="14" y="10" width="38" height="14" rx="2" fill="#FEF9EC" stroke="#C27803" stroke-width="0.8"/>
+          <text x="19" y="20" font-size="6" font-weight="600" fill="#1C1916">Add &amp; Norm</text>
+          <rect x="14" y="28" width="38" height="14" rx="2" fill="#DBEAFE" stroke="#3B82F6" stroke-width="0.8"/>
+          <text x="18" y="38" font-size="6" font-weight="600" fill="#1C1916">Multi-Head</text>
+          <!-- Feed Fwd at bottom encoder -->
+          <rect x="14" y="46" width="38" height="14" rx="2" fill="#FEF9EC" stroke="#C27803" stroke-width="0.8"/>
+          <text x="22" y="56" font-size="6" font-weight="600" fill="#1C1916">Feed Fwd</text>
+
+          <!-- Decoder (right) column -->
+          <rect x="68" y="10" width="38" height="14" rx="2" fill="#D1FAE5" stroke="#059669" stroke-width="0.8"/>
+          <text x="72" y="20" font-size="6" font-weight="600" fill="#1C1916">Add &amp; Norm</text>
+          <rect x="68" y="28" width="38" height="14" rx="2" fill="#DBEAFE" stroke="#3B82F6" stroke-width="0.8"/>
+          <text x="70" y="38" font-size="6" font-weight="600" fill="#1C1916">Multi-Head Attn</text>
+          <rect x="68" y="46" width="38" height="14" rx="2" fill="#FEF9EC" stroke="#C27803" stroke-width="0.8"/>
+          <text x="76" y="56" font-size="6" font-weight="600" fill="#1C1916">Feed Fwd</text>
+
+          <!-- Arrows -->
+          <line x1="33" y1="60" x2="33" y2="72" stroke="#7A7264" stroke-width="0.8"/>
+          <line x1="87" y1="60" x2="87" y2="72" stroke="#7A7264" stroke-width="0.8"/>
+
+          <!-- Bottom embedding strip -->
+          <rect x="20" y="73" width="82" height="13" rx="2" fill="#FAF6EF" stroke="#D4C9B5" stroke-width="0.7"/>
+          <text x="33" y="82" font-size="6" font-weight="500" fill="#5A534B">Positional Encoding</text>
+
+          <!-- Inputs/Outputs labels -->
+          <text x="26" y="92" font-size="6" fill="#7A7264">Inputs</text>
+          <text x="74" y="92" font-size="6" fill="#7A7264">Outputs</text>
+        </svg>
+      </div>
+
+      <div class="card-title">Attention Mechanisms &amp; Transformers</div>
+      <div class="meta-badge-row">
+        <span>PPTX • 54 Slides</span>
+        <span class="rag-badge-green"><span class="gdot"></span>RAG Ready</span>
+      </div>
+      <div class="progress-section">
+        <div class="progress-row">
+          <span class="progress-label">Progress</span>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:20%"></div>
+          </div>
+          <span class="progress-pct">20%</span>
+        </div>
+      </div>
+      <a href="#" class="card-btn">Open Workspace</a>
+    </div>
+
+    <!-- ── CARD 4: Dropzone ── -->
+    <div class="dropzone-card">
+      <!-- Amber cloud with upload arrow — matches reference image -->
+      <svg width="50" height="50" viewBox="0 0 64 64" fill="none">
+        <path d="M48 40C52.4 40 56 36.4 56 32C56 27.9 52.8 24.5 48.7 24.1C47.5 17.2 41.5 12 34.3 12C28.3 12 23 15.7 20.9 21.1C19.7 20.4 18.3 20 16.8 20C12.5 20 9 23.5 9 27.8C9 28.6 9.1 29.4 9.4 30.1C5.1 31.5 2 35.4 2 40C2 45.5 6.5 50 12 50H48C52.4 50 56 46.4 56 42" stroke="#BF7B00" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M32 32V46" stroke="#BF7B00" stroke-width="2.6" stroke-linecap="round"/>
+        <path d="M25 39L32 32L39 39" stroke="#BF7B00" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="dropzone-text">Drop new lecture slide deck here or click to browse</div>
+    </div>
+
+  </main>
+
+  <!-- ══════════ RECENT THREADS ══════════ -->
+  <section class="threads-section">
+    <h2>Recent AI Study Threads</h2>
+    <div class="thread-badges">
+      <a href="#" class="thread-badge">
+        📌 <span><b>Thread:</b> Deriving Chain Rule (Slide 14)</span>
+      </a>
+      <a href="#" class="thread-badge">
+        📌 <span><b>Thread:</b> Softmax vs Sigmoid</span>
+      </a>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

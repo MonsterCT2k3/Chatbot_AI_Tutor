@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Tutor K3 — Lesson Detail Workspace</title>
+  
+  <!-- Google Fonts: Newsreader (Serif) & Inter (UI Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-page: #F6F3EC;
+      --bg-card: #FFFFFF;
+      --bg-drawer-active: #EFE7DA;
+      
+      --text-dark: #1C1916;
+      --text-muted: #5A534B;
+      --text-sub: #7A7266;
+      
+      --border-panel: #E5DFD5;
+      --border-inner: #ECE6DB;
+      --border-dashed: #D6C8B4;
+      
+      --terracotta: #B83A09;
+      --terracotta-hover: #9E3006;
+      
+      --amber-accent: #C27803;
+      --amber-bg: #FAF3E8;
+      --amber-highlight: #FEF08A;
+      
+      --emerald-ready: #10B981;
+      --emerald-bg: #ECFDF5;
+      --emerald-text: #065F46;
+      
+      --font-serif: 'Newsreader', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-math: 'Times New Roman', Times, serif;
+      
+      --radius-panel: 18px;
+      --radius-card: 12px;
+      --radius-pill: 9999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-page);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 16px 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Outer Container */
+    .workspace-grid {
+      width: 100%;
+      max-width: 1380px;
+      display: grid;
+      grid-template-columns: 235px 1fr 345px;
+      gap: 14px;
+      align-items: stretch;
+      min-height: calc(100vh - 32px);
+    }
+
+    /* ==========================================================================
+       PANEL 1: LEFT SIDEBAR (Materials & Sessions)
+       ========================================================================== */
+    .panel-left {
+      background: var(--bg-card);
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius-panel);
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 2px 8px rgba(45, 42, 38, 0.04);
+    }
+
+    /* Brand Logo */
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+      color: var(--text-dark);
+    }
+
+    .brand-pen-svg {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+    }
+
+    .brand-title-text {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    /* Knowledge Base Chip */
+    .kb-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #FAF8F3;
+      border: 1px solid #E8E2D7;
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-dark);
+      width: fit-content;
+    }
+
+    .kb-dot-green {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--emerald-ready);
+    }
+
+    /* Upload Button */
+    .upload-box-btn {
+      background: #FAF7F1;
+      border: 1.5px dashed var(--border-dashed);
+      border-radius: 8px;
+      padding: 11px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-dark);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+
+    .upload-box-btn:hover {
+      border-color: var(--terracotta);
+      background: #FDF9F4;
+    }
+
+    /* Section Headings */
+    .sidebar-section-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+
+    .sidebar-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-doc-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.15s ease;
+      line-height: 1.3;
+    }
+
+    .sidebar-doc-item:hover {
+      background: #F7F3EC;
+      color: var(--text-dark);
+    }
+
+    .sidebar-doc-item.active {
+      background: var(--bg-drawer-active);
+      color: var(--text-dark);
+      font-weight: 600;
+      border-left: 3.5px solid var(--terracotta);
+      border-radius: 0 8px 8px 0;
+      margin-left: -14px;
+      padding-left: 18px;
+    }
+
+    .doc-icon-svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Discussion Items */
+    .sidebar-discuss-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 7px 8px;
+      font-size: 12px;
+      color: var(--text-dark);
+      text-decoration: none;
+      border-radius: 6px;
+      line-height: 1.35;
+    }
+
+    .sidebar-discuss-item:hover {
+      background: #F7F3EC;
+    }
+
+    .active-green-pill {
+      background: #EAF5EC;
+      color: #166534;
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      flex-shrink: 0;
+    }
+
+    /* Footer: Storage & Profile */
+    .sidebar-footer {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-inner);
+    }
+
+    .storage-text-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .storage-track-bar {
+      width: 100%;
+      height: 5px;
+      background: #EDE6DA;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .storage-fill-bar {
+      height: 100%;
+      width: 24%;
+      background: var(--terracotta);
+      border-radius: 999px;
+    }
+
+    .user-footer-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-dark);
+    }
+
+    .avatar-round-img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .user-text-col {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+      font-size: 12.5px;
+    }
+
+    .user-primary-name {
+      font-weight: 600;
+    }
+
+    .user-secondary-role {
+      font-size: 11px;
+      color: var(--text-sub);
+    }
+
+    .chevron-icon {
+      margin-left: auto;
+      color: #9C9488;
+    }
+
+    /* ==========================================================================
+       PANEL 2: CENTER SLIDE VIEWER
+       ========================================================================== */
+    .panel-center {
+      background: var(--bg-card);
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius-panel);
+      padding: 16px 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(45, 42, 38, 0.04);
+      position: relative;
+    }
+
+    /* Top Viewer Navigation Bar */
+    .viewer-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .lecture-main-title {
+      font-family: var(--font-sans);
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .viewer-tools-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slide-count-text {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .stepper-zoom-box {
+      display: flex;
+      align-items: center;
+      background: #FFFFFF;
+      border: 1px solid var(--border-panel);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .stepper-btn {
+      background: none;
+      border: none;
+      padding: 4px 9px;
+      font-size: 13px;
+      color: var(--text-dark);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stepper-btn:hover {
+      background: #FAF8F4;
+    }
+
+    .stepper-vertical-line {
+      width: 1px;
+      height: 14px;
+      background: var(--border-panel);
+    }
+
+    .icon-box-btn {
+      background: #FFFFFF;
+      border: 1px solid var(--border-panel);
+      border-radius: 6px;
+      padding: 5px 8px;
+      color: var(--text-dark);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-box-btn:hover {
+      background: #FAF8F4;
+    }
+
+    /* Main Slide Canvas Container */
+    .slide-canvas-card {
+      flex: 1;
+      background: #FFFFFF;
+      border: 1px solid var(--border-inner);
+      border-radius: var(--radius-card);
+      padding: 26px 30px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 18px -4px rgba(45, 42, 38, 0.05);
+      position: relative;
+    }
+
+    .slide-headline-text {
+      font-family: var(--font-sans);
+      font-size: 23px;
+      font-weight: 700;
+      color: #1C1916;
+      line-height: 1.25;
+      margin-bottom: 24px;
+      max-width: 540px;
+    }
+
+    .slide-columns-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+
+    /* Left: Neural Network Layer Diagram */
+    .neural-diagram-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .layer-label-caption {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Right: Formula Reference & Yellow Highlight */
+    .formula-col-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .formula-header-caption {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    /* Yellow Pastel Highlight Box */
+    .yellow-formula-card {
+      background: var(--amber-highlight);
+      border: 1.5px solid #FDE047;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-family: var(--font-math);
+      font-size: 17px;
+      font-style: italic;
+      color: #1A1A1A;
+      box-shadow: 0 2px 8px rgba(254, 240, 138, 0.4);
+      display: inline-block;
+    }
+
+    /* Tooltip Pin Badge */
+    .tooltip-pin-badge {
+      margin-top: 8px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius-pill);
+      padding: 6px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-dark);
+      box-shadow: 0 4px 12px rgba(45, 42, 38, 0.08);
+      animation: floatSubtle 3s ease-in-out infinite;
+    }
+
+    @keyframes floatSubtle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    /* Bottom Thumbnail Filmstrip */
+    .thumbnails-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-inner);
+    }
+
+    .carousel-arrow-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #8C857B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+
+    .mini-thumbs-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .thumb-item-box {
+      background: #FFFFFF;
+      border: 1px solid var(--border-panel);
+      border-radius: 6px;
+      padding: 6px 8px;
+      width: 82px;
+      height: 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .thumb-item-box:hover {
+      border-color: #C8C2B7;
+    }
+
+    .thumb-item-box.active {
+      border: 1.5px solid var(--terracotta);
+      background: #FDF8F2;
+      box-shadow: 0 2px 6px rgba(184, 58, 9, 0.15);
+    }
+
+    .thumb-mock-graphics {
+      width: 100%;
+      height: 24px;
+      background: #FBF8F3;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .thumb-title-label {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .thumb-item-box.active .thumb-title-label {
+      color: var(--terracotta);
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       PANEL 3: RIGHT AI CHAT PANEL
+       ========================================================================== */
+    .panel-right {
+      background: var(--bg-card);
+      border: 1px solid var(--border-panel);
+      border-radius: var(--radius-panel);
+      padding: 16px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(45, 42, 38, 0.04);
+    }
+
+    /* Header Status Row */
+    .chat-status-badges-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .socratic-chip {
+      background: var(--amber-bg);
+      border: 1px solid #ECE3D4;
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dark);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .verified-chip {
+      background: var(--emerald-bg);
+      border: 1px solid #A7F3D0;
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--emerald-text);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Messages Scroll Area */
+    .chat-scroll-stream {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    /* User Message Bubble */
+    .user-bubble-container {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .user-bubble-content {
+      background: #2D2925;
+      color: #FFFFFF;
+      border-radius: 12px 12px 2px 12px;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      line-height: 1.45;
+      max-width: 275px;
+    }
+
+    /* AI Tutor Card */
+    .ai-bubble-container {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .ai-book-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #FDF3E7;
+      border: 1px solid #FCD34D;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .ai-card-content {
+      background: #FFFFFF;
+      border: 1px solid var(--border-inner);
+      border-left: 3.5px solid var(--terracotta);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      box-shadow: 0 2px 6px rgba(45, 42, 38, 0.03);
+      flex: 1;
+    }
+
+    .source-tag-chip {
+      background: #FEF3C7;
+      border: 1px solid #FDE68A;
+      border-radius: var(--radius-pill);
+      padding: 3px 9px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #92400E;
+      width: fit-content;
+    }
+
+    .ai-response-text {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-dark);
+    }
+
+    .ai-response-text ul {
+      margin-top: 5px;
+      padding-left: 16px;
+    }
+
+    .ai-response-text li {
+      margin-bottom: 3px;
+    }
+
+    /* Math Formula Block */
+    .math-block-container {
+      background: #FAF8F4;
+      border: 1px solid #ECE6DB;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: var(--font-math);
+      font-size: 14px;
+      font-style: italic;
+      text-align: center;
+      color: #1F2937;
+    }
+
+    /* Citation Pill Button */
+    .citation-link-badge {
+      background: var(--amber-highlight);
+      border: 1px solid #FDE047;
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #1F2937;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      width: fit-content;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .citation-link-badge:hover {
+      background: #FDE047;
+    }
+
+    /* Follow-up Quiz Card */
+    .quiz-followup-box {
+      background: #FAF7F1;
+      border: 1px solid var(--border-inner);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .quiz-header-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .quiz-option-btn {
+      background: #FFFFFF;
+      border: 1px solid var(--border-inner);
+      border-radius: var(--radius-pill);
+      padding: 6px 10px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-dark);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-sans);
+    }
+
+    .quiz-option-btn:hover {
+      border-color: var(--terracotta);
+      color: var(--terracotta);
+      background: #FDF9F4;
+    }
+
+    /* Floating Input Dock */
+    .input-dock-box {
+      background: #FFFFFF;
+      border: 1px solid var(--border-inner);
+      border-radius: 12px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(45, 42, 38, 0.04);
+    }
+
+    .dock-textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      color: var(--text-dark);
+      resize: none;
+      height: 34px;
+    }
+
+    .dock-textarea::placeholder {
+      color: #9C9488;
+    }
+
+    .dock-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tool-icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #7E776D;
+      display: flex;
+      align-items: center;
+      padding: 2px;
+    }
+
+    .tool-icon-btn:hover {
+      color: var(--text-dark);
+    }
+
+    .dock-right-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .send-action-btn {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      color: #FFFFFF;
+      background: var(--terracotta);
+      border: none;
+      border-radius: var(--radius-pill);
+      padding: 6px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 6px rgba(184, 58, 9, 0.25);
+      transition: background 0.15s ease;
+    }
+
+    .send-action-btn:hover {
+      background: var(--terracotta-hover);
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+       MAIN 3-PANEL APPLICATION GRID (NO BROWSER BAR)
+       ========================================== -->
+  <div class="workspace-grid">
+
+    <!-- ========================================
+         PANEL 1: LEFT SIDEBAR (Materials & Sessions)
+         ======================================== -->
+    <aside class="panel-left">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="brand-header">
+        <svg class="brand-pen-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 7L23.5 17H16.5L20 7Z" stroke="#1C1916" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M20 7V17" stroke="#1C1916" stroke-width="1.8"/>
+          <circle cx="20" cy="14" r="1" fill="#B83A09"/>
+          <path d="M8 26C12 24.5 16.5 24.5 20 27C23.5 24.5 28 24.5 32 26V33C28 31.5 23.5 31.5 20 34C16.5 31.5 12 31.5 8 33V26Z" stroke="#1C1916" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20 27V34" stroke="#1C1916" stroke-width="2"/>
+        </svg>
+        <span class="brand-title-text">AI Tutor K3</span>
+      </a>
+
+      <!-- Knowledge Base Status Badge -->
+      <div class="kb-pill-badge">
+        <span class="kb-dot-green"></span>
+        <span>Knowledge Base: Active (pgvector)</span>
+      </div>
+
+      <!-- Upload Button -->
+      <a href="#" class="upload-box-btn">
+        <span>+ Upload Lecture Material (PDF / PPTX)</span>
+      </a>
+
+      <!-- Section: Course Library -->
+      <div>
+        <h3 class="sidebar-section-title">Course Library</h3>
+        <div class="sidebar-list">
+          
+          <a href="#" class="sidebar-doc-item active">
+            <!-- Orange Folder/PPTX icon -->
+            <svg class="doc-icon-svg" viewBox="0 0 24 24" fill="none">
+              <path d="M4 4h6l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#B83A09" opacity="0.85"/>
+            </svg>
+            <span>Deep Neural Networks &amp; Backprop.pptx</span>
+          </a>
+
+          <a href="#" class="sidebar-doc-item">
+            <!-- Gray Doc icon -->
+            <svg class="doc-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#7A7266" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span>Linear Algebra &amp; Vector Calculus.pdf</span>
+          </a>
+
+          <a href="#" class="sidebar-doc-item">
+            <!-- Gray Doc icon -->
+            <svg class="doc-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#7A7266" stroke-width="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span>Attention Mechanisms in LLMs.pdf</span>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- Section: Study Discussions -->
+      <div>
+        <h3 class="sidebar-section-title">Study Discussions</h3>
+        <div class="sidebar-list">
+          <a href="#" class="sidebar-discuss-item">
+            <span>1. Backpropagation Chain Rule Deepdive</span>
+            <span class="active-green-pill">Active</span>
+          </a>
+          <a href="#" class="sidebar-discuss-item">
+            <span>2. Optimization &amp; Loss Functions</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Footer: R2 Storage & User -->
+      <div class="sidebar-footer">
+        <div>
+          <div class="storage-text-title">R2 Cloud Storage: 2.4 GB / 10 GB</div>
+          <div class="storage-track-bar">
+            <div class="storage-fill-bar"></div>
+          </div>
+        </div>
+
+        <a href="#" class="user-footer-card">
+          <img class="avatar-round-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=faces" alt="User" />
+          <div class="user-text-col">
+            <span class="user-primary-name">Research Fellow</span>
+            <span class="user-secondary-role">Research Fellow</span>
+          </div>
+          <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </a>
+      </div>
+
+    </aside>
+
+    <!-- ========================================
+         PANEL 2: CENTER VIEWER (Interactive Slide Canvas)
+         ======================================== -->
+    <main class="panel-center">
+      
+      <!-- Top Controls -->
+      <div class="viewer-top-row">
+        <span class="lecture-main-title">Lecture 04: Backpropagation Algorithm</span>
+        
+        <div class="viewer-tools-group">
+          <span class="slide-count-text">Slide 14 of 48</span>
+          
+          <div class="stepper-zoom-box">
+            <button class="stepper-btn" title="Zoom out">−</button>
+            <span class="stepper-vertical-line"></span>
+            <button class="stepper-btn" title="Zoom in">+</button>
+          </div>
+
+          <button class="icon-box-btn" title="Presentation Layout">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          </button>
+
+          <button class="icon-box-btn" title="Search Slide Content">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Slide View Canvas Card -->
+      <div class="slide-canvas-card">
+        <h2 class="slide-headline-text">
+          Computing Gradients with Computation Graphs &amp; Chain Rule
+        </h2>
+
+        <div class="slide-columns-grid">
+          
+          <!-- Left: Neural Layer Flow Diagram -->
+          <div class="neural-diagram-wrapper">
+            <svg width="220" height="140" viewBox="0 0 220 140" fill="none">
+              <!-- Forward text & arrow -->
+              <text x="18" y="38" font-size="11" font-weight="600" fill="#1C1916">Forward</text>
+              <line x1="18" y1="46" x2="68" y2="46" stroke="#7A7266" stroke-width="1.5"/>
+              <polygon points="68,46 62,43 62,49" fill="#7A7266"/>
+
+              <!-- Backward text & arrow -->
+              <text x="18" y="98" font-size="11" font-weight="600" fill="#1C1916">Backward</text>
+              <line x1="68" y1="88" x2="18" y2="88" stroke="#B83A09" stroke-width="1.5"/>
+              <polygon points="18,88 24,85 24,91" fill="#B83A09"/>
+
+              <!-- Neural Layer Nodes (Circle graph) -->
+              <!-- Col 1 -->
+              <circle cx="95" cy="35" r="7" stroke="#1C1916" stroke-width="1.4" fill="#FFFFFF"/>
+              <circle cx="95" cy="70" r="7" stroke="#1C1916" stroke-width="1.4" fill="#FFFFFF"/>
+              <circle cx="95" cy="105" r="7" stroke="#1C1916" stroke-width="1.4" fill="#FFFFFF"/>
+              
+              <!-- Col 2 -->
+              <circle cx="145" cy="25" r="7" stroke="#1C1916" stroke-width="1.4" fill="#FFFFFF"/>
+              <circle cx="145" cy="55" r="7" stroke="#1C1916" stroke-width="1.4" fill="#FFFFFF"/>
+              <circle cx="145" cy="85" r="7" stroke="#1C1916" stroke-width="1.4" fill="#FFFFFF"/>
+              <circle cx="145" cy="115" r="7" stroke="#1C1916" stroke-width="1.4" fill="#FFFFFF"/>
+
+              <!-- Connecting lines -->
+              <line x1="102" y1="35" x2="138" y2="25" stroke="#C5BEB3" stroke-width="1"/>
+              <line x1="102" y1="35" x2="138" y2="55" stroke="#C5BEB3" stroke-width="1"/>
+              <line x1="102" y1="70" x2="138" y2="55" stroke="#C5BEB3" stroke-width="1"/>
+              <line x1="102" y1="70" x2="138" y2="85" stroke="#C5BEB3" stroke-width="1"/>
+              <line x1="102" y1="105" x2="138" y2="85" stroke="#C5BEB3" stroke-width="1"/>
+              <line x1="102" y1="105" x2="138" y2="115" stroke="#C5BEB3" stroke-width="1"/>
+
+              <!-- Output Arrows -->
+              <line x1="152" y1="55" x2="182" y2="55" stroke="#7A7266" stroke-width="1.4"/>
+              <polygon points="182,55 176,52 176,58" fill="#7A7266"/>
+              
+              <line x1="182" y1="85" x2="152" y2="85" stroke="#B83A09" stroke-width="1.4"/>
+              <polygon points="152,85 158,82 158,88" fill="#B83A09"/>
+            </svg>
+            <span class="layer-label-caption">Layer 1</span>
+          </div>
+
+          <!-- Right: Formula with Yellow Pastel Highlight -->
+          <div class="formula-col-wrapper">
+            <span class="formula-header-caption">Particcl Highlighter form:</span>
+            
+            <!-- Yellow Highlighted Box -->
+            <div class="yellow-formula-card">
+              ∂L/∂W<sup>[1]</sup> = ∂L/∂Z<sup>[1]</sup> · (A<sup>[0]</sup>)<sup>T</sup>
+            </div>
+
+            <!-- Tooltip Pin Badge -->
+            <div class="tooltip-pin-badge">
+              <span>📌</span>
+              <span>Referenced in AI Tutor explanation</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Bottom Slide Carousel Filmstrip -->
+      <div class="thumbnails-footer-row">
+        <button class="carousel-arrow-btn" title="Previous Slide">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+
+        <div class="mini-thumbs-container">
+          
+          <div class="thumb-item-box">
+            <div class="thumb-mock-graphics">
+              <svg width="24" height="14" viewBox="0 0 24 14" fill="#C5BEB3"><rect width="24" height="3" rx="1"/><rect y="5" width="18" height="2" rx="1"/><rect y="9" width="12" height="2" rx="1"/></svg>
+            </div>
+            <span class="thumb-title-label">Slide 12</span>
+          </div>
+
+          <div class="thumb-item-box">
+            <div class="thumb-mock-graphics">
+              <svg width="24" height="14" viewBox="0 0 24 14" fill="#C5BEB3"><rect width="24" height="3" rx="1"/><circle cx="6" cy="9" r="2"/><circle cx="14" cy="9" r="2"/></svg>
+            </div>
+            <span class="thumb-title-label">Slide 13</span>
+          </div>
+
+          <!-- Slide 14: Active Highlighted -->
+          <div class="thumb-item-box active">
+            <div class="thumb-mock-graphics" style="background: #FEF9EB;">
+              <svg width="24" height="14" viewBox="0 0 24 14" fill="#B83A09"><circle cx="6" cy="7" r="2"/><circle cx="12" cy="7" r="2"/><rect x="16" y="5" width="6" height="4" rx="1" fill="#FDE047"/></svg>
+            </div>
+            <span class="thumb-title-label">Slide 14</span>
+          </div>
+
+          <div class="thumb-item-box">
+            <div class="thumb-mock-graphics">
+              <svg width="24" height="14" viewBox="0 0 24 14" fill="#C5BEB3"><circle cx="6" cy="7" r="2"/><circle cx="14" cy="7" r="2"/></svg>
+            </div>
+            <span class="thumb-title-label">Slide 15</span>
+          </div>
+
+          <div class="thumb-item-box">
+            <div class="thumb-mock-graphics">
+              <svg width="24" height="14" viewBox="0 0 24 14" fill="#C5BEB3"><rect width="24" height="2"/><line x1="2" y1="8" x2="22" y2="8" stroke="#C5BEB3" stroke-width="1.5"/></svg>
+            </div>
+            <span class="thumb-title-label">Slide 16</span>
+          </div>
+
+        </div>
+
+        <button class="carousel-arrow-btn" title="Next Slide">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+
+    </main>
+
+    <!-- ========================================
+         PANEL 3: RIGHT AI CHAT PANEL
+         ======================================== -->
+    <aside class="panel-right">
+      
+      <!-- Top Status Row -->
+      <div class="chat-status-badges-row">
+        <span class="socratic-chip">🎓 Socratic Professor Mode</span>
+        <span class="verified-chip">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Verified by Course Material</span>
+        </span>
+      </div>
+
+      <!-- Chat Stream Area -->
+      <div class="chat-scroll-stream">
+        
+        <!-- User Bubble -->
+        <div class="user-bubble-container">
+          <div class="user-bubble-content">
+            Can you explain how the Chain Rule calculates hidden layer weights in Slide 14?
+          </div>
+        </div>
+
+        <!-- AI Tutor Response Block -->
+        <div class="ai-bubble-container">
+          <div class="ai-book-avatar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+
+          <div class="ai-card-content">
+            <!-- Source Tag Badge -->
+            <span class="source-tag-chip">[SOURCE: Slide 14 • Verified via pgvector]</span>
+            
+            <div class="ai-response-text">
+              Ain you explain how the Chain Rule calculates hidden layer weights in:
+              <ul>
+                <li><strong>Forward gradient:</strong> hidden layer weights in Layers.</li>
+                <li><strong>Bold enriuctured:</strong> by the positive weights of a formula.</li>
+              </ul>
+            </div>
+
+            <!-- Mathematical Formula Block -->
+            <div class="math-block-container">
+              ∂L/∂W<sup>[1]</sup> = ∂L/∂Z<sup>[1]</sup> · (A<sup>[0]</sup>)<sup>T</sup>
+            </div>
+
+            <!-- Clickable Slide Citation Badge -->
+            <a href="#" class="citation-link-badge">
+              <span>📖</span>
+              <span>Slide 14: Hidden Layer Gradients</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Socratic Follow-up Quiz Box -->
+        <div class="quiz-followup-box">
+          <div class="quiz-header-title">
+            <span>💡</span>
+            <span>Explore Further &amp; Self-Quiz:</span>
+          </div>
+          <button class="quiz-option-btn">Walk through a numerical example</button>
+          <button class="quiz-option-btn">Why choose ReLU over Sigmoid?</button>
+          <button class="quiz-option-btn">Take a 3-question quick quiz</button>
+        </div>
+
+      </div>
+
+      <!-- Floating Bottom Input Dock -->
+      <div class="input-dock-box">
+        <textarea class="dock-textarea" placeholder="Ask a question about this slide or request an explanation..."></textarea>
+        
+        <div class="dock-actions-row">
+          <button class="tool-icon-btn" title="Attach file">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+
+          <div class="dock-right-group">
+            <button class="tool-icon-btn" title="Voice Input">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+            
+            <button class="send-action-btn">
+              <span>Send</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+</body>
+</html>

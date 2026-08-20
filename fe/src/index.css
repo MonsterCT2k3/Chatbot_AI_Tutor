@@ -1,0 +1,92 @@
+/* Design tokens — gộp lại từ 3 file mockup (fe/src/mock_html_ui/), trước đó mỗi
+   file tự khai báo :root riêng với vài giá trị lệch nhau (terracotta #C2410C vs
+   #B83A09 vs #B03408). Chọn 1 bộ token DUY NHẤT ở đây, dùng chung cho toàn app —
+   không lặp lại :root trong từng component/page nữa. */
+:root {
+  --bg-page: #F6F3EC;
+  --bg-canvas: #F4F0EA;
+  --bg-surface: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-drawer-active: #EFE7DA;
+
+  --text-dark: #1C1916;
+  --text-muted: #5A534B;
+  --text-sub: #7A7266;
+  --text-light: #9C9790;
+
+  --border-panel: #E5DFD5;
+  --border-inner: #ECE6DB;
+  --border-dashed: #D6C8B4;
+  --border-color: #E7E2DA;
+  --border-focus: #B83A09;
+
+  --terracotta: #B83A09;
+  --terracotta-hover: #9E3006;
+  --terracotta-light: #FDF4EC;
+
+  --amber-accent: #C27803;
+  --amber-bg: #FAF3E8;
+  --amber-highlight: #FEF08A;
+
+  --emerald-ready: #10B981;
+  --emerald-bg: #ECFDF5;
+  --emerald-text: #065F46;
+
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-math: 'Times New Roman', Times, serif;
+
+  --radius-panel: 18px;
+  --radius-card: 12px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --radius-pill: 9999px;
+
+  --shadow-card: 0 20px 45px -12px rgba(45, 42, 38, 0.08), 0 4px 16px -4px rgba(45, 42, 38, 0.03);
+  --shadow-sm: 0 2px 8px rgba(45, 42, 38, 0.04);
+}
+
+/* Dark mode — CHƯA có trong mockup gốc (cả 3 file chỉ thiết kế light mode).
+   Khai báo tạm bằng cách tối màu nền/chữ, giữ nguyên terracotta/amber làm
+   accent — cần bạn duyệt lại bằng mắt khi có màn hình thật, đây là suy luận
+   hợp lý chứ không phải thiết kế đã chốt. */
+[data-theme='dark'] {
+  --bg-page: #1C1916;
+  --bg-canvas: #221E19;
+  --bg-surface: #2A2620;
+  --bg-card: #2A2620;
+  --bg-drawer-active: #362F26;
+
+  --text-dark: #F4F0EA;
+  --text-muted: #B8B0A4;
+  --text-sub: #9C9488;
+  --text-light: #736F6A;
+
+  --border-panel: #3D362C;
+  --border-inner: #362F26;
+  --border-dashed: #4A4033;
+  --border-color: #3D362C;
+
+  --terracotta-light: #3A2A1E;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-page);
+  color: var(--text-dark);
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, textarea {
+  font-family: inherit;
+}

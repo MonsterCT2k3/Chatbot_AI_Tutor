@@ -3,3 +3,7 @@ be/.venv
 **/__pycache__/
 *.pyc
 be/pdf_extract/
+
+fe/node_modules
+fe/dist
+fe/.env
