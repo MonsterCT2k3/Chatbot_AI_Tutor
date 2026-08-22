@@ -1,12 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Document, Page } from 'react-pdf';
 import { ChevronLeft, ChevronRight, LayoutGrid, Search } from 'lucide-react';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import '../../lib/pdfjsSetup';
 
-const MIN_SCALE = 0.6;
-const MAX_SCALE = 2.2;
+// Khớp .slide-canvas-card { padding: 20px } trong LessonWorkspacePage.css —
+// trừ ra để tính đúng phần diện tích THỰC hiển thị được, không tính cả padding.
+const CANVAS_PADDING = 40;
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 3;
 const FILMSTRIP_RADIUS = 2; // hiện current page ± 2, giống mockup (5 thumbnail)
 
 // Dựng từ panel-center trong detail_screen_lesson.html. Toàn bộ nội dung
@@ -17,7 +20,35 @@ const FILMSTRIP_RADIUS = 2; // hiện current page ± 2, giống mockup (5 thumb
 // scale nhỏ) thay vì icon giả, chỉ giới hạn quanh trang hiện tại để không phải
 // render hết toàn bộ tài liệu.
 export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumber, numPages, setNumPages }) {
-  const [scale, setScale] = useState(1);
+  // zoom = hệ số NHÂN THÊM lên trên mức "vừa khung" (fit) — zoom=1 nghĩa là
+  // trang vừa khít khung, không cần cuộn; >1 mới thật sự tràn ra và cần cuộn.
+  // Khác với cách cũ (dùng `scale` cố định theo kích thước gốc PDF, không
+  // biết khung to nhỏ ra sao) nên hầu như luôn tràn ra 2 chiều, phải cuộn kể
+  // cả khi không zoom gì cả.
+  const [zoom, setZoom] = useState(1);
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const [pageAspect, setPageAspect] = useState(16 / 9); // fallback trước khi biết kích thước trang thật
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return undefined;
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerSize({ width: entry.contentRect.width, height: entry.contentRect.height });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const fitWidth = useMemo(() => {
+    const availW = Math.max(0, containerSize.width - CANVAS_PADDING);
+    const availH = Math.max(0, containerSize.height - CANVAS_PADDING);
+    if (!availW || !availH) return 0;
+    // "contain": khớp theo chiều nào bị giới hạn trước (giống object-fit: contain).
+    return Math.min(availW, availH * pageAspect);
+  }, [containerSize, pageAspect]);
+
+  const displayWidth = fitWidth * zoom;
 
   const filmstripPages = useMemo(() => {
     if (!numPages) return [];
@@ -39,9 +70,9 @@ export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumb
           <span className="slide-count-text">Trang {pageNumber} / {numPages || '…'}</span>
 
           <div className="stepper-zoom-box">
-            <button type="button" className="stepper-btn" title="Thu nhỏ" onClick={() => setScale((s) => Math.max(MIN_SCALE, s - 0.15))}>−</button>
+            <button type="button" className="stepper-btn" title="Thu nhỏ" onClick={() => setZoom((z) => Math.max(MIN_ZOOM, +(z - 0.15).toFixed(2)))}>−</button>
             <span className="stepper-vertical-line" />
-            <button type="button" className="stepper-btn" title="Phóng to" onClick={() => setScale((s) => Math.min(MAX_SCALE, s + 0.15))}>+</button>
+            <button type="button" className="stepper-btn" title="Phóng to" onClick={() => setZoom((z) => Math.min(MAX_ZOOM, +(z + 0.15).toFixed(2)))}>+</button>
           </div>
 
           {/* Chưa có API "layout trình chiếu" / "tìm trong tài liệu" ở backend
@@ -68,8 +99,18 @@ export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumb
         error={<div className="viewer-loading">Không tải được tài liệu.</div>}
         onLoadSuccess={({ numPages: n }) => setNumPages(n)}
       >
-        <div className="slide-canvas-card">
-          <Page pageNumber={pageNumber} scale={scale} />
+        {/* zoom > 1: bỏ canh giữa flex khi tràn khung — flex center + overflow
+            scroll có 1 lỗi CSS quen thuộc là phần bị đẩy ra ngoài ở góc
+            trên-trái không cuộn tới được, chỉ đúng khi nội dung vừa/nhỏ hơn
+            khung (trường hợp mặc định zoom=1 ở đây). */}
+        <div className={`slide-canvas-card ${zoom > 1 ? 'zoomed' : ''}`} ref={canvasRef}>
+          {displayWidth > 0 && (
+            <Page
+              pageNumber={pageNumber}
+              width={displayWidth}
+              onLoadSuccess={(page) => setPageAspect(page.width / page.height)}
+            />
+          )}
         </div>
 
         <div className="thumbnails-footer-row">
