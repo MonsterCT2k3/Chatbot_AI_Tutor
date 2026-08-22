@@ -5,9 +5,6 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import '../../lib/pdfjsSetup';
 
-// Khớp .slide-canvas-card { padding: 20px } trong LessonWorkspacePage.css —
-// trừ ra để tính đúng phần diện tích THỰC hiển thị được, không tính cả padding.
-const CANVAS_PADDING = 40;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3;
 const FILMSTRIP_RADIUS = 2; // hiện current page ± 2, giống mockup (5 thumbnail)
@@ -21,34 +18,35 @@ const FILMSTRIP_RADIUS = 2; // hiện current page ± 2, giống mockup (5 thumb
 // render hết toàn bộ tài liệu.
 export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumber, numPages, setNumPages }) {
   // zoom = hệ số NHÂN THÊM lên trên mức "vừa khung" (fit) — zoom=1 nghĩa là
-  // trang vừa khít khung, không cần cuộn; >1 mới thật sự tràn ra và cần cuộn.
-  // Khác với cách cũ (dùng `scale` cố định theo kích thước gốc PDF, không
-  // biết khung to nhỏ ra sao) nên hầu như luôn tràn ra 2 chiều, phải cuộn kể
-  // cả khi không zoom gì cả.
+  // trang vừa khít chiều rộng khung, chưa cần cuộn ngang; >1 mới thật sự tràn
+  // ra và cần cuộn.
+  //
+  // ĐÃ BỎ cách "fit theo cả 2 chiều" (đo aspect ratio thật của trang qua
+  // onLoadSuccess rồi suy ra width) — cách đó tạo phụ thuộc VÒNG: đo trang
+  // hiện tại để tính width, width đổi lại khiến trang render lại (và
+  // onLoadSuccess của react-pdf bắn lại theo `scale`), dễ dính đúng lớp bug
+  // đã biết giữa react-pdf/pdf.js và React 18 StrictMode (double-invoke effect
+  // lúc mount) khiến canvas bị huỷ render giữa chừng, để lại khung trắng —
+  // xem wojtekmaj/react-pdf#972. Giờ chỉ fit theo CHIỀU RỘNG khung chứa (đo
+  // 1 chiều, không phụ thuộc ngược vào chính trang đang render) — chiều dọc
+  // cho cuộn tự nhiên nếu trang cao hơn khung, đúng hành vi PDF viewer chuẩn
+  // (Chrome, Google Docs viewer... đều làm vậy), không còn khả năng tạo vòng
+  // lặp nữa vì hoàn toàn không phụ thuộc vào bất kỳ thứ gì trang tự báo lại.
   const [zoom, setZoom] = useState(1);
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const [pageAspect, setPageAspect] = useState(16 / 9); // fallback trước khi biết kích thước trang thật
+  const [containerWidth, setContainerWidth] = useState(0);
   const canvasRef = useRef(null);
 
   useEffect(() => {
     const el = canvasRef.current;
     if (!el) return undefined;
     const observer = new ResizeObserver(([entry]) => {
-      setContainerSize({ width: entry.contentRect.width, height: entry.contentRect.height });
+      setContainerWidth(entry.contentRect.width);
     });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
-  const fitWidth = useMemo(() => {
-    const availW = Math.max(0, containerSize.width - CANVAS_PADDING);
-    const availH = Math.max(0, containerSize.height - CANVAS_PADDING);
-    if (!availW || !availH) return 0;
-    // "contain": khớp theo chiều nào bị giới hạn trước (giống object-fit: contain).
-    return Math.min(availW, availH * pageAspect);
-  }, [containerSize, pageAspect]);
-
-  const displayWidth = fitWidth * zoom;
+  const displayWidth = containerWidth * zoom;
 
   const filmstripPages = useMemo(() => {
     if (!numPages) return [];
@@ -112,27 +110,17 @@ export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumb
         error={<div className="viewer-loading">Không tải được tài liệu.</div>}
         onLoadSuccess={({ numPages: n }) => setNumPages(n)}
       >
-        {/* zoom > 1: bỏ canh giữa flex khi tràn khung — flex center + overflow
-            scroll có 1 lỗi CSS quen thuộc là phần bị đẩy ra ngoài ở góc
-            trên-trái không cuộn tới được, chỉ đúng khi nội dung vừa/nhỏ hơn
-            khung (trường hợp mặc định zoom=1 ở đây). */}
-        <div className={`slide-canvas-card ${zoom > 1 ? 'zoomed' : ''}`} ref={canvasRef}>
+        {/* Canh trái/trên (không center) — an toàn với overflow: auto khi
+            zoom > 1 làm trang tràn khung (flex center + overflow có 1 lỗi CSS
+            quen thuộc là phần tràn ra ở góc trên-trái không cuộn tới được). */}
+        <div className="slide-canvas-card" ref={canvasRef}>
           {displayWidth > 0 && (
-            <Page
-              pageNumber={pageNumber}
-              width={displayWidth}
-              // BUG THẬT vừa tìm ra: page.width/page.height của react-pdf được
-              // tính theo `scale` HIỆN TẠI (chính là displayWidth ta truyền
-              // vào) — dùng nó để suy ra pageAspect tạo thành vòng lặp: đổi
-              // width -> onLoadSuccess bắn lại (effect của react-pdf phụ
-              // thuộc `scale`) -> setPageAspect ra giá trị hơi khác (sai số
-              // dấu phẩy động) -> fitWidth đổi -> width đổi tiếp... render
-              // canvas liên tục bị hủy giữa chừng trước khi vẽ xong -> canvas
-              // trống trơn. page.originalWidth/originalHeight luôn tính ở
-              // scale=1 CỐ ĐỊNH, không phụ thuộc displayWidth -> ra đúng 1 giá
-              // trị ổn định ngay từ lần đầu, vòng lặp dừng lại.
-              onLoadSuccess={(page) => setPageAspect(page.originalWidth / page.originalHeight)}
-            />
+            // key={pageNumber}: ép remount hẳn 1 <Page> MỚI mỗi khi đổi trang
+            // thay vì để react-pdf tự cập nhật lại instance cũ qua effect —
+            // tránh hẳn 1 lớp bug hay gặp giữa react-pdf/pdf.js và React 18
+            // StrictMode (double-invoke effect lúc mount) từng khiến canvas bị
+            // huỷ render giữa chừng, để lại khung trắng.
+            <Page key={pageNumber} pageNumber={pageNumber} width={displayWidth} />
           )}
 
           {pageNumber > 1 && (

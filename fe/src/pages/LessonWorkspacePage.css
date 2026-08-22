@@ -451,8 +451,11 @@
   border-radius: var(--radius-card);
   padding: 20px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  /* flex-start (không center) ở CẢ 2 chiều — an toàn với overflow:auto khi
+     zoom làm trang tràn khung: flex center + overflow có 1 lỗi CSS quen
+     thuộc là phần tràn ra ở góc trên-trái không cuộn tới được. */
+  align-items: flex-start;
+  justify-content: flex-start;
   box-shadow: 0 4px 18px -4px rgba(45, 42, 38, 0.05);
   overflow: auto;
   min-height: 0;
@@ -491,11 +494,6 @@
 .slide-canvas-card .react-pdf__Page__canvas {
   max-width: 100%;
   height: auto !important;
-}
-
-.slide-canvas-card.zoomed {
-  align-items: flex-start;
-  justify-content: flex-start;
 }
 
 .viewer-loading {
