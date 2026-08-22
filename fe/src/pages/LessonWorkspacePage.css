@@ -42,14 +42,36 @@
    (1fr) tự giãn hết phần còn lại, 2 cột 2 bên vẫn giữ độ rộng cố định hợp lý
    để đọc (không hợp lý nếu 1 danh sách tài liệu hay khung chat kéo dài hết
    màn ultra-wide). */
+/* "App shell": khung ngoài CAO ĐÚNG BẰNG MÀN HÌNH và không bao giờ phình theo
+   nội dung. Mọi việc cuộn đẩy vào các vùng lá bên trong (danh sách tài liệu,
+   trang PDF, luồng chat).
+
+   Trước đây dùng `min-height: 100vh` (được phép cao hơn màn hình) + các panel
+   thiếu `min-height: 0`, dẫn tới lỗi ĐO THẬT ĐƯỢC: bấm phóng to 1 lần thì
+   trang to gấp 2.22 lần thay vì 1.25, và chat + filmstrip bị đẩy 900px xuống
+   dưới đáy màn hình. Lý do: trang PDF cao hơn khung -> khung phình theo ->
+   ResizeObserver đo lại thấy khung cao hơn -> "vừa khung" to hơn -> trang to
+   hơn nữa -> phình tiếp... chạy đến khi bị chặn bởi chiều rộng mới dừng.
+
+   `grid-template-rows: minmax(0, 1fr)` là mấu chốt: hàng grid mặc định là
+   `auto` nên nó CO GIÃN THEO NỘI DUNG; minmax(0, 1fr) ép hàng đúng bằng chiều
+   cao khung và cho phép co nhỏ hơn nội dung (tương đương min-height:0 ở cấp
+   hàng). Thiếu nó thì overflow:hidden bên dưới cũng vô nghĩa, vì overflow chỉ
+   ảnh hưởng lúc VẼ, không ảnh hưởng lúc TÍNH kích thước.
+
+   min-height: 600px là lối thoát cho cửa sổ quá thấp: thà cho cuộn cả trang
+   còn hơn bóp các panel đến mức không dùng được. */
 .workspace-grid {
   width: 100%;
   padding: 16px 20px;
   display: grid;
   grid-template-columns: 235px 1fr 690px;
+  grid-template-rows: minmax(0, 1fr);
   gap: 14px;
   align-items: stretch;
-  min-height: 100vh;
+  height: 100dvh;
+  min-height: 600px;
+  overflow: hidden;
   transition: grid-template-columns 0.2s ease;
 }
 
@@ -58,6 +80,10 @@
 }
 
 /* ── PANEL 1: Sidebar ────────────────────────────── */
+/* min-height/min-width: 0 trên CẢ 3 panel — grid item mặc định là
+   `min-height: auto`, tức TỪ CHỐI co nhỏ hơn nội dung của nó. Thiếu dòng này
+   thì nội dung dài sẽ đẩy phình cả grid ra ngoài màn hình (xem ghi chú ở
+   .workspace-grid). Đây là cái bẫy CSS phổ biến nhất của layout kiểu app shell. */
 .panel-left {
   background: var(--bg-card);
   border: 1px solid var(--border-panel);
@@ -68,6 +94,8 @@
   gap: 18px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  min-height: 0;
+  min-width: 0;
   transition: padding 0.2s ease;
 }
 
@@ -197,6 +225,18 @@
   font-weight: 700;
   color: var(--text-dark);
   margin-bottom: 8px;
+}
+
+/* Danh sách tài liệu là vùng CO GIÃN + tự cuộn của sidebar. Trước đây nó nằm
+   trong .panel-left {overflow:hidden} mà không có cách nào cuộn -> nhiều tài
+   liệu là bị CẮT MẤT, không xem được (lỗi tiềm ẩn, chưa lộ vì đang ít file). */
+.sidebar-library {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  /* chừa chỗ cho viền active (margin-left âm của .sidebar-doc-item.active) */
+  margin-left: -14px;
+  padding-left: 14px;
 }
 
 .sidebar-list {
@@ -352,6 +392,8 @@
   gap: 14px;
   box-shadow: var(--shadow-sm);
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .viewer-top-row {
@@ -646,6 +688,8 @@
   gap: 12px;
   box-shadow: var(--shadow-sm);
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .chat-status-badges-row {

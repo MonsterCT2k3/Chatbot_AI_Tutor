@@ -95,7 +95,7 @@ export default function WorkspaceSidebar({ documents, currentDocumentId, onDocum
       </button>
       {!collapsed && uploadError && <div className="sidebar-upload-error">{uploadError}</div>}
 
-      <div>
+      <div className="sidebar-library">
         {!collapsed && <h3 className="sidebar-section-title">Thư viện tài liệu</h3>}
         <div className="sidebar-list">
           {documents.map((doc) => {
