@@ -402,8 +402,22 @@
   cursor: pointer;
 }
 
-.stepper-btn:hover {
+.stepper-btn:hover:not(:disabled) {
   background: #FAF8F4;
+}
+
+.stepper-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Mức zoom hiện tại — bấm vào để về lại "vừa khung" (100%). */
+.zoom-level-btn {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 46px;
+  font-family: inherit;
 }
 
 .stepper-vertical-line {
@@ -444,22 +458,36 @@
   min-height: 0;
 }
 
+/* Lớp NGOÀI — được ResizeObserver ĐO. overflow:hidden nên KHÔNG BAO GIỜ có
+   thanh cuộn, do đó kích thước của nó không bị nội dung PDF tác động ngược.
+   Đây chính là mấu chốt cắt đứt vòng lặp gây bug canvas trắng — xem ghi chú
+   chi tiết ở đầu SlideViewer.jsx. */
 .slide-canvas-card {
   flex: 1;
   background: #FFFFFF;
   border: 1px solid var(--border-inner);
   border-radius: var(--radius-card);
   padding: 20px;
-  display: flex;
-  /* flex-start (không center) ở CẢ 2 chiều — an toàn với overflow:auto khi
-     zoom làm trang tràn khung: flex center + overflow có 1 lỗi CSS quen
-     thuộc là phần tràn ra ở góc trên-trái không cuộn tới được. */
-  align-items: flex-start;
-  justify-content: flex-start;
   box-shadow: 0 4px 18px -4px rgba(45, 42, 38, 0.05);
-  overflow: auto;
+  overflow: hidden;
   min-height: 0;
   position: relative;
+}
+
+/* Lớp TRONG — nơi cuộn thật sự khi zoom > 1. */
+.pdf-scroll-area {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  display: flex;
+}
+
+/* margin:auto (KHÔNG dùng justify-content/align-items: center) là cách canh
+   giữa đúng cho nội dung có thể tràn khung: còn chỗ trống thì auto chia đều
+   -> canh giữa; hết chỗ (zoom to) thì auto về 0 -> cuộn tới được MỌI cạnh.
+   Dùng center thì phần tràn ra ở cạnh trên/trái bị cắt, không cuộn tới nổi. */
+.pdf-scroll-area > .react-pdf__Page {
+  margin: auto;
 }
 
 /* Nút chuyển trang mờ 2 bên rìa trang — chỉ nổi rõ khi hover, không chiếm
@@ -491,10 +519,13 @@
 .edge-nav-left { left: 14px; }
 .edge-nav-right { right: 14px; }
 
-.slide-canvas-card .react-pdf__Page__canvas {
-  max-width: 100%;
-  height: auto !important;
-}
+/* ĐÃ BỎ rule cũ:
+       .slide-canvas-card .react-pdf__Page__canvas { max-width: 100%; height: auto !important; }
+   Đây là 1 lý do THẬT khiến "phóng to thu nhỏ không được như ý": max-width:100%
+   ép canvas không bao giờ vượt quá bề rộng khung, nên bấm + phóng to thì canvas
+   bị CHẶN lại ở đúng mép khung, còn height:auto kéo theo méo tỉ lệ. react-pdf
+   đã tự set width/height chính xác theo `width` prop ta truyền vào — không cần
+   (và không được) CSS đè lên nữa. */
 
 .viewer-loading {
   font-size: 13px;
