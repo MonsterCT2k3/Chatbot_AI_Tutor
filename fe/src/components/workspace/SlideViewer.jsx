@@ -61,6 +61,19 @@ export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumb
     setPageNumber(Math.min(Math.max(1, n), numPages || 1));
   }
 
+  // Phím ← → chuyển trang — BỎ QUA khi đang gõ trong input/textarea (ô chat)
+  // để không cướp mất phím mũi tên dùng để di chuyển con trỏ khi gõ.
+  useEffect(() => {
+    function handleKeyDown(e) {
+      const tag = document.activeElement?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
+      if (e.key === 'ArrowLeft') goToPage(pageNumber - 1);
+      else if (e.key === 'ArrowRight') goToPage(pageNumber + 1);
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [pageNumber, numPages]);
+
   return (
     <main className="panel-center">
       <div className="viewer-top-row">
@@ -110,6 +123,17 @@ export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumb
               width={displayWidth}
               onLoadSuccess={(page) => setPageAspect(page.width / page.height)}
             />
+          )}
+
+          {pageNumber > 1 && (
+            <button type="button" className="edge-nav-btn edge-nav-left" title="Trang trước" onClick={() => goToPage(pageNumber - 1)}>
+              <ChevronLeft size={22} />
+            </button>
+          )}
+          {numPages && pageNumber < numPages && (
+            <button type="button" className="edge-nav-btn edge-nav-right" title="Trang sau" onClick={() => goToPage(pageNumber + 1)}>
+              <ChevronRight size={22} />
+            </button>
           )}
         </div>
 
