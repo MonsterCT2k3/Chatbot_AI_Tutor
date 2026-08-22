@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, PenLine, ArrowRight, Pin } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import '../components/auth/AuthLayout.css';
 import './SignInPage.css';
 
 // Dựng lại từ fe/src/mock_html_ui/auth/signin.html.
@@ -45,7 +46,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="signin-body">
+    <div className="auth-body">
       <div className="page-container">
         {/* ── Cột trái: Hero + teaser ── */}
         <div className="hero-section">
@@ -118,7 +119,7 @@ export default function SignInPage() {
             <span className="divider-text">— hoặc đăng nhập bằng email —</span>
           </div>
 
-          <form className="signin-form" onSubmit={handleSubmit}>
+          <form className="auth-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label" htmlFor="email">Email học tập hoặc Email cá nhân</label>
               <div className="input-wrapper">
@@ -185,9 +186,9 @@ export default function SignInPage() {
             </button>
           </form>
 
-          <p className="signup-footer">
+          <p className="auth-switch-footer">
             Chưa có tài khoản?
-            <Link to="/signup" className="signup-link">Đăng ký miễn phí</Link>
+            <Link to="/signup" className="auth-switch-link">Đăng ký miễn phí</Link>
           </p>
         </div>
       </div>

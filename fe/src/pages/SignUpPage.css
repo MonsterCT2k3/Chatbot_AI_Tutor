@@ -1,0 +1,116 @@
+/* Dựng lại từ fe/src/mock_html_ui/auth/signup.html — CHỈ chứa phần RIÊNG của
+   trang này (khung + form dùng chung nằm ở components/auth/AuthLayout.css). */
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.feature-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-inner);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(45, 42, 38, 0.06);
+}
+
+.check-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #FDF3E7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--amber-accent);
+}
+
+.feature-text {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.feature-text strong {
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.social-proof-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-inner);
+  border-radius: var(--radius-pill);
+  padding: 8px 18px 8px 10px;
+  width: fit-content;
+  box-shadow: var(--shadow-sm);
+  margin-top: 6px;
+}
+
+.avatar-group {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-surface);
+  margin-left: -8px;
+  object-fit: cover;
+  background-color: #E2DDD5;
+}
+
+.avatar-circle:first-child {
+  margin-left: 0;
+}
+
+.social-proof-text {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* Password strength indicator — 4 mốc client-side, xem SignUpPage.jsx
+   (getPasswordStrength) cho logic tính, KHÔNG phải rule backend enforce. */
+.strength-meter {
+  display: flex;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.strength-segment {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: #EAE6DF;
+  transition: background-color 0.3s ease;
+}
+
+.strength-segment.active-1 { background-color: #EF4444; }
+.strength-segment.active-2 { background-color: #F59E0B; }
+.strength-segment.active-3 { background-color: #10B981; }
+.strength-segment.active-4 { background-color: #059669; }
+
+.field-hint {
+  font-size: 12px;
+  color: var(--text-light);
+}
+
+.field-hint.error {
+  color: #DC2626;
+}
