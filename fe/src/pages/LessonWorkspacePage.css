@@ -46,7 +46,7 @@
   width: 100%;
   padding: 16px 20px;
   display: grid;
-  grid-template-columns: 235px 1fr 345px;
+  grid-template-columns: 235px 1fr 690px;
   gap: 14px;
   align-items: stretch;
   min-height: 100vh;
@@ -54,7 +54,7 @@
 }
 
 .workspace-grid.sidebar-collapsed {
-  grid-template-columns: 64px 1fr 345px;
+  grid-template-columns: 64px 1fr 690px;
 }
 
 /* ── PANEL 1: Sidebar ────────────────────────────── */
@@ -621,7 +621,7 @@
   padding: 10px 14px;
   font-size: 12.5px;
   line-height: 1.45;
-  max-width: 275px;
+  max-width: 75%;
   white-space: pre-wrap;
 }
 
