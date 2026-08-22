@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Loader2, Plus, Presentation } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, FileText, Loader2, Plus, Presentation } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { uploadDocument } from '../../services/documentService';
 
@@ -25,7 +25,7 @@ function formatBytes(bytes) {
 // giả hoàn toàn.
 const MOCK_QUOTA_BYTES = 10 * 1024 * 1024 * 1024;
 
-export default function WorkspaceSidebar({ documents, currentDocumentId, onDocumentUploaded }) {
+export default function WorkspaceSidebar({ documents, currentDocumentId, onDocumentUploaded, collapsed, onToggleCollapse }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const fileInputRef = useRef(null);
@@ -53,16 +53,28 @@ export default function WorkspaceSidebar({ documents, currentDocumentId, onDocum
   }
 
   return (
-    <aside className="panel-left">
-      <a href="/" className="brand-header">
-        <FileText size={26} strokeWidth={1.8} />
-        <span className="brand-title-text">AI Tutor K3</span>
-      </a>
-
-      <div className="kb-pill-badge">
-        <span className="kb-dot-green" />
-        <span>Knowledge Base: Active (pgvector)</span>
+    <aside className={`panel-left ${collapsed ? 'collapsed' : ''}`}>
+      <div className="sidebar-top-row">
+        <a href="/" className="brand-header" title="AI Tutor K3">
+          <FileText size={26} strokeWidth={1.8} />
+          {!collapsed && <span className="brand-title-text">AI Tutor K3</span>}
+        </a>
+        <button
+          type="button"
+          className="sidebar-collapse-btn"
+          onClick={onToggleCollapse}
+          title={collapsed ? 'Mở rộng thanh bên' : 'Thu gọn thanh bên'}
+        >
+          {collapsed ? <ChevronsRight size={15} /> : <ChevronsLeft size={15} />}
+        </button>
       </div>
+
+      {!collapsed && (
+        <div className="kb-pill-badge">
+          <span className="kb-dot-green" />
+          <span>Knowledge Base: Active (pgvector)</span>
+        </div>
+      )}
 
       <input
         ref={fileInputRef}
@@ -71,14 +83,20 @@ export default function WorkspaceSidebar({ documents, currentDocumentId, onDocum
         hidden
         onChange={handleFileChange}
       />
-      <button type="button" className="upload-box-btn" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+      <button
+        type="button"
+        className="upload-box-btn"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={isUploading}
+        title="Tải bài giảng lên (PDF / PPTX)"
+      >
         {isUploading ? <Loader2 size={14} className="spin-icon" /> : <Plus size={14} />}
-        <span>{isUploading ? 'Đang tải lên...' : 'Tải bài giảng lên (PDF / PPTX)'}</span>
+        {!collapsed && <span>{isUploading ? 'Đang tải lên...' : 'Tải bài giảng lên (PDF / PPTX)'}</span>}
       </button>
-      {uploadError && <div className="sidebar-upload-error">{uploadError}</div>}
+      {!collapsed && uploadError && <div className="sidebar-upload-error">{uploadError}</div>}
 
       <div>
-        <h3 className="sidebar-section-title">Thư viện tài liệu</h3>
+        {!collapsed && <h3 className="sidebar-section-title">Thư viện tài liệu</h3>}
         <div className="sidebar-list">
           {documents.map((doc) => {
             const Icon = doc.file_type === 'pptx' ? Presentation : FileText;
@@ -95,39 +113,45 @@ export default function WorkspaceSidebar({ documents, currentDocumentId, onDocum
                 }}
               >
                 <Icon size={16} className="doc-icon-svg" />
-                <span>{doc.filename}</span>
+                {!collapsed && <span>{doc.filename}</span>}
               </a>
             );
           })}
         </div>
       </div>
 
-      <div>
-        <h3 className="sidebar-section-title">Thảo luận học tập</h3>
-        <div className="sidebar-list">
-          {MOCK_DISCUSSIONS.map((d) => (
-            <div key={d.title} className="sidebar-discuss-item">
-              <span>{d.title}</span>
-              {d.active && <span className="active-green-pill">Đang mở</span>}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="sidebar-footer">
+      {!collapsed && (
         <div>
-          <div className="storage-text-title">Dung lượng: {formatBytes(usedBytes)} / 10 GB</div>
-          <div className="storage-track-bar">
-            <div className="storage-fill-bar" style={{ width: `${usedPct}%` }} />
+          <h3 className="sidebar-section-title">Thảo luận học tập</h3>
+          <div className="sidebar-list">
+            {MOCK_DISCUSSIONS.map((d) => (
+              <div key={d.title} className="sidebar-discuss-item">
+                <span>{d.title}</span>
+                {d.active && <span className="active-green-pill">Đang mở</span>}
+              </div>
+            ))}
           </div>
         </div>
+      )}
+
+      <div className="sidebar-footer">
+        {!collapsed && (
+          <div>
+            <div className="storage-text-title">Dung lượng: {formatBytes(usedBytes)} / 10 GB</div>
+            <div className="storage-track-bar">
+              <div className="storage-fill-bar" style={{ width: `${usedPct}%` }} />
+            </div>
+          </div>
+        )}
 
         <button type="button" className="user-footer-card" onClick={logout} title="Đăng xuất">
           <span className="avatar-round-img avatar-fallback">{displayName ? displayName[0].toUpperCase() : '?'}</span>
-          <div className="user-text-col">
-            <span className="user-primary-name">{displayName || 'Tài khoản'}</span>
-            <span className="user-secondary-role">Đăng xuất</span>
-          </div>
+          {!collapsed && (
+            <div className="user-text-col">
+              <span className="user-primary-name">{displayName || 'Tài khoản'}</span>
+              <span className="user-secondary-role">Đăng xuất</span>
+            </div>
+          )}
         </button>
       </div>
     </aside>

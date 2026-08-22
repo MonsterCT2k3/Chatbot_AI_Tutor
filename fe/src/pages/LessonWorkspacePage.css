@@ -36,16 +36,25 @@
   cursor: pointer;
 }
 
+/* Không giới hạn max-width như trước (1380px) — đây là màn workspace (đọc
+   PDF + chat), không phải trang marketing, nên tận dụng hết chiều rộng màn
+   hình có lợi thật (đọc PDF/chat rộng hơn) thay vì để trống 2 bên. Cột giữa
+   (1fr) tự giãn hết phần còn lại, 2 cột 2 bên vẫn giữ độ rộng cố định hợp lý
+   để đọc (không hợp lý nếu 1 danh sách tài liệu hay khung chat kéo dài hết
+   màn ultra-wide). */
 .workspace-grid {
   width: 100%;
-  max-width: 1380px;
-  margin: 0 auto;
   padding: 16px 20px;
   display: grid;
   grid-template-columns: 235px 1fr 345px;
   gap: 14px;
   align-items: stretch;
   min-height: 100vh;
+  transition: grid-template-columns 0.2s ease;
+}
+
+.workspace-grid.sidebar-collapsed {
+  grid-template-columns: 64px 1fr 345px;
 }
 
 /* ── PANEL 1: Sidebar ────────────────────────────── */
@@ -58,6 +67,57 @@
   flex-direction: column;
   gap: 18px;
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: padding 0.2s ease;
+}
+
+/* Thu gọn: chỉ còn 1 rail icon căn giữa, ẩn hết phần chữ (đã ẩn ở JSX) —
+   CSS chỉ lo phần căn chỉnh lại layout cho khớp bề rộng 64px của cột. */
+.panel-left.collapsed {
+  padding: 18px 8px;
+  align-items: center;
+}
+
+.panel-left.collapsed .sidebar-doc-item,
+.panel-left.collapsed .upload-box-btn,
+.panel-left.collapsed .user-footer-card {
+  justify-content: center;
+  width: 100%;
+}
+
+.panel-left.collapsed .sidebar-doc-item.active {
+  margin-left: 0;
+  padding-left: 10px;
+  border-radius: 8px;
+}
+
+.sidebar-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.panel-left.collapsed .sidebar-top-row {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-collapse-btn {
+  background: none;
+  border: none;
+  color: var(--text-sub);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.sidebar-collapse-btn:hover {
+  background: var(--bg-page);
+  color: var(--text-dark);
 }
 
 .brand-header {
@@ -66,6 +126,7 @@
   gap: 9px;
   text-decoration: none;
   color: var(--text-dark);
+  overflow: hidden;
 }
 
 .brand-title-text {

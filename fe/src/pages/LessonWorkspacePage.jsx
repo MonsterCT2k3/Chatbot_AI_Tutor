@@ -20,6 +20,7 @@ export default function LessonWorkspacePage() {
   const [pageNumber, setPageNumber] = useState(1);
   const [numPages, setNumPages] = useState(null);
   const [error, setError] = useState(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const refreshDocuments = useCallback(() => {
     listDocuments().then(setDocuments).catch(() => {});
@@ -74,11 +75,13 @@ export default function LessonWorkspacePage() {
   }
 
   return (
-    <div className="workspace-grid">
+    <div className={`workspace-grid ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <WorkspaceSidebar
         documents={documents}
         currentDocumentId={documentId}
         onDocumentUploaded={handleDocumentUploaded}
+        collapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed((v) => !v)}
       />
 
       {fileUrl && (
