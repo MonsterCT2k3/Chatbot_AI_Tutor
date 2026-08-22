@@ -28,11 +28,18 @@
 }
 
 /* ── Navbar ────────────────────────────── */
+/* Khối nổi trên nền trang (thay vì nằm phẳng như mockup gốc) — nền trắng,
+   bo góc, đổ bóng nhẹ để tách khỏi --bg-page cream, đỡ "chìm"/đơn điệu. */
 .navbar {
   display: flex;
   align-items: center;
   gap: 14px;
   width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-panel);
+  border-radius: var(--radius-panel);
+  padding: 14px 22px;
+  box-shadow: var(--shadow-sm);
 }
 
 .logo-link {
@@ -70,7 +77,9 @@
   width: 100%;
   font-size: 13px;
   color: var(--text-dark);
-  background: #fff;
+  /* Nền cream (khác nền trắng của .navbar) để ô tìm kiếm trông "lõm" nhẹ vào
+     trong khối navbar thay vì hoà lẫn trắng-trên-trắng. */
+  background: var(--bg-page);
   border: 1px solid var(--border-panel);
   border-radius: var(--radius-pill);
   padding: 8px 14px 8px 36px;
@@ -92,10 +101,17 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-dark);
+  color: var(--text-sub);
   display: flex;
   align-items: center;
-  padding: 4px;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.15s, color 0.15s;
+}
+
+.icon-btn:not(:disabled):hover {
+  background: var(--bg-page);
+  color: var(--text-dark);
 }
 
 .user-block {
@@ -107,30 +123,32 @@
   cursor: pointer;
   color: var(--text-dark);
   font-family: inherit;
+  padding: 4px 6px 4px 4px;
+  border-radius: var(--radius-pill);
+  transition: background 0.15s;
+}
+
+.user-block:hover {
+  background: var(--bg-page);
 }
 
 .user-block .avatar-fallback {
-  width: 33px;
-  height: 33px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: var(--terracotta-light);
-  color: var(--terracotta);
+  background: var(--terracotta);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 13px;
   font-weight: 700;
+  box-shadow: 0 0 0 3px var(--terracotta-light);
+  flex-shrink: 0;
 }
 
 .user-block .uname { font-size: 13px; font-weight: 600; line-height: 1.2; text-align: left; }
 .user-block .urole { font-size: 11.5px; color: var(--text-sub); }
-
-.nav-divider {
-  border: none;
-  border-top: 1px solid var(--border-panel);
-  margin: 0;
-  width: 100%;
-}
 
 /* ── Hero ────────────────────────────── */
 .hero-row {

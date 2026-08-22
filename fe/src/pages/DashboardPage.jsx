@@ -113,8 +113,6 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        <hr className="nav-divider" />
-
         <section className="hero-row">
           <div className="hero-left">
             <h1>Chào mừng trở lại{displayName ? `, ${displayName}` : ''}.</h1>
