@@ -490,15 +490,27 @@
   margin: auto;
   flex-shrink: 0;
   overflow: hidden;
+  position: relative;
 }
 
-/* Lớp thực hiện zoom bằng CSS transform (GPU) thay vì bắt pdf.js vẽ lại —
-   xem ghi chú "VỀ CHỚP NHÁY KHI ZOOM" trong SlideViewer.jsx. transform KHÔNG
-   ảnh hưởng layout, nên kích thước cuộn/canh giữa do .pdf-zoom-box (đã đặt
-   width/height đúng cỡ hiển thị) đảm nhiệm. */
-.pdf-zoom-inner {
+/* Mỗi .pdf-layer là 1 "buffer" chứa 1 <Page> đã render — xem phần (3)
+   DOUBLE-BUFFER trong SlideViewer.jsx. Đặt absolute để lớp đang vẽ ngầm không
+   đẩy layout; kích thước hiển thị/cuộn do .pdf-zoom-box quyết định. Lớp đang
+   hiển thị được CSS scale (GPU) để phản hồi zoom tức thì mà không cần pdf.js
+   vẽ lại. */
+.pdf-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
   transform-origin: top left;
   will-change: transform;
+}
+
+/* Lớp đang vẽ ngầm: vẫn render thật (cần thế mới vẽ được) nhưng không nhìn
+   thấy và không bắt được chuột/chuỗi chọn văn bản. */
+.pdf-layer-offscreen {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* Nút chuyển trang mờ 2 bên rìa trang — chỉ nổi rõ khi hover, không chiếm
