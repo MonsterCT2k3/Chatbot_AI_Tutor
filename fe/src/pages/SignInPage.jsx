@@ -31,11 +31,14 @@ export default function SignInPage() {
       await login({ email, password });
       navigate('/', { replace: true });
     } catch (err) {
-      // Khớp be/app/routers/auth.py: 401 INVALID_CREDENTIALS, 429 rate limit
-      // (5 lần/phút, xem @limiter.limit("5/minute") trên /auth/login).
+      // Response lỗi có envelope RIÊNG (app/exceptions.py, không đi qua
+      // ResponseEnvelopeMiddleware như response thành công) — đọc đúng
+      // err.response.data.error.code, KHÔNG phải .detail.code (đó là format
+      // FastAPI mặc định, backend này đã ghi đè). Khớp be/app/routers/auth.py:
+      // 401 INVALID_CREDENTIALS, 429 rate limit (5 lần/phút).
       if (err.response?.status === 429) {
         setError('Bạn đã thử đăng nhập quá nhiều lần. Vui lòng đợi 1 phút rồi thử lại.');
-      } else if (err.response?.data?.detail?.message) {
+      } else if (err.response?.data?.error?.code === 'INVALID_CREDENTIALS') {
         setError('Email hoặc mật khẩu không đúng.');
       } else {
         setError('Không thể kết nối tới máy chủ. Vui lòng thử lại.');

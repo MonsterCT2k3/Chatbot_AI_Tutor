@@ -56,7 +56,9 @@ export default function DashboardPage() {
       await uploadDocument(file);
       await refreshDocuments();
     } catch (err) {
-      const message = err.response?.data?.detail?.message;
+      // err.response.data.message (envelope lỗi riêng của backend, xem
+      // apiClient.js) — KHÔNG phải .detail.message.
+      const message = err.response?.data?.message;
       setError(message || 'Tải tài liệu lên thất bại. Kiểm tra định dạng file (chỉ PDF/PPTX) và dung lượng (tối đa 50MB).');
     }
   }
