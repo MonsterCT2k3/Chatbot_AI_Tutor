@@ -231,6 +231,16 @@
   justify-content: center;
   margin-bottom: 13px;
   color: var(--text-light);
+  overflow: hidden;
+}
+
+/* Ảnh bìa = trang 1 PDF thật render bởi react-pdf (xem DocumentCard.jsx) */
+.preview-box .react-pdf__Document {
+  display: flex;
+}
+
+.preview-box canvas {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 }
 
 .doc-title {
