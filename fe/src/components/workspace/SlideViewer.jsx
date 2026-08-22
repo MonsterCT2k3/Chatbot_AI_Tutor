@@ -121,7 +121,17 @@ export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumb
             <Page
               pageNumber={pageNumber}
               width={displayWidth}
-              onLoadSuccess={(page) => setPageAspect(page.width / page.height)}
+              // BUG THẬT vừa tìm ra: page.width/page.height của react-pdf được
+              // tính theo `scale` HIỆN TẠI (chính là displayWidth ta truyền
+              // vào) — dùng nó để suy ra pageAspect tạo thành vòng lặp: đổi
+              // width -> onLoadSuccess bắn lại (effect của react-pdf phụ
+              // thuộc `scale`) -> setPageAspect ra giá trị hơi khác (sai số
+              // dấu phẩy động) -> fitWidth đổi -> width đổi tiếp... render
+              // canvas liên tục bị hủy giữa chừng trước khi vẽ xong -> canvas
+              // trống trơn. page.originalWidth/originalHeight luôn tính ở
+              // scale=1 CỐ ĐỊNH, không phụ thuộc displayWidth -> ra đúng 1 giá
+              // trị ổn định ngay từ lần đầu, vòng lặp dừng lại.
+              onLoadSuccess={(page) => setPageAspect(page.originalWidth / page.originalHeight)}
             />
           )}
 
