@@ -1,8 +1,10 @@
+import logging
 import uuid
 
 from app.database import async_session
 from app.models.chunk import DocumentChunk
 from app.models.document import Document, DocumentPage
+from app.services.document_service import get_thumbnail_key
 from app.services.ingestion_service import (
     chunk_text,
     convert_pptx_to_pdf,
@@ -10,8 +12,11 @@ from app.services.ingestion_service import (
     extract_text_hybrid,
     extract_text_mistral_ocr,
     extract_text_pypdf,
+    render_first_page_thumbnail,
 )
 from app.services.storage_service import download_file, get_presigned_url, upload_file
+
+logger = logging.getLogger(__name__)
 
 
 async def run_ingestion(document_id: uuid.UUID) -> None:
@@ -34,6 +39,14 @@ async def run_ingestion(document_id: uuid.UUID) -> None:
                 await db.commit()
             else:
                 pdf_bytes = file_bytes
+
+            try:
+                thumbnail_bytes = render_first_page_thumbnail(pdf_bytes)
+                await upload_file(thumbnail_bytes, get_thumbnail_key(document), content_type="image/png")
+            except Exception:
+                # Thumbnail is a nice-to-have for the dashboard card, not required
+                # for the document to be usable — never fail ingestion over it.
+                logger.exception("Failed to render thumbnail for document %s", document.id)
 
             extraction_mode = document.metadata_.get("extraction_mode", "pypdf")
 

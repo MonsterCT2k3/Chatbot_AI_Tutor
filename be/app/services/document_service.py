@@ -77,6 +77,10 @@ async def get_owned_document(db: AsyncSession, document_id: uuid.UUID, user_id: 
     return document
 
 
+def get_thumbnail_key(document: Document) -> str:
+    return f"documents/{document.user_id}/{document.id}/thumbnail.png"
+
+
 def get_viewable_pdf_key(document: Document) -> str:
     # PPTX isn't renderable in a browser — PDF.js needs the LibreOffice-converted
     # copy from ingestion (Phase 3), which only exists once ingestion has run.

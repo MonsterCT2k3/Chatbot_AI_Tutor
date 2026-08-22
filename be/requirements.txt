@@ -39,6 +39,11 @@ mistralai
 pypdf
 tiktoken
 
+# Renders page 1 to a PNG thumbnail once at ingest time (dashboard card
+# preview) — pure binary wheel, no system poppler/mupdf install needed unlike
+# pdf2image/pymupdf.
+pypdfium2
+
 # Only used to generate a throwaway .pptx test fixture in step 3.2's test —
 # not used for real parsing (PPTX is converted to PDF, not read directly)
 python-pptx

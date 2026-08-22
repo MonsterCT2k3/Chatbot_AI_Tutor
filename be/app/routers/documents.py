@@ -20,6 +20,7 @@ from app.services.document_service import (
     delete_document,
     ensure_document_ready,
     get_owned_document,
+    get_thumbnail_key,
     get_viewable_pdf_key,
 )
 from app.services.rag_service import ask_for_user
@@ -130,6 +131,29 @@ async def get_document_file(
         )
 
     return DocumentFileResponse(url=get_presigned_url(pdf_key))
+
+
+@router.get("/{document_id}/thumbnail", response_model=DocumentFileResponse)
+async def get_document_thumbnail(
+    document_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        document = await get_owned_document(db, document_id, current_user.id)
+        ensure_document_ready(document)
+    except DocumentNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "DOCUMENT_NOT_FOUND", "message": "Document not found"},
+        )
+    except DocumentNotReadyError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "DOCUMENT_NOT_READY", "message": "The document isn't ready yet"},
+        )
+
+    return DocumentFileResponse(url=get_presigned_url(get_thumbnail_key(document)))
 
 
 @router.post("/{document_id}/ask", response_model=AskResponse)

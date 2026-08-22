@@ -234,12 +234,11 @@
   overflow: hidden;
 }
 
-/* Ảnh bìa = trang 1 PDF thật render bởi react-pdf (xem DocumentCard.jsx) */
-.preview-box .react-pdf__Document {
-  display: flex;
-}
-
-.preview-box canvas {
+/* Ảnh bìa = ảnh PNG trang 1 render sẵn ở backend lúc ingest (xem DocumentCard.jsx) */
+.preview-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 }
 

@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Document, Page } from 'react-pdf';
 import { FileText, Presentation, Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { getDocumentFileUrl } from '../../services/documentService';
-import '../../lib/pdfjsSetup';
+import { getDocumentThumbnailUrl } from '../../services/documentService';
 
 // status thật từ be/app/models/document.py: pending/parsing/embedding/ready/failed.
 // 3 trạng thái đầu đều là "đang xử lý" với người dùng — không cần phân biệt
@@ -27,23 +25,25 @@ export default function DocumentCard({ document, onOpen }) {
   const isReady = document.status === 'ready';
   const TypeIcon = document.file_type === 'pptx' ? Presentation : FileText;
 
-  // Ảnh bìa = trang 1 của bản PDF thật (kể cả tài liệu gốc là .pptx, backend
-  // luôn có bản PDF xem được — GET /documents/{id}/file, xem
-  // get_viewable_pdf_key trong be/app/routers/documents.py). Chỉ fetch presigned
-  // URL này SAU KHI status='ready', vì endpoint trả 409 nếu chưa ingest xong.
-  const [fileUrl, setFileUrl] = useState(null);
+  // Ảnh bìa = ảnh PNG trang 1 render SẴN lúc ingest ở backend (xem
+  // be/app/services/ingestion_service.py render_first_page_thumbnail) — chỉ
+  // là 1 <img> bình thường, không tự parse PDF ở trình duyệt nữa (trước đây
+  // dùng react-pdf load cả file PDF chỉ để lấy 1 ảnh nhỏ, chậm cả lần đầu lẫn
+  // mỗi lần reload). Chỉ fetch URL này SAU KHI status='ready', vì endpoint
+  // trả 409 nếu chưa ingest xong.
+  const [thumbnailUrl, setThumbnailUrl] = useState(null);
   const [thumbFailed, setThumbFailed] = useState(false);
 
   useEffect(() => {
     if (!isReady) return undefined;
     let cancelled = false;
-    getDocumentFileUrl(document.id)
-      .then((url) => { if (!cancelled) setFileUrl(url); })
+    getDocumentThumbnailUrl(document.id)
+      .then((url) => { if (!cancelled) setThumbnailUrl(url); })
       .catch(() => { if (!cancelled) setThumbFailed(true); });
     return () => { cancelled = true; };
   }, [isReady, document.id]);
 
-  const showThumbnail = isReady && fileUrl && !thumbFailed;
+  const showThumbnail = isReady && thumbnailUrl && !thumbFailed;
 
   return (
     <button
@@ -55,14 +55,7 @@ export default function DocumentCard({ document, onOpen }) {
     >
       <div className="preview-box">
         {showThumbnail ? (
-          <Document
-            file={fileUrl}
-            loading={<TypeIcon size={40} strokeWidth={1.3} />}
-            error={<TypeIcon size={40} strokeWidth={1.3} />}
-            onLoadError={() => setThumbFailed(true)}
-          >
-            <Page pageNumber={1} height={110} renderTextLayer={false} renderAnnotationLayer={false} />
-          </Document>
+          <img src={thumbnailUrl} alt="" onError={() => setThumbFailed(true)} />
         ) : (
           <TypeIcon size={40} strokeWidth={1.3} />
         )}

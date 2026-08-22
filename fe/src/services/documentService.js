@@ -35,6 +35,14 @@ export async function getDocumentFileUrl(documentId) {
   return data.url;
 }
 
+// URL ảnh thumbnail trang 1 (presigned R2, PNG nhỏ render sẵn lúc ingest —
+// xem be/app/services/ingestion_service.py render_first_page_thumbnail).
+// Dùng thẳng làm `src` cho <img>, KHÔNG cần react-pdf.
+export async function getDocumentThumbnailUrl(documentId) {
+  const { data } = await apiClient.get(`/documents/${documentId}/thumbnail`);
+  return data.url;
+}
+
 export async function deleteDocument(documentId) {
   await apiClient.delete(`/documents/${documentId}`);
 }

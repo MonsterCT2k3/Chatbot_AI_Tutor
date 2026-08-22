@@ -4,6 +4,7 @@ import tempfile
 from io import BytesIO
 from pathlib import Path
 
+import pypdfium2 as pdfium
 import tiktoken
 from mistralai.client import Mistral
 from openai import AsyncOpenAI
@@ -41,6 +42,25 @@ _IMAGE_ANALYSIS_PROMPT = (
 def extract_text_pypdf(pdf_bytes: bytes) -> list[tuple[int, str]]:
     reader = PdfReader(BytesIO(pdf_bytes))
     return [(page_number, page.extract_text() or "") for page_number, page in enumerate(reader.pages, start=1)]
+
+
+def render_first_page_thumbnail(pdf_bytes: bytes, target_width: int = 480) -> bytes:
+    # Rasterizes page 1 server-side, once, at ingest time — the dashboard
+    # card then just does a plain <img> fetch instead of every browser
+    # tab re-parsing the whole PDF with pdf.js on every page load.
+    pdf = pdfium.PdfDocument(pdf_bytes)
+    try:
+        page = pdf[0]
+        try:
+            scale = target_width / page.get_size()[0]
+            bitmap = page.render(scale=scale)
+            buffer = BytesIO()
+            bitmap.to_pil().save(buffer, format="PNG")
+            return buffer.getvalue()
+        finally:
+            page.close()
+    finally:
+        pdf.close()
 
 
 async def retry_async(fn, max_retries: int = 5, backoff_factor: int = 2):
