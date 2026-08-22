@@ -486,8 +486,19 @@
    giữa đúng cho nội dung có thể tràn khung: còn chỗ trống thì auto chia đều
    -> canh giữa; hết chỗ (zoom to) thì auto về 0 -> cuộn tới được MỌI cạnh.
    Dùng center thì phần tràn ra ở cạnh trên/trái bị cắt, không cuộn tới nổi. */
-.pdf-scroll-area > .react-pdf__Page {
+.pdf-zoom-box {
   margin: auto;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Lớp thực hiện zoom bằng CSS transform (GPU) thay vì bắt pdf.js vẽ lại —
+   xem ghi chú "VỀ CHỚP NHÁY KHI ZOOM" trong SlideViewer.jsx. transform KHÔNG
+   ảnh hưởng layout, nên kích thước cuộn/canh giữa do .pdf-zoom-box (đã đặt
+   width/height đúng cỡ hiển thị) đảm nhiệm. */
+.pdf-zoom-inner {
+  transform-origin: top left;
+  will-change: transform;
 }
 
 /* Nút chuyển trang mờ 2 bên rìa trang — chỉ nổi rõ khi hover, không chiếm
@@ -500,8 +511,8 @@
   color: #fff;
   border: none;
   border-radius: 50%;
-  width: 38px;
-  height: 38px;
+  width: 76px;
+  height: 76px;
   display: flex;
   align-items: center;
   justify-content: center;

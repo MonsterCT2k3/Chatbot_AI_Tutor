@@ -12,6 +12,13 @@ const FILMSTRIP_RADIUS = 2; // hiện current page ± 2, giống mockup (5 thumb
 // Chừa vài px để phép "vừa khung" không bị lố 1-2px do làm tròn rồi sinh
 // thanh cuộn thừa ngay ở mức zoom = 1 (mức lẽ ra phải vừa khít).
 const FIT_SAFETY_PX = 4;
+// Render canvas ở độ phân giải GẤP ĐÔI mức "vừa khung" rồi phóng/thu bằng CSS
+// (xem ghi chú "VỀ CHỚP NHÁY KHI ZOOM" bên dưới). Ở 100% ảnh bị thu 2:1 -> rất
+// nét; ở 200% là đúng tỉ lệ 1:1; ở mức tối đa 300% chỉ phóng 1.5x -> hơi mềm
+// nhưng vẫn đọc tốt. Có trần tuyệt đối để không ngốn RAM trên màn hình siêu
+// rộng (react-pdf còn tự nhân thêm devicePixelRatio nữa).
+const RENDER_QUALITY = 2;
+const MAX_RENDER_WIDTH = 2000;
 
 // Dựng từ panel-center trong detail_screen_lesson.html. Toàn bộ nội dung
 // "slide" (sơ đồ neural network, công thức highlight vàng, tooltip pin...)
@@ -95,15 +102,55 @@ export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumb
     return () => { cancelled = true; };
   }, [pdfProxy, pageNumber]);
 
-  // zoom = 1 nghĩa là VỪA KHÍT khung (cả 2 chiều) — không thanh cuộn, canh
-  // giữa hoàn hảo. zoom > 1 mới tràn ra và cần cuộn.
-  const displayWidth = useMemo(() => {
+  // ─────────────────────────────────────────────────────────────────────────
+  // VỀ CHỚP NHÁY KHI PHÓNG TO/THU NHỎ:
+  //
+  // Trong react-pdf/dist/Page/Canvas.js, mỗi lần `scale` đổi là nó chạy lại:
+  //     canvas.width = ...;                  // gán width XOÁ SẠCH pixel đang có
+  //     canvas.style.visibility = 'hidden';  // rồi ẩn canvas đi
+  //     page.render(...).then(() => { canvas.style.visibility = ''; })  // hiện lại KHI vẽ xong
+  //
+  // => mỗi lần bấm +/− là 1 chu kỳ "xoá -> ẩn -> vẽ lại -> hiện", tức là NHÁY
+  // 1 cái; bấm liên tục thì chớp liên tục. Không thể vá bằng CSS
+  // (visibility:visible !important chỉ làm lộ ra canvas ĐÃ BỊ XOÁ TRẮNG).
+  //
+  // CÁCH SỬA: KHÔNG cho `scale` của react-pdf đổi theo zoom nữa. Canvas được
+  // render ĐÚNG 1 LẦN ở `renderWidth` (chỉ đổi khi cửa sổ đổi kích thước hoặc
+  // sang trang khác), còn zoom xử lý HOÀN TOÀN bằng CSS transform — chạy trên
+  // GPU, không đụng tới pdf.js, nên mượt tuyệt đối và không nháy.
+  // ─────────────────────────────────────────────────────────────────────────
+  const fitWidth = useMemo(() => {
     if (!pageSize || !viewport.width || !viewport.height) return 0;
     const availW = viewport.width - FIT_SAFETY_PX;
     const availH = viewport.height - FIT_SAFETY_PX;
     const fitScale = Math.min(availW / pageSize.width, availH / pageSize.height);
-    return pageSize.width * fitScale * zoom;
-  }, [pageSize, viewport, zoom]);
+    return pageSize.width * fitScale;
+  }, [pageSize, viewport]);
+
+  // Kích thước THẬT truyền cho <Page> — cố tình KHÔNG phụ thuộc `zoom`, và
+  // dùng HYSTERESIS: chỉ đổi khi khung đổi ĐÁNG KỂ (>15%).
+  //
+  // Vì sao cần: đo thật bằng trình duyệt cho thấy khi zoom lên 175%, fitWidth
+  // tụt đúng 15px (bề rộng 1 thanh cuộn xuất hiện ở đâu đó trong layout) ->
+  // renderWidth đổi 1538 -> 1508 -> pdf.js vẽ lại -> NHÁY, đúng thứ ta đang
+  // muốn diệt. Hysteresis nuốt trọn các dao động vặt như vậy, đồng thời cắt
+  // đứt mọi vòng phản hồi còn sót lại (giá trị đã chốt thì thay đổi nhỏ không
+  // làm nó đổi nữa), nhưng vẫn render lại nét khi người dùng thật sự đổi kích
+  // thước cửa sổ. Không có nhược điểm về hiển thị: renderWidth CHỈ quyết định
+  // độ nét, còn kích thước nhìn thấy do displayWidth/visualScale lo, nên lệch
+  // chút cũng không làm sai layout.
+  const [renderWidth, setRenderWidth] = useState(0);
+  useEffect(() => {
+    const target = fitWidth ? Math.min(fitWidth * RENDER_QUALITY, MAX_RENDER_WIDTH) : 0;
+    if (!target) return;
+    setRenderWidth((prev) => (prev === 0 || Math.abs(target - prev) / prev > 0.15 ? target : prev));
+  }, [fitWidth]);
+
+  // Kích thước NGƯỜI DÙNG THẤY = vừa khung × zoom. Chênh lệch giữa 2 con số
+  // này được bù bằng CSS transform, không render lại.
+  const displayWidth = fitWidth * zoom;
+  const displayHeight = pageSize ? displayWidth * (pageSize.height / pageSize.width) : 0;
+  const visualScale = renderWidth ? displayWidth / renderWidth : 1;
 
   const filmstripPages = useMemo(() => {
     if (!numPages) return [];
@@ -196,17 +243,27 @@ export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumb
         <div className="slide-canvas-card" ref={measureRef}>
           {/* Lớp TRONG: nơi thanh cuộn thật sự xuất hiện khi zoom > 1. */}
           <div className="pdf-scroll-area">
-            {displayWidth > 0 && <Page key={pageNumber} pageNumber={pageNumber} width={displayWidth} />}
+            {renderWidth > 0 && (
+              // .pdf-zoom-box mang kích thước NGƯỜI DÙNG THẤY -> đây mới là thứ
+              // quyết định layout/thanh cuộn. Còn <Page> bên trong luôn giữ
+              // nguyên renderWidth và chỉ được CSS scale lại, nên pdf.js không
+              // phải vẽ lại lần nào khi zoom.
+              <div className="pdf-zoom-box" style={{ width: displayWidth, height: displayHeight }}>
+                <div className="pdf-zoom-inner" style={{ transform: `scale(${visualScale})` }}>
+                  <Page key={pageNumber} pageNumber={pageNumber} width={renderWidth} />
+                </div>
+              </div>
+            )}
           </div>
 
           {pageNumber > 1 && (
             <button type="button" className="edge-nav-btn edge-nav-left" title="Trang trước" onClick={() => goToPage(pageNumber - 1)}>
-              <ChevronLeft size={22} />
+              <ChevronLeft size={40} />
             </button>
           )}
           {numPages && pageNumber < numPages && (
             <button type="button" className="edge-nav-btn edge-nav-right" title="Trang sau" onClick={() => goToPage(pageNumber + 1)}>
-              <ChevronRight size={22} />
+              <ChevronRight size={40} />
             </button>
           )}
         </div>
