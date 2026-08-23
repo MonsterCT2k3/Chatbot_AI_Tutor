@@ -2,7 +2,23 @@
 
 # Phase 6 — Chat session CRUD + multi-turn: giải thích luồng code
 
-Mỗi bước nhỏ (6.1, 6.2...) có 1 file riêng trong folder này — dữ liệu/code thật, ý nghĩa, tại sao cần bước đó, tại sao làm theo cách đó, test đã chạy, và bước đó nối vào đâu ở các bước sau. Cùng format đã dùng ở [Phase 5.6](../phase-5.6-guardrails-observability/README.md).
+Mỗi bước nhỏ (6.1, 6.2...) có 1 file riêng trong folder này.
+
+### Format "Quyết định & Đánh đổi" (áp dụng từ phase này)
+
+Các phase trước ([3](../phase-3-ingestion/README.md) → [5.6](../phase-5.6-guardrails-observability/README.md)) dùng format cũ, trong đó phần chiếm nhiều chỗ nhất là **chép lại code** — thứ đã có sẵn trong repo, sẽ lạc hậu khi code đổi, và đọc nó là chế độ "thợ code". Từ Phase 6 đổi sang format lấy **quyết định** làm trung tâm, mỗi file trả lời đúng 7 câu hỏi của kỹ sư:
+
+| Mục | Trả lời câu hỏi |
+|---|---|
+| **Vấn đề** | Bước này giải quyết chuyện gì, vì sao không bỏ qua được? |
+| **Các ngã rẽ** | Có mấy đường đi? Chọn đường nào, **bỏ** đường nào, và vì sao? |
+| **Luồng** | Dữ liệu chạy qua đâu (sơ đồ, không phải danh sách gạch đầu dòng)? |
+| **Bất biến** | Điều gì phải **luôn đúng**, nếu sai thì mọi thứ bên dưới sai theo? |
+| **Hỏng thì biểu hiện thế nào** | Lỗi **ồn ào** (có exception) hay **âm thầm** (dữ liệu sai, không báo gì)? |
+| **Bằng chứng** | Lấy gì chứng minh là đúng, không phải "chạy thấy ổn"? |
+| **Ràng buộc để lại** | Bước sau bị buộc phải theo cái gì? |
+
+Không chép code vào tài liệu — chỉ link tới file thật. Mục tiêu là hiểu được **tổng thể và lý do**, không cần đọc từng dòng.
 
 **Bối cảnh phase này giải quyết vấn đề gì:** tới hết Phase 5.6, mỗi câu hỏi là một lượt ĐỘC LẬP — hỏi xong đóng trang là mất sạch, và hỏi nối tiếp kiểu *"giải thích rõ hơn phần đó"* thì retrieval gần như chắc chắn tìm sai chunk vì bản thân câu hỏi không mang đủ thông tin. Phase 6 xử lý cả hai: lưu hội thoại thật (phần 1) và làm cho AI hiểu được ngữ cảnh nhiều lượt (phần 2).
 
