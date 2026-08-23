@@ -1,11 +1,13 @@
 import uuid
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.user import User
+from app.schemas.message import MessageListResponse, MessageResponse
 from app.schemas.session import SessionCreate, SessionResponse, SessionUpdate
 from app.services.document_service import DocumentNotFoundError
 from app.services.session_service import (
@@ -13,6 +15,7 @@ from app.services.session_service import (
     create_session,
     delete_session,
     get_owned_session,
+    list_messages,
     list_sessions,
     rename_session,
 )
@@ -75,6 +78,45 @@ async def rename_chat_session(
         return await rename_session(db, session_id, current_user.id, payload.title)
     except SessionNotFoundError:
         raise _NOT_FOUND
+
+
+@router.get("/{session_id}/messages", response_model=MessageListResponse)
+async def list_chat_messages(
+    session_id: uuid.UUID,
+    limit: int = Query(50, ge=1, le=100),
+    # Khai kiểu datetime để FastAPI tự phân tích ISO-8601 và tự trả 422 với
+    # giá trị rác — không cần tự viết parser, và không có đường nào để một
+    # cursor hỏng lọt xuống tầng truy vấn.
+    before: datetime | None = Query(None, description="Cursor: lấy các tin nhắn CŨ HƠN mốc này"),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        messages, citations, has_more = await list_messages(
+            db, session_id, current_user.id, limit=limit, before=before
+        )
+    except SessionNotFoundError:
+        raise _NOT_FOUND
+
+    # Chỉ trả cursor khi THẬT SỰ còn trang cũ hơn. Trả vô điều kiện sẽ khiến
+    # client bấm "xem thêm" rồi nhận về 1 trang rỗng.
+    # messages đã TĂNG dần, nên phần tử [0] là cũ nhất trang này.
+    #
+    # Dùng hậu tố "Z" thay vì "+00:00": trong query string, dấu "+" mang nghĩa
+    # DẤU CÁCH, nên cursor dạng "...+00:00" nối thẳng vào URL sẽ tới server
+    # thành "... 00:00" và hỏng. Client đúng ra phải URL-encode, nhưng cursor
+    # vốn là token client trả lại NGUYÊN XI — phát ra một giá trị vỡ khi dùng
+    # theo cách tự nhiên nhất là tự đặt bẫy. "Z" là ISO-8601 hợp lệ và an toàn
+    # với URL mà không cần encode. (Phát hiện khi test: trang thứ 2 trả 422.)
+    next_cursor = None
+    if has_more and messages:
+        oldest = messages[0].created_at.astimezone(timezone.utc)
+        next_cursor = oldest.isoformat().replace("+00:00", "Z")
+
+    return MessageListResponse(
+        messages=[MessageResponse.from_model(m, citations.get(m.id, ())) for m in messages],
+        next_cursor=next_cursor,
+    )
 
 
 @router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)

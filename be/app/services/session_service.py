@@ -1,8 +1,10 @@
 import uuid
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.message import ChatMessage, MessageCitation
 from app.models.session import ChatSession
 from app.services.document_service import DocumentNotFoundError, get_owned_document
 
@@ -68,6 +70,63 @@ async def rename_session(
     await db.commit()
     await db.refresh(session)
     return session
+
+
+async def list_messages(
+    db: AsyncSession,
+    session_id: uuid.UUID,
+    user_id: uuid.UUID,
+    *,
+    limit: int,
+    before: datetime | None = None,
+) -> tuple[list[ChatMessage], dict[uuid.UUID, list[MessageCitation]], bool]:
+    """Lịch sử hội thoại, phân trang LÙI về quá khứ.
+
+    Trả về (tin nhắn TĂNG dần theo thời gian, citations gom theo message_id,
+    còn trang cũ hơn hay không).
+    """
+    await get_owned_session(db, session_id, user_id)
+
+    query = select(ChatMessage).where(ChatMessage.session_id == session_id)
+    if before is not None:
+        # Client có thể gửi mốc thời gian KHÔNG kèm timezone. created_at trong
+        # DB là TIMESTAMPTZ, so sánh với giá trị naive sẽ được Postgres diễn
+        # giải theo timezone của phiên — tức lệch giờ một cách âm thầm. Coi
+        # giá trị thiếu timezone là UTC để so sánh luôn xác định.
+        if before.tzinfo is None:
+            before = before.replace(tzinfo=timezone.utc)
+        query = query.where(ChatMessage.created_at < before)
+
+    # Lấy DƯ 1 dòng để biết còn trang cũ hơn hay không, thay vì chạy thêm 1
+    # truy vấn COUNT. Nếu không biết điều này thì chỉ còn 2 lựa chọn đều tệ:
+    # luôn trả next_cursor (client bấm "xem thêm" rồi nhận trang RỖNG), hoặc
+    # đếm toàn bộ lịch sử mỗi lần phân trang.
+    #
+    # Sắp GIẢM dần vì phân trang đi LÙI (mới nhất trước), khớp đúng index
+    # idx_messages_session (session_id, created_at).
+    rows = list(
+        (await db.scalars(query.order_by(ChatMessage.created_at.desc()).limit(limit + 1))).all()
+    )
+    has_more = len(rows) > limit
+    rows = rows[:limit]
+
+    # Hợp đồng ở schema (6.1): messages trả ra phải TĂNG dần — đúng thứ tự
+    # hiển thị. Truy vấn buộc phải giảm dần, nên đảo lại ở đây.
+    rows.reverse()
+
+    # 1 truy vấn cho TẤT CẢ citations, không phải mỗi tin nhắn một truy vấn.
+    # Lấy từng cái sẽ thành N+1: trang 50 tin nhắn tốn 51 lượt đi DB.
+    citations: dict[uuid.UUID, list[MessageCitation]] = {}
+    if rows:
+        found = await db.scalars(
+            select(MessageCitation)
+            .where(MessageCitation.message_id.in_([m.id for m in rows]))
+            .order_by(MessageCitation.page_number)
+        )
+        for citation in found:
+            citations.setdefault(citation.message_id, []).append(citation)
+
+    return rows, citations, has_more
 
 
 async def delete_session(db: AsyncSession, session_id: uuid.UUID, user_id: uuid.UUID) -> None:
