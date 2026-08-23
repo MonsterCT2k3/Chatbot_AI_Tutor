@@ -27,7 +27,7 @@ Không chép code vào tài liệu — chỉ link tới file thật. Mục tiêu
 ## Các bước
 
 - [x] [6.1 — Schemas cho session và message](6.1-schemas.md)
-- [ ] 6.2 — `get_owned_session` + CRUD endpoints
+- [x] [6.2 — Ai được đọc session của ai](6.2-quyen-so-huu-va-crud.md)
 - [ ] 6.3 — `GET /{id}/messages`: phân trang cursor
 - [ ] 6.4 — Lưu tin nhắn đúng thứ tự (commit riêng trước khi gọi LLM)
 - [ ] 6.5 — `POST /api/sessions/{id}/messages` (non-streaming)
