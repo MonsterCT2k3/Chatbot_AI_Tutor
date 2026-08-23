@@ -28,7 +28,7 @@ Không chép code vào tài liệu — chỉ link tới file thật. Mục tiêu
 
 - [x] [6.1 — Schemas cho session và message](6.1-schemas.md)
 - [x] [6.2 — Ai được đọc session của ai](6.2-quyen-so-huu-va-crud.md)
-- [ ] 6.3 — `GET /{id}/messages`: phân trang cursor
+- [x] [6.3 — Đọc lịch sử hội thoại](6.3-phan-trang-cursor.md)
 - [ ] 6.4 — Lưu tin nhắn đúng thứ tự (commit riêng trước khi gọi LLM)
 - [ ] 6.5 — `POST /api/sessions/{id}/messages` (non-streaming)
 - [ ] 6.6 — Feedback tải lại được sau khi mở lại lịch sử
