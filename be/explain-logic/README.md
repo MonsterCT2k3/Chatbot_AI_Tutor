@@ -9,3 +9,4 @@ Mỗi phase (từ Phase 3 trở đi — Phase 0/1/2 không cần vì đã hiểu
 - [Phase 5 — RAG orchestrator](phase-5-rag-orchestrator/README.md)
 - [Phase 5.5 — Advanced RAG](phase-5.5-advanced-rag/README.md)
 - [Phase 5.6 — Guardrails, Safety & Observability](phase-5.6-guardrails-observability/README.md)
+- [Phase 6 — Chat session CRUD + multi-turn](phase-6-chat-sessions/README.md)
