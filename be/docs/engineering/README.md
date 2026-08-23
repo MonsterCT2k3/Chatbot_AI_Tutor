@@ -41,7 +41,9 @@ docs/engineering/
 - Tên file mô tả **mảng chức năng**, không phải tên file mã nguồn. `003-rag-pipeline.md` chứ không phải `003-rag-service-py.md`.
 - Số không bao giờ được dùng lại, kể cả khi một bản ghi trở nên lỗi thời. Thay vào đó, thêm mục "Cập nhật" vào cuối, hoặc viết bản ghi mới và liên kết chéo hai chiều.
 
-> **Chưa có file nào.** Thư mục này mới được dựng khung; các bản ghi sẽ thêm dần khi từng mảng chức năng hoàn thiện.
+### Các bản ghi hiện có
+
+- [x] [`001-authentication.md`](001-authentication.md) — xác thực: JWT ngắn hạn + refresh token thu hồi được
 
 ---
 
@@ -163,11 +165,11 @@ Không cần viết khi:
 
 ## 6. Gợi ý những bản ghi đầu tiên
 
-Chưa tạo file nào. Dựa trên phần đã hoàn thành của dự án, những mảng sau đã đủ chín để tổng kết:
+Dựa trên phần đã hoàn thành của dự án, những mảng sau đã đủ chín để tổng kết:
 
-| Dự kiến | Mảng | Vì sao đáng viết |
+| | Mảng | Vì sao đáng viết |
 |---|---|---|
-| `001` | Xác thực | Đánh đổi JWT ngắn hạn + refresh token lưu DB; quy tắc 404 thay vì 403 |
+| ✅ `001` | Xác thực | Đánh đổi JWT ngắn hạn + refresh token lưu DB; quy tắc 404 thay vì 403 |
 | `002` | Nạp tài liệu | Bất đồng bộ, chạy nền không bền vững, ba chế độ bóc text |
 | `003` | RAG pipeline | Bảy chốt kiểm soát và lý do từng chốt tồn tại |
 | `004` | Retrieval | Câu chuyện đo lường: rerank được nhận, hybrid/multi-query bị loại, và bug index ivfflat |
