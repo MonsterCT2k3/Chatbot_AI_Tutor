@@ -31,9 +31,10 @@ Nói ngắn gọn: `explain-logic` là **nhật ký**, `engineering` là **bài 
 ```
 docs/engineering/
 ├── 001-authentication.md
-├── 002-chat-api.md
+├── 002-document-ingestion.md
 ├── 003-rag-pipeline.md
 ├── 004-retrieval.md
+├── 005-guardrails-observability.md
 └── ...
 ```
 
@@ -43,7 +44,11 @@ docs/engineering/
 
 ### Các bản ghi hiện có
 
-- [x] [`001-authentication.md`](001-authentication.md) — xác thực: JWT ngắn hạn + refresh token thu hồi được
+- [x] [`001-authentication.md`](001-authentication.md) — JWT ngắn hạn + refresh token thu hồi được; vì sao mã lỗi cũng là kênh rò rỉ
+- [x] [`002-document-ingestion.md`](002-document-ingestion.md) — bất đồng bộ, chạy nền không bền vững, ba chế độ bóc text
+- [x] [`003-rag-pipeline.md`](003-rag-pipeline.md) — bảy chốt chống bịa; vì sao giám khảo phải khác nhà cung cấp
+- [x] [`004-retrieval.md`](004-retrieval.md) — năm kỹ thuật, bốn bị loại **có số liệu**; bug index làm mất 14% âm thầm
+- [x] [`005-guardrails-observability.md`](005-guardrails-observability.md) — ba lớp hạn mức; biến lỗi âm thầm thành lỗi ồn ào
 
 ---
 
@@ -163,14 +168,14 @@ Không cần viết khi:
 
 ---
 
-## 6. Gợi ý những bản ghi đầu tiên
+## 6. Bản đồ các bản ghi
 
-Dựa trên phần đã hoàn thành của dự án, những mảng sau đã đủ chín để tổng kết:
+Năm mảng đã hoàn thành của dự án đều đã có bản ghi:
 
 | | Mảng | Vì sao đáng viết |
 |---|---|---|
 | ✅ `001` | Xác thực | Đánh đổi JWT ngắn hạn + refresh token lưu DB; quy tắc 404 thay vì 403 |
-| `002` | Nạp tài liệu | Bất đồng bộ, chạy nền không bền vững, ba chế độ bóc text |
-| `003` | RAG pipeline | Bảy chốt kiểm soát và lý do từng chốt tồn tại |
-| `004` | Retrieval | Câu chuyện đo lường: rerank được nhận, hybrid/multi-query bị loại, và bug index ivfflat |
-| `005` | Guardrails & observability | Quota, circuit breaker, ghi log để trả lời được "prompt mới có tốt hơn không" |
+| ✅ `002` | Nạp tài liệu | Bất đồng bộ, chạy nền không bền vững, ba chế độ bóc text |
+| ✅ `003` | RAG pipeline | Bảy chốt kiểm soát và lý do từng chốt tồn tại |
+| ✅ `004` | Retrieval | Câu chuyện đo lường: rerank được nhận, hybrid/multi-query bị loại, và bug index ivfflat |
+| ✅ `005` | Guardrails & observability | Quota, circuit breaker, ghi log để trả lời được "prompt mới có tốt hơn không" |
