@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// Base URL của backend thật (be/app/main.py — auth/documents đã có, sessions/
-// messages mới chỉ là router rỗng, CHƯA có endpoint nào, không gọi tới).
+// Base URL của backend thật. Auth/documents/sessions đều có endpoint.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 export const apiClient = axios.create({

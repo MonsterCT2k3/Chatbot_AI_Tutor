@@ -71,14 +71,38 @@ Vấn đề thật: RAG ở Phase 5/5.5 chỉ xử lý được câu hỏi ĐỘ
 - [ ] **6.1 Schemas** — `SessionCreate`, `SessionResponse`, `SessionUpdate`, `MessageResponse`, `MessageListResponse` (kèm `next_cursor`). `MessageResponse` phải có `answer_id` (đọc từ `metadata`) và `citations` — xem mục ⑥⑦.
 - [ ] **6.2 `get_owned_session` + CRUD endpoints** — soi gương `get_owned_document` (404 không phân biệt), kiểm tra cả quyền sở hữu `document_id` lúc tạo. Test: user B gọi vào session của user A → 404, KHÔNG phải 403 (403 sẽ vô tình xác nhận session đó có tồn tại).
 - [ ] **6.3 `GET /{id}/messages`** — phân trang cursor theo `created_at desc` (mục ②). Test: chèn thêm tin nhắn mới giữa 2 lần gọi phân trang → không có tin nhắn nào bị lặp hay bị nhảy cóc.
-- [ ] **6.4 Lưu tin nhắn đúng thứ tự** — commit tin nhắn người dùng TRƯỚC khi gọi LLM (mục ③). Test: lưu 1 cặp hỏi-đáp rồi đọc lại → `created_at` của câu hỏi **thực sự nhỏ hơn** của câu trả lời (không bằng nhau).
-- [ ] **6.5 `POST /api/sessions/{id}/messages` (non-streaming)** — gọi `ask_for_user()` (mục ⑤), lưu `chat_messages` + `message_citations` (mục ⑥), "chạm" `updated_at` của session (mục ④), auto-đặt tên ở tin nhắn đầu (mục ⑨). Test: sau khi chat, `GET /api/sessions` đưa session vừa chat lên ĐẦU danh sách; vượt quota → 429; đọc lại lịch sử thấy đủ trích dẫn.
-- [ ] **6.6 Feedback tải lại được** — ghi `ai_usage_log_id` vào `chat_messages.metadata`, `GET /{id}/messages` trả kèm `answer_id` (mục ⑦). Test: chat → 👍 → tải lại lịch sử → vẫn gửi feedback được cho đúng câu trả lời cũ.
-- [ ] **6.7 `rag_service.contextualize_question`** — viết lại câu hỏi dựa trên lịch sử gần nhất, có fallback khi lỗi, có ghi `ai_call_log`. Test: 1 kịch bản hỏi nối tiếp thật (hỏi về 1 khái niệm, rồi hỏi tiếp "nó là gì") → xác nhận retrieval ra đúng chunk nhờ câu hỏi đã viết lại, so với việc dùng thẳng câu hỏi gốc (retrieval sai).
-- [ ] **6.8 Giới hạn lịch sử đưa vào contextualize** — chốt số lượt tối đa, test hội thoại dài không làm phình prompt vô kiểm soát. **Nâng cấp cân nhắc (không bắt buộc ngay):** thay vì chỉ CẮT BỎ các lượt cũ khi vượt ngưỡng, có thể TÓM TẮT (summarize) các lượt cũ thành 1 đoạn ngắn thay vì bỏ hẳn — giữ được ngữ cảnh dài hạn của cả buổi học mà không phình prompt vô hạn (kỹ thuật "conversation summarization", phổ biến ở các chat AI chuyên nghiệp có hội thoại dài).
-- [ ] **6.9 Test end-to-end** — 2 session cùng 1 document → chat riêng từng session, lịch sử không lẫn nhau; test follow-up thật trong cùng 1 session ra câu trả lời đúng ngữ cảnh mà người dùng không cần lặp lại toàn bộ câu hỏi.
+- [x] **6.4 Lưu tin nhắn đúng thứ tự** — commit tin nhắn người dùng TRƯỚC khi gọi LLM (mục ③). Test: lưu 1 cặp hỏi-đáp rồi đọc lại → `created_at` của câu hỏi **thực sự nhỏ hơn** của câu trả lời (không bằng nhau).
+- [x] **6.5 `POST /api/sessions/{id}/messages` (non-streaming)** — gọi `ask_for_user()` (mục ⑤), lưu `chat_messages` + `message_citations` (mục ⑥), "chạm" `updated_at` của session (mục ④), auto-đặt tên ở tin nhắn đầu (mục ⑨). Test: sau khi chat, `GET /api/sessions` đưa session vừa chat lên ĐẦU danh sách; vượt quota → 429; đọc lại lịch sử thấy đủ trích dẫn.
+- [x] **6.6 Feedback tải lại được** — ghi `ai_usage_log_id` vào `chat_messages.metadata`, `GET /{id}/messages` trả kèm `answer_id` (mục ⑦). Test: chat → 👍 → tải lại lịch sử → vẫn gửi feedback được cho đúng câu trả lời cũ.
+- [x] **6.7 `rag_service.contextualize_question`** — viết lại câu hỏi dựa trên lịch sử gần nhất, có fallback khi lỗi, có ghi `ai_call_log`. Spec: [`specification-for-phase-6/6.7-contextualize-question.md`](specification-for-phase-6/6.7-contextualize-question.md).
+- [x] **6.8 Giới hạn lịch sử đưa vào contextualize** — gộp vào 6.7 (`CONTEXTUALIZE_MAX_MESSAGES = 10`). Không summarize.
+- [x] **6.9 Test end-to-end** — **Phạm vi hợp lý:** chỉ chứng hai việc *chưa* đo trên đường production (`send_message` + LLM thật): (1) 2 session cùng document không lẫn lịch sử, (2) follow-up đại từ/thứ tự bước retrieve đúng nhờ 6.7. **Không** đốt 50 câu để chứng 429, **không** lặp 404/cursor/`updated_at`/👍 — đã có ở 6.2–6.6. Nếu follow-up LLM thật trượt: ghi nhận, không xoay prompt 6.7 trong bước này.
 
 > **Lưu ý về chi phí test:** các bước 6.7–6.9 gọi LLM thật. Giữ đúng nguyên tắc đã thống nhất — test bằng vài kịch bản hỏi nối tiếp cụ thể, KHÔNG chạy lại toàn bộ golden dataset cho mỗi lần sửa.
+
+---
+
+### Đánh giá bước còn lại (2026-08-25) — mức độ & có cần plan trước không
+
+**Đã xong:** 6.1–6.5 (schema, quyền sở hữu, cursor, commit tách, `POST /messages` + citation + `updated_at` + auto-title). Còn 6.6–6.9, cộng việc nối frontend (không có số bước riêng trong bản gốc).
+
+Cách đọc cột **Cần plan trước?**
+
+- **Không** — ngã rẽ đã chốt trong file này, pattern đã có trong code. Làm thẳng, đọc diff + chạy.
+- **Ngã rẽ ngắn** — 1–2 quyết định chưa đóng, nói 5 phút rồi mới code. Không viết tài liệu plan mới.
+- **Có** — đụng đường RAG / timeout / id log, dễ phá bất biến đã có. Phải chốt trên giấy rồi mới implement.
+
+| Bước | Việc còn lại | Mức | Cần plan trước? | Vì sao |
+|---|---|---|---|---|
+| **6.6** | Ghi `metadata.ai_usage_log_id` lúc lưu tin assistant; `GET /messages` đã đọc sẵn qua `ANSWER_ID_METADATA_KEY` / `from_model` | Nhỏ | **Không** | Mục ⑦ đã chốt hết: không đổi FK 👍/👎, chỉ bắc cầu JSONB. 6.5 cố ý để trống đúng chỗ này. Test: chat → 👍 → F5 → 👍 vẫn trúng cùng `ai_usage_log`. |
+| **Nối FE** (ngoài checklist) | Sidebar session thật + `chatService` đổi từ `/documents/{id}/ask` sang `POST /sessions/{id}/messages` | Trung bình, không phải kiến trúc | **Ngã rẽ ngắn** (không viết plan phase) | Backend đã đủ để dùng. Còn quyết định nhỏ: tạo session lúc nào (mở document / tin đầu), `/ask` cũ để song song tới Phase 7. Không đụng RAG. Nên làm **sau 6.6** nếu muốn 👍/👎 trên UI vẫn sống khi F5. |
+| **6.7** | `contextualize_question` + cắm vào `send_message` | Lớn trong phase này | **Có** — spec đã viết | Khái niệm mới trên đường găng. Spec: [`specification-for-phase-6/6.7-contextualize-question.md`](specification-for-phase-6/6.7-contextualize-question.md) (gộp cửa sổ 6.8). |
+| **6.8** | Cắt số lượt lịch sử đưa vào contextualize | Nhỏ **nếu gộp vào plan 6.7** | **Không** (một hằng số, vd 5 cặp) | Việc “chốt N” không cần plan riêng. **Tóm tắt** (summarize) các lượt cũ là LLM thứ hai trên đường găng — bản gốc ghi không bắt buộc; **cấm làm trong 6.8**. Nếu làm sau này thì thành việc kiểu 6.7, phải plan. |
+| **6.9** | E2E: 2 session không lẫn; follow-up thật; 404; quota 429 | Kiểm chứng, không thiết kế | **Không** | Chạy sau 6.7–6.8. Vài kịch bản cụ thể, không golden dataset. |
+
+**Thứ tự làm:** 6.6 → (nối FE nếu muốn dùng được trên UI) → plan 6.7 (gồm cửa sổ lịch sử của 6.8) → implement 6.7+6.8 → 6.9.
+
+**Không nhảy Phase 7 (SSE)** trước khi 6.6 xong và FE đã nói chuyện với session API — `done` của stream phải ghi vào `session_id` thật (lý do đổi thứ tự 6/7 từ đầu file).
 
 **DoD:**
 1. Tạo 2 session cho cùng 1 document → chat riêng từng session → lịch sử không lẫn nhau.

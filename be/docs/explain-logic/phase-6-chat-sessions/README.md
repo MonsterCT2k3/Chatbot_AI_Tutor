@@ -29,9 +29,9 @@ Không chép code vào tài liệu — chỉ link tới file thật. Mục tiêu
 - [x] [6.1 — Schemas cho session và message](6.1-schemas.md)
 - [x] [6.2 — Ai được đọc session của ai](6.2-quyen-so-huu-va-crud.md)
 - [x] [6.3 — Đọc lịch sử hội thoại](6.3-phan-trang-cursor.md)
-- [ ] 6.4 — Lưu tin nhắn đúng thứ tự (commit riêng trước khi gọi LLM)
-- [ ] 6.5 — `POST /api/sessions/{id}/messages` (non-streaming)
-- [ ] 6.6 — Feedback tải lại được sau khi mở lại lịch sử
-- [ ] 6.7 — `rag_service.contextualize_question`
-- [ ] 6.8 — Giới hạn lịch sử đưa vào contextualize
-- [ ] 6.9 — Test end-to-end
+- [x] [6.4 — Lưu tin nhắn đúng thứ tự](6.4-luu-tin-nhan-dung-thu-tu.md)
+- [x] [6.5 — Gửi tin nhắn (non-streaming)](6.5-gui-tin-nhan.md)
+- [x] [6.6 — Feedback tải lại được](6.6-feedback-tai-lai.md)
+- [x] [6.7 — Viết lại câu hỏi nối tiếp để đi tìm slide](6.7-contextualize-question.md) (gộp 6.8: cắt 10 tin)
+- [x] 6.8 — Cửa sổ 10 tin, gộp vào 6.7 (không summarize)
+- [x] [6.9 — Test end-to-end](6.9-test-end-to-end.md)

@@ -4,15 +4,6 @@ import { ChevronsLeft, ChevronsRight, FileText, Loader2, Plus, Presentation } fr
 import { useAuth } from '../../context/AuthContext';
 import { uploadDocument } from '../../services/documentService';
 
-// Dựng từ fe/src/mock_html_ui/detail_screen_lesson/detail_screen_lesson.html
-// panel-left. "Study Discussions" (session/thread) cần Phase 6 (chưa build) —
-// giữ nguyên UI mockup nhưng để MOCK tĩnh, không gắn API/onClick thật (khác
-// với phần Course Library/Storage/User bên dưới, toàn bộ đều là dữ liệu thật).
-const MOCK_DISCUSSIONS = [
-  { title: '1. Trao đổi về nội dung Slide 14', active: true },
-  { title: '2. Câu hỏi ôn tập chương này' },
-];
-
 function formatBytes(bytes) {
   const gb = bytes / (1024 * 1024 * 1024);
   return gb >= 0.1 ? `${gb.toFixed(1)} GB` : `${(bytes / (1024 * 1024)).toFixed(0)} MB`;
@@ -25,7 +16,13 @@ function formatBytes(bytes) {
 // giả hoàn toàn.
 const MOCK_QUOTA_BYTES = 10 * 1024 * 1024 * 1024;
 
-export default function WorkspaceSidebar({ documents, currentDocumentId, onDocumentUploaded, collapsed, onToggleCollapse }) {
+export default function WorkspaceSidebar({
+  documents,
+  currentDocumentId,
+  onDocumentUploaded,
+  collapsed,
+  onToggleCollapse,
+}) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const fileInputRef = useRef(null);
@@ -119,20 +116,6 @@ export default function WorkspaceSidebar({ documents, currentDocumentId, onDocum
           })}
         </div>
       </div>
-
-      {!collapsed && (
-        <div>
-          <h3 className="sidebar-section-title">Thảo luận học tập</h3>
-          <div className="sidebar-list">
-            {MOCK_DISCUSSIONS.map((d) => (
-              <div key={d.title} className="sidebar-discuss-item">
-                <span>{d.title}</span>
-                {d.active && <span className="active-green-pill">Đang mở</span>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="sidebar-footer">
         {!collapsed && (

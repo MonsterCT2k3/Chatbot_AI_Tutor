@@ -1,4 +1,6 @@
+import asyncio
 import re
+import threading
 import time
 import uuid
 from collections import deque
@@ -13,6 +15,7 @@ from starlette.concurrency import run_in_threadpool
 
 from app.config import settings
 from app.models.chunk import DocumentChunk
+from app.models.message import ChatMessage
 from app.services.ingestion_service import embed_chunks, retry_async
 from app.services.usage_service import (
     check_circuit_breaker,
@@ -220,20 +223,45 @@ async def hybrid_search(
 
 
 _reranker_model = None
+_reranker_lock = threading.Lock()
+_RERANKER_MODEL_NAME = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
 
 
 def _get_reranker_model():
-    # Lazy singleton, imported inside the function on purpose — sentence-transformers
-    # pulls in torch, which is a heavy import (~seconds) that every part of the app
-    # importing rag_service would otherwise pay at startup, even though reranking
-    # isn't wired into ask() yet. mmarco-mMiniLMv2-L12-H384-v1 is trained on mMARCO,
-    # which covers Vietnamese (unlike the more common English-only ms-marco rerankers).
+    # Singleton, import torch inside this function so `import rag_service`
+    # (eval scripts, ingestion worker) does not pay the heavy import. The API
+    # process calls preload_reranker() from FastAPI lifespan so the first ask()
+    # does not stall 15–50s on torch + weight load. mmarco-mMiniLMv2-L12-H384-v1
+    # is trained on mMARCO, which covers Vietnamese (unlike the more common
+    # English-only ms-marco rerankers).
     global _reranker_model
     if _reranker_model is None:
-        from sentence_transformers import CrossEncoder
+        with _reranker_lock:
+            if _reranker_model is None:
+                from sentence_transformers import CrossEncoder
 
-        _reranker_model = CrossEncoder("cross-encoder/mmarco-mMiniLMv2-L12-H384-v1")
+                try:
+                    # Prefer the local HF cache — a hub stat check on first
+                    # load was measured as a large share of the 16–50s stall.
+                    # Force CPU: this MiniLM is tiny, and defaulting to CUDA
+                    # pulled ~1.6GB of torch CUDA libs plus extra first-predict
+                    # JIT on a model that ask() already runs in a threadpool.
+                    _reranker_model = CrossEncoder(
+                        _RERANKER_MODEL_NAME,
+                        device="cpu",
+                        local_files_only=True,
+                        token=False,
+                    )
+                except (OSError, ValueError):
+                    _reranker_model = CrossEncoder(_RERANKER_MODEL_NAME, device="cpu")
     return _reranker_model
+
+
+def preload_reranker():
+    """Load weights and run a dummy batch matching rerank_search's candidate_pool."""
+    model = _get_reranker_model()
+    model.predict([("warmup", "warmup")] * 20)
+    return model
 
 
 async def rerank_search(
@@ -641,6 +669,75 @@ def citations_from_structured_answer(structured: StructuredAnswer, chunks: list[
     return citations
 
 
+CONTEXTUALIZE_TIMEOUT_S = 2.5
+CONTEXTUALIZE_PROMPT_VERSION = "contextualize-v1"
+_CONTEXTUALIZE_SYSTEM_PROMPT = (
+    "Bạn viết lại câu hỏi của học viên thành MỘT câu hỏi tiếng Việt độc lập, "
+    "đủ nghĩa khi không có hội thoại trước đó, để dùng cho tìm kiếm trong giáo trình. "
+    "Không trả lời câu hỏi. Không giải thích. Không markdown. "
+    "Nếu câu hiện tại đã độc lập thì trả lại nguyên văn."
+)
+
+
+def build_contextualize_user_prompt(history: list[ChatMessage], question: str) -> str:
+    lines = [f"{message.role}: {message.content}" for message in history]
+    history_block = "\n".join(lines) if lines else "(không có)"
+    return f"<history>\n{history_block}\n</history>\n\nCâu hiện tại: {question}"
+
+
+async def _contextualize_call(user_prompt: str):
+    return await _openai_client.chat.completions.create(
+        model=settings.CHAT_MODEL,
+        messages=[
+            {"role": "system", "content": _CONTEXTUALIZE_SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=0,
+    )
+
+
+async def contextualize_question(
+    history: list[ChatMessage],
+    question: str,
+    *,
+    db: AsyncSession,
+    call_group_id: uuid.UUID,
+) -> str:
+    # Luôn trả str, không raise tới send_message. Hỏng/timeout → câu gốc.
+    user_prompt = build_contextualize_user_prompt(history, question)
+    t0 = time.monotonic()
+    fail_reason: str | None = None
+    rewritten = question
+    usage = TokenUsage()
+    try:
+        response = await asyncio.wait_for(_contextualize_call(user_prompt), timeout=CONTEXTUALIZE_TIMEOUT_S)
+        text = (response.choices[0].message.content or "").strip()
+        usage = _usage_from_response(response)
+        if text:
+            rewritten = text
+        else:
+            fail_reason = "empty_rewrite"
+    except TimeoutError:
+        fail_reason = "timeout"
+    except Exception as exc:
+        fail_reason = f"{type(exc).__name__}"
+
+    await log_ai_call(
+        db,
+        call_group_id,
+        call_type="contextualize",
+        model=settings.CHAT_MODEL,
+        latency_ms=(time.monotonic() - t0) * 1000,
+        prompt=user_prompt,
+        response=rewritten if fail_reason is None else f"{fail_reason} | fallback={question}",
+        prompt_tokens=usage.prompt_tokens,
+        completion_tokens=usage.completion_tokens,
+        estimated_cost_usd=estimate_cost_usd(settings.CHAT_MODEL, usage.prompt_tokens, usage.completion_tokens),
+        prompt_version=CONTEXTUALIZE_PROMPT_VERSION,
+    )
+    return question if fail_reason is not None else rewritten
+
+
 async def ask(
     db: AsyncSession,
     document_id: uuid.UUID,
@@ -648,20 +745,25 @@ async def ask(
     *,
     client: AsyncOpenAI | None = None,
     model: str | None = None,
+    retrieve_question: str | None = None,
+    call_group_id: uuid.UUID | None = None,
 ) -> AnswerResult:
     # client/model default to Groq (production) — overridable so eval scripts
     # can run the exact same retrieval + prompt through a different provider
     # for a fair head-to-head, without duplicating this function.
     call_client = client or _groq_client
     call_model = model or settings.GROQ_CHAT_MODEL
+    # Câu độc lập (6.7) chỉ cho embed/rerank/generate. Moderate vẫn dùng `question`
+    # gốc — đúng chữ học viên gõ. None ⇒ đường cũ (eval, /ask).
+    retrieve_q = retrieve_question or question
 
     # 5.6.9: 1 id chung cho MỌI lệnh gọi AI của riêng lượt ask() này — sinh ra ở
     # đây (KHÔNG phải khi ai_usage_log được ghi, việc đó xảy ra SAU, trong
     # ask_for_user) để log được từng lệnh gọi ngay lúc nó xảy ra, không phải
-    # đợi có kết quả cuối cùng. Trả ra qua AnswerResult.call_group_id để
-    # ask_for_user tái sử dụng làm id của dòng ai_usage_log — liên kết mềm 2
-    # bảng mà không cần FK cứng (xem comment ở AICallLog).
-    call_group_id = uuid.uuid4()
+    # đợi có kết quả cuối cùng. send_message (6.7) có thể truyền sẵn id đã dùng
+    # cho log contextualize, để cả lượt chung 1 UUID.
+    if call_group_id is None:
+        call_group_id = uuid.uuid4()
 
     async def _log_call(call_type, *, model, latency_ms, prompt=None, response=None, usage=None, cost=0.0):
         u = usage or TokenUsage()
@@ -696,16 +798,16 @@ async def ask(
             call_group_id=call_group_id,
         )
 
-    query_embedding = (await embed_chunks([question]))[0]
+    query_embedding = (await embed_chunks([retrieve_q]))[0]
 
     # rerank_search (5.5.5), not plain similarity_search — measured improvement
     # on real data: no regression on easy documents (Recall@6 stayed 1.000,
     # MRR 0.914→0.921) and a real gain on a harder 83-page document (Recall@6
     # 0.837→0.953, MRR 0.715→0.900). See explain-logic/phase-5.5-advanced-rag/5.5.5.
-    chunks = await rerank_search(db, document_id, query_embedding, question)
+    chunks = await rerank_search(db, document_id, query_embedding, retrieve_q)
     context = format_context(chunks)
 
-    gen_prompt = build_prompt(chunks, question)
+    gen_prompt = build_prompt(chunks, retrieve_q)
     t0 = time.monotonic()
     structured, gen_usage = await _generate_structured(call_client, call_model, gen_prompt)
     answer = render_structured_answer(structured)
@@ -743,7 +845,7 @@ async def ask(
         # cho người dùng, mà fallback về đúng câu từ chối cố định (an toàn hơn
         # là đoán). Giám khảo (score_faithfulness) luôn dùng OpenAI, độc lập
         # với model sinh câu trả lời (Groq) — không tự chấm điểm chính mình.
-        retry_prompt = build_prompt(chunks, question, extra_instruction=_GROUNDING_RETRY_INSTRUCTION)
+        retry_prompt = build_prompt(chunks, retrieve_q, extra_instruction=_GROUNDING_RETRY_INSTRUCTION)
         t0 = time.monotonic()
         retry_structured, retry_gen_usage = await _generate_structured(call_client, call_model, retry_prompt)
         retry_answer = render_structured_answer(retry_structured)
@@ -834,6 +936,8 @@ async def ask_for_user(
     *,
     client: AsyncOpenAI | None = None,
     model: str | None = None,
+    retrieve_question: str | None = None,
+    call_group_id: uuid.UUID | None = None,
 ) -> AnswerResult:
     """ask() + guardrail chi phí theo user (5.6.6). ĐÂY là hàm endpoint thật phải gọi.
 
@@ -854,7 +958,15 @@ async def ask_for_user(
     # (kể cả moderation), cùng nguyên tắc "chặn càng sớm càng tốt" của 5.6.1.
     await check_daily_quota(db, user_id)
 
-    result = await ask(db, document_id, question, client=client, model=model)
+    result = await ask(
+        db,
+        document_id,
+        question,
+        client=client,
+        model=model,
+        retrieve_question=retrieve_question,
+        call_group_id=call_group_id,
+    )
 
     # Log SAU KHI có kết quả, và tính vào quota KỂ CẢ khi bị guardrail chặn:
     # mỗi lượt bị chặn vẫn tốn tiền moderation/embedding thật, và nếu không

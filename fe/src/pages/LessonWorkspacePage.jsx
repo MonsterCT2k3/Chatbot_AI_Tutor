@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import WorkspaceSidebar from '../components/workspace/WorkspaceSidebar';
 import SlideViewer from '../components/workspace/SlideViewer';
 import ChatPanel from '../components/workspace/ChatPanel';
 import { getDocument, getDocumentFileUrl, listDocuments } from '../services/documentService';
+import { deleteSession, listSessions } from '../services/sessionService';
 import './LessonWorkspacePage.css';
 
 // Dựng từ fe/src/mock_html_ui/detail_screen_lesson/detail_screen_lesson.html.
@@ -13,6 +14,8 @@ import './LessonWorkspacePage.css';
 export default function LessonWorkspacePage() {
   const { documentId } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sessionId = searchParams.get('session');
 
   const [documents, setDocuments] = useState([]);
   const [currentDoc, setCurrentDoc] = useState(null);
@@ -21,6 +24,14 @@ export default function LessonWorkspacePage() {
   const [numPages, setNumPages] = useState(null);
   const [error, setError] = useState(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [sessions, setSessions] = useState([]);
+
+  function setSessionParam(id) {
+    const next = new URLSearchParams(searchParams);
+    if (id) next.set('session', id);
+    else next.delete('session');
+    setSearchParams(next, { replace: true });
+  }
 
   const refreshDocuments = useCallback(() => {
     listDocuments().then(setDocuments).catch(() => {});
@@ -46,6 +57,27 @@ export default function LessonWorkspacePage() {
       .catch((err) => {
         setError(err.response?.status === 404 ? 'Tài liệu không tồn tại hoặc bạn không có quyền xem.' : 'Không tải được tài liệu.');
       });
+  }, [documentId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    listSessions(documentId)
+      .then((list) => {
+        if (cancelled) return;
+        setSessions(list);
+        const q = searchParams.get('session');
+        if (q && list.some((s) => s.id === q)) return;
+        if (list[0]) setSessionParam(list[0].id);
+        else setSessionParam(null);
+      })
+      .catch(() => {
+        if (!cancelled) setSessions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // Chỉ re-run khi đổi tài liệu — không phụ thuộc searchParams kẻo loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentId]);
 
   function handleDocumentUploaded(newDoc) {
@@ -95,7 +127,28 @@ export default function LessonWorkspacePage() {
         />
       )}
 
-      <ChatPanel documentId={documentId} pageNumber={pageNumber} setPageNumber={setPageNumber} />
+      <ChatPanel
+        documentId={documentId}
+        sessionId={sessionId}
+        sessions={sessions}
+        setPageNumber={setPageNumber}
+        onSelectSession={setSessionParam}
+        onNewSession={() => setSessionParam(null)}
+        onDeleteSession={async (id) => {
+          try {
+            await deleteSession(id);
+            const list = (await listSessions(documentId)) || [];
+            setSessions(list);
+            if (id === sessionId) setSessionParam(list[0]?.id || null);
+          } catch {
+            /* xoá fail: giữ nguyên danh sách */
+          }
+        }}
+        onSessionEnsured={(session) => {
+          setSessionParam(session.id);
+          listSessions(documentId).then(setSessions).catch(() => {});
+        }}
+      />
     </div>
   );
 }

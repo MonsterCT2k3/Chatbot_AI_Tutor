@@ -1,16 +1,39 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.message import ChatMessage, MessageCitation
 from app.models.session import ChatSession
-from app.services.document_service import DocumentNotFoundError, get_owned_document
+from app.schemas.message import ANSWER_ID_METADATA_KEY
+from app.services.document_service import DocumentNotFoundError, ensure_document_ready, get_owned_document
+from app.services.rag_service import Citation, ask_for_user, contextualize_question
+from app.services.usage_service import check_circuit_breaker, check_daily_quota
 
 
 class SessionNotFoundError(Exception):
     pass
+
+
+# Khớp server_default của chat_sessions.title — so sánh đúng chuỗi này thì
+# mới được phép ghi đè bằng câu hỏi đầu (user đã đặt tên thì không đụng).
+DEFAULT_SESSION_TITLE = "New chat"
+AUTO_TITLE_MAX_LEN = 60
+# 6.8 gộp vào 6.7: cửa sổ đưa vào rewrite, không tóm tắt.
+CONTEXTUALIZE_MAX_MESSAGES = 10
+
+
+def auto_title_from_question(question: str, max_len: int = AUTO_TITLE_MAX_LEN) -> str:
+    text = " ".join(question.split())
+    if not text:
+        return DEFAULT_SESSION_TITLE
+    if len(text) <= max_len:
+        return text
+    cut = text[:max_len]
+    if " " in cut:
+        cut = cut.rsplit(" ", 1)[0]
+    return cut or text[:max_len]
 
 
 async def get_owned_session(db: AsyncSession, session_id: uuid.UUID, user_id: uuid.UUID) -> ChatSession:
@@ -127,6 +150,139 @@ async def list_messages(
             citations.setdefault(citation.message_id, []).append(citation)
 
     return rows, citations, has_more
+
+
+async def save_user_message(db: AsyncSession, session: ChatSession, content: str) -> ChatMessage:
+    # Commit RIÊNG, trước mọi lệnh gọi LLM. now() của Postgres đóng băng từ
+    # lúc transaction bắt đầu tới lúc commit — hai INSERT trong CÙNG
+    # transaction nhận created_at GIỐNG HỆT (đã đo trên DB thật). Commit ở
+    # đây còn giữ được câu hỏi nếu ask() ném exception sau đó.
+    message = ChatMessage(session_id=session.id, role="user", content=content)
+    db.add(message)
+    await db.commit()
+    await db.refresh(message)
+    return message
+
+
+async def save_assistant_message(
+    db: AsyncSession,
+    session: ChatSession,
+    content: str,
+    *,
+    citations: list[Citation] | None = None,
+    ai_usage_log_id: uuid.UUID | None = None,
+) -> ChatMessage:
+    # Transaction riêng so với save_user_message (6.4). 6.6: bắc cầu sang
+    # ai_usage_log qua JSONB — 👍/👎 vẫn FK cứng tới bảng đó, không đổi sang
+    # chat_messages.id. Lưu str(uuid) vì JSONB đọc lại ra str, không phải UUID.
+    metadata = {}
+    if ai_usage_log_id is not None:
+        metadata[ANSWER_ID_METADATA_KEY] = str(ai_usage_log_id)
+    message = ChatMessage(
+        session_id=session.id, role="assistant", content=content, metadata_=metadata
+    )
+    db.add(message)
+    await db.flush()
+    for citation in citations or []:
+        db.add(
+            MessageCitation(
+                message_id=message.id,
+                document_id=session.document_id,
+                chunk_id=citation.chunk_id,
+                page_number=citation.page_number,
+                snippet=citation.snippet,
+            )
+        )
+    await db.commit()
+    await db.refresh(message)
+    return message
+
+
+async def touch_session(db: AsyncSession, session: ChatSession, *, title: str | None = None) -> None:
+    # Thêm dòng chat_messages KHÔNG chạy trigger updated_at (trigger chỉ bắn
+    # khi chính dòng session bị UPDATE). SET title kể cả khi không đổi tên —
+    # Postgres vẫn coi là UPDATE, trigger chạy. SQLAlchemy bỏ qua UPDATE nếu
+    # gán attribute Python không dirty, nên phải đi qua update() tường minh.
+    await db.execute(
+        update(ChatSession)
+        .where(ChatSession.id == session.id)
+        .values(title=title if title is not None else session.title)
+    )
+    await db.commit()
+    await db.refresh(session)
+
+
+async def recent_messages_for_contextualize(
+    db: AsyncSession, session_id: uuid.UUID, *, limit: int = CONTEXTUALIZE_MAX_MESSAGES
+) -> list[ChatMessage]:
+    rows = list(
+        (
+            await db.scalars(
+                select(ChatMessage)
+                .where(ChatMessage.session_id == session_id)
+                .order_by(ChatMessage.created_at.desc())
+                .limit(limit)
+            )
+        ).all()
+    )
+    rows.reverse()
+    return rows
+
+
+async def send_message(
+    db: AsyncSession, session_id: uuid.UUID, user_id: uuid.UUID, question: str
+) -> tuple[ChatMessage, list[MessageCitation]]:
+    session = await get_owned_session(db, session_id, user_id)
+    document = await get_owned_document(db, session.document_id, user_id)
+    ensure_document_ready(document)
+
+    # History TRƯỚC khi save — nếu load sau, câu vừa gửi nằm trong history.
+    history = await recent_messages_for_contextualize(db, session.id)
+
+    await save_user_message(db, session, question)
+    auto_title = auto_title_from_question(question) if session.title == DEFAULT_SESSION_TITLE else None
+    await touch_session(db, session, title=auto_title)
+
+    call_group_id = uuid.uuid4()
+    retrieve_question = question
+    if history:
+        # Tránh trả tiền rewrite khi đã hết quota / breaker đang mở.
+        await check_circuit_breaker(db)
+        await check_daily_quota(db, user_id)
+        retrieve_question = await contextualize_question(
+            history, question, db=db, call_group_id=call_group_id
+        )
+
+    # ask_for_user, không ask(): quota / circuit breaker / ai_usage_log.
+    # Exception sau bước này: tin user đã commit — đúng bất biến 6.4.
+    result = await ask_for_user(
+        db,
+        user_id,
+        session.document_id,
+        question,
+        retrieve_question=retrieve_question,
+        call_group_id=call_group_id,
+    )
+
+    assistant = await save_assistant_message(
+        db,
+        session,
+        result.answer,
+        citations=result.citations,
+        ai_usage_log_id=result.call_group_id,
+    )
+    await touch_session(db, session)
+
+    saved_citations = list(
+        (
+            await db.scalars(
+                select(MessageCitation)
+                .where(MessageCitation.message_id == assistant.id)
+                .order_by(MessageCitation.page_number)
+            )
+        ).all()
+    )
+    return assistant, saved_citations
 
 
 async def delete_session(db: AsyncSession, session_id: uuid.UUID, user_id: uuid.UUID) -> None:

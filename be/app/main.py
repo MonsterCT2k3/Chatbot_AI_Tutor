@@ -1,10 +1,13 @@
+import time
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from contextlib import asynccontextmanager
 
 from app.exceptions import (
     http_exception_handler,
@@ -15,10 +18,14 @@ from app.exceptions import (
 from app.middleware import ResponseEnvelopeMiddleware
 from app.rate_limiter import limiter
 from app.routers import auth, documents, sessions, messages
+from app.services.rag_service import preload_reranker
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    t0 = time.monotonic()
+    await run_in_threadpool(preload_reranker)
+    print(f"Reranker preloaded in {time.monotonic() - t0:.1f}s")
     print("AI Tutor Backend is READY!")
     yield
     print("Shutting down AI Tutor Backend.")

@@ -7,9 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.user import User
-from app.schemas.message import MessageListResponse, MessageResponse
+from app.schemas.message import MessageCreate, MessageListResponse, MessageResponse
 from app.schemas.session import SessionCreate, SessionResponse, SessionUpdate
-from app.services.document_service import DocumentNotFoundError
+from app.services.document_service import DocumentNotFoundError, DocumentNotReadyError
 from app.services.session_service import (
     SessionNotFoundError,
     create_session,
@@ -18,7 +18,9 @@ from app.services.session_service import (
     list_messages,
     list_sessions,
     rename_session,
+    send_message,
 )
+from app.services.usage_service import CircuitBreakerOpenError, QuotaExceededError
 
 router = APIRouter()
 
@@ -78,6 +80,41 @@ async def rename_chat_session(
         return await rename_session(db, session_id, current_user.id, payload.title)
     except SessionNotFoundError:
         raise _NOT_FOUND
+
+
+@router.post("/{session_id}/messages", response_model=MessageResponse)
+async def post_chat_message(
+    session_id: uuid.UUID,
+    payload: MessageCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        message, citations = await send_message(db, session_id, current_user.id, payload.question)
+    except SessionNotFoundError:
+        raise _NOT_FOUND
+    except DocumentNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "DOCUMENT_NOT_FOUND", "message": "Document not found"},
+        )
+    except DocumentNotReadyError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "DOCUMENT_NOT_READY", "message": "The document isn't fully ingested yet"},
+        )
+    except QuotaExceededError as e:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail={"code": "QUOTA_EXCEEDED", "message": str(e)},
+        )
+    except CircuitBreakerOpenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"code": "CIRCUIT_BREAKER_OPEN", "message": str(e)},
+        )
+
+    return MessageResponse.from_model(message, citations)
 
 
 @router.get("/{session_id}/messages", response_model=MessageListResponse)
