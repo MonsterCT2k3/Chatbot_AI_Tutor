@@ -9,8 +9,9 @@
    - Ảnh minh họa SVG riêng theo chủ đề từng tài liệu (mạng nơ-ron, ma trận...)
      — không thể biết trước nội dung file người dùng upload, thay bằng icon
      loại file chung (PDF/PPTX).
-   - "Recent AI Study Threads" — cần Phase 6 (session), chưa có dữ liệu thật
-     nào để hiển thị, bỏ hẳn thay vì hiện thread giả. */
+   - "Recent AI Study Threads" — khối threads trên dashboard cố ý không làm
+     (session thuộc về từng tài liệu cụ thể trong workspace, không phải feed
+     toàn cục trên dashboard). */
 
 .dashboard-body {
   min-height: 100vh;

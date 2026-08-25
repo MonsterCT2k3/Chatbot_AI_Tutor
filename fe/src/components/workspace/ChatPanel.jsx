@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { BookOpen, Check, History, Mic, Paperclip, Plus, Send, ThumbsDown, ThumbsUp, X } from 'lucide-react';
+import { BookOpen, Check, History, Mic, Paperclip, Pencil, Plus, Send, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import { submitFeedback } from '../../services/chatService';
 import { createSession, listMessages, mapStreamStatus, sendSessionMessageStream } from '../../services/sessionService';
 
@@ -44,6 +44,7 @@ export default function ChatPanel({
   onSessionEnsured,
   onSelectSession,
   onNewSession,
+  onRenameSession,
   onDeleteSession,
   setPageNumber,
   revealCitationPage,
@@ -55,6 +56,10 @@ export default function ChatPanel({
   const [streamStatus, setStreamStatus] = useState(null);
   const [error, setError] = useState(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [renameBusy, setRenameBusy] = useState(false);
+  const editInputRef = useRef(null);
   const scrollRef = useRef(null);
   const skipLoadRef = useRef(false);
   const historyRef = useRef(null);
@@ -78,7 +83,50 @@ export default function ChatPanel({
 
   useEffect(() => {
     setHistoryOpen(false);
+    setEditingId(null);
   }, [sessionId]);
+
+  useEffect(() => {
+    if (!historyOpen) {
+      setEditingId(null);
+    }
+  }, [historyOpen]);
+
+  useEffect(() => {
+    if (editingId) {
+      editInputRef.current?.focus();
+      editInputRef.current?.select();
+    }
+  }, [editingId]);
+
+  function startEditing(s, e) {
+    e?.stopPropagation?.();
+    setEditingId(s.id);
+    setEditTitle(s.title || '');
+  }
+
+  async function submitRename(s) {
+    if (renameBusy) return;
+    const t = editTitle.trim();
+    if (!t) {
+      setEditingId(null);
+      return;
+    }
+    const cleanTitle = t.slice(0, 200);
+    if (cleanTitle === (s.title || '').trim()) {
+      setEditingId(null);
+      return;
+    }
+    setRenameBusy(true);
+    try {
+      await onRenameSession?.(s.id, cleanTitle);
+      setEditingId(null);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Không đổi được tên cuộc trò chuyện.');
+    } finally {
+      setRenameBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (skipLoadRef.current) {
@@ -164,7 +212,7 @@ export default function ChatPanel({
             const p = Number(citation?.page_number);
             if (Number.isFinite(p) && p >= 1) {
               didAutoJumpRef.current = true;
-              if (revealCitationPage) revealCitationPage(p);
+              if (revealCitationPage) revealCitationPage(p, citation?.bbox ?? null);
               else setPageNumber?.(p);
             }
           }
@@ -186,9 +234,10 @@ export default function ChatPanel({
             clearCitationHighlight?.();
           } else {
             didAutoJumpRef.current = true;
-            const firstPage = Number(nextCitations[0]?.page_number);
+            const firstCitation = nextCitations[0];
+            const firstPage = Number(firstCitation?.page_number);
             if (Number.isFinite(firstPage) && firstPage >= 1) {
-              if (revealCitationPage) revealCitationPage(firstPage);
+              if (revealCitationPage) revealCitationPage(firstPage, firstCitation?.bbox ?? null);
               else setPageNumber?.(firstPage);
             }
           }
@@ -297,6 +346,33 @@ export default function ChatPanel({
             <ul className="chat-history-list">
               {sessions.map((s) => {
                 const active = s.id === sessionId;
+                const isEditing = editingId === s.id;
+                if (isEditing) {
+                  return (
+                    <li key={s.id} className="chat-history-item-editing-row">
+                      <input
+                        ref={editInputRef}
+                        type="text"
+                        className="chat-history-edit-input"
+                        value={editTitle}
+                        maxLength={200}
+                        disabled={renameBusy}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            submitRename(s);
+                          } else if (e.key === 'Escape') {
+                            e.preventDefault();
+                            setEditingId(null);
+                          }
+                        }}
+                        onBlur={() => submitRename(s)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </li>
+                  );
+                }
                 return (
                   <li key={s.id}>
                     <button
@@ -306,15 +382,30 @@ export default function ChatPanel({
                         onSelectSession?.(s.id);
                         setHistoryOpen(false);
                       }}
+                      onDoubleClick={(e) => {
+                        e.preventDefault();
+                        startEditing(s, e);
+                      }}
                     >
                       <span className="chat-history-item-title">{s.title || 'New chat'}</span>
                       <span className="chat-history-item-time">{formatSessionTime(s.updated_at)}</span>
                     </button>
                     <button
                       type="button"
-                      className="chat-history-item-delete"
+                      className="chat-history-item-action chat-history-item-rename"
+                      title="Đổi tên"
+                      onClick={(e) => startEditing(s, e)}
+                    >
+                      <Pencil size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      className="chat-history-item-action chat-history-item-delete"
                       title="Xoá"
-                      onClick={() => onDeleteSession?.(s.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteSession?.(s.id);
+                      }}
                     >
                       <X size={12} />
                     </button>
@@ -368,7 +459,7 @@ export default function ChatPanel({
                         key={c.chunk_id || `${c.page_number}-${ci}`}
                         type="button"
                         className="citation-link-badge"
-                        onClick={() => (revealCitationPage ? revealCitationPage(c.page_number) : setPageNumber?.(c.page_number))}
+                        onClick={() => (revealCitationPage ? revealCitationPage(c.page_number, c.bbox ?? null) : setPageNumber?.(c.page_number))}
                         title={c.snippet || ''}
                       >
                         <span>📖</span>

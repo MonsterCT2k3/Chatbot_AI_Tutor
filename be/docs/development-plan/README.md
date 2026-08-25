@@ -10,13 +10,13 @@ Các phần hạ tầng thuần túy không trực tiếp quyết định chất
 
 ## Trạng thái hiện tại (2026-08-25)
 
-**Backend: Phase 0 → Phase 7 hoàn thành.** (Phase 0–5.6 như trước.) **Phase 6** — session CRUD, `send_message`, contextualize multi-turn, `answer_id` / feedback khi F5. **Phase 7** — SSE trên `POST /sessions/{id}/messages` (`status` / `token` / `citation` / `replace` / `done`), judge sau token, FE `fetch` stream, đã xoá `POST /documents/{id}/ask` (giữ feedback URL + `ask()` cho eval).
+**Backend: Phase 0 → Phase 8 hoàn thành.** Phase 6 session + multi-turn; Phase 7 SSE (status/token/citation/replace/done), xoá `/ask` hỏi (giữ feedback + `ask()` eval); Phase 8 citation UX (auto-jump, chip/viền trang, spike + wire `bbox`).
 
-**Frontend:** Phase 9 dựng sớm vẫn là khung chính. Đã nối session picker + chat SSE (7.5). Citation **click → nhảy trang** đã có; **chưa** auto-jump khi SSE `citation` tới, **chưa** overlay nguồn trên viewer — đó là [Phase 8](phase-8-citation-highlight.md) (đã rà lại 2026-08-25: UX trang + overlay nhẹ; bbox vùng chữ = phụ lục, không DoD).
+**Frontend ([Phase 9](phase-9-frontend.md)):** khung dựng sớm; đã nối session + SSE + citation/bbox. **DoD E2E lõi đã đạt.** Còn checklist dọn tùy chọn (đổi tên session UI, comment cũ, mock quota, sync doc) — xem file Phase 9.
 
 **Ghi chú cũ vẫn đúng:** thumbnail trang 1 + CORS R2 đã xử lý lúc làm FE sớm.
 
-Tiếp theo: **Phase 8 (citation UX trên viewer)** — plan đã viết lại cho khớp code hiện tại; rồi hardening / việc Phase 9 còn sót nếu có.
+Tiếp theo: dọn sót Phase 9 (nếu muốn đóng sạch) và/hoặc **[Phase 10 — Hardening](phase-10-hardening.md)**.
 
 ## Danh sách các phase
 
@@ -31,9 +31,9 @@ Tiếp theo: **Phase 8 (citation UX trên viewer)** — plan đã viết lại c
 - [Phase 5.6 — Guardrails, Safety & Observability](phase-5.6-guardrails-observability.md) ✅ Hoàn thành
 - [Phase 6 — Chat session CRUD + multi-turn](phase-6-chat-sessions.md) ✅ Hoàn thành
 - [Phase 7 — Streaming (SSE)](phase-7-streaming.md) ✅ Hoàn thành
-- [Phase 8 — Citation UX trên viewer (jump + overlay trang)](phase-8-citation-highlight.md) ← tiếp theo (plan đã rà 2026-08-25)
-- [Phase 9 — Frontend (React)](phase-9-frontend.md) 🚧 Phần lớn đã xong sớm — session + SSE đã nối; còn overlay citation (Phase 8)
-- [Phase 10 — Hardening & vận hành](phase-10-hardening.md)
+- [Phase 8 — Citation UX trên viewer (jump + overlay + bbox)](phase-8-citation-highlight.md) ✅ Hoàn thành
+- [Phase 9 — Frontend (React)](phase-9-frontend.md) ✅ DoD E2E đạt — còn checklist dọn 9.1–9.4 (tuỳ chọn)
+- [Phase 10 — Hardening & vận hành](phase-10-hardening.md) ← tiếp theo / song song dọn Phase 9
 
 ## Thứ tự khuyến nghị tóm tắt
 

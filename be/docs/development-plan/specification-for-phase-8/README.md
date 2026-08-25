@@ -11,4 +11,4 @@ Kế hoạch phase: [`../phase-8-citation-highlight.md`](../phase-8-citation-hig
 | [8.1-auto-jump-highlight-state.md](8.1-auto-jump-highlight-state.md) | State `highlightedPage` + auto-jump trang khi SSE/click citation | **Xong** (review PASS) |
 | [8.2-page-overlay.md](8.2-page-overlay.md) | Viền/glow + chip `Nguồn · Trang N` trên `SlideViewer` | **Xong** (review PASS) |
 | [8.3-bbox-spike.md](8.3-bbox-spike.md) | Spike đo bbox chữ PDF → chốt schema + CHOICE wire hay không | **Xong** — `CHOICE=GO_WIRE` (review PASS) |
-| [8.3b-bbox-wire.md](8.3b-bbox-wire.md) | Wire ingest `bbox` + citation/SSE + overlay rect FE | Spec — chưa implement |
+| [8.3b-bbox-wire.md](8.3b-bbox-wire.md) | Wire ingest `bbox` + citation/SSE + overlay rect FE | **Xong** (review PASS) |

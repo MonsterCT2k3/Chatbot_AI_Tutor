@@ -540,6 +540,7 @@ class Citation:
     page_number: int
     chunk_id: uuid.UUID
     snippet: str
+    bbox: dict | None = None
 
 
 @dataclass
@@ -669,7 +670,14 @@ def citations_from_structured_answer(structured: StructuredAnswer, chunks: list[
         if chunk is None:
             continue
         seen_pages.add(seg.page_number)
-        citations.append(Citation(page_number=seg.page_number, chunk_id=chunk.id, snippet=chunk.content[:200]))
+        citations.append(
+            Citation(
+                page_number=seg.page_number,
+                chunk_id=chunk.id,
+                snippet=chunk.content[:200],
+                bbox=chunk.bbox if isinstance(chunk.bbox, dict) else None,
+            )
+        )
     return citations
 
 

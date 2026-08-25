@@ -12,10 +12,10 @@ import './DashboardPage.css';
 // (mockup có nhiều số liệu/tính năng KHÔNG có dữ liệu thật đứng sau).
 //
 // Trạng thái tài liệu (pending/parsing/embedding) tự đổi thành 'ready' phía
-// server SAU KHI ingest xong — không có cách nào server chủ động báo cho
-// client (chưa có WebSocket/SSE, xem Phase 7 streaming). Poll lại danh sách
-// mỗi 3s CHỈ KHI có tài liệu nào đó chưa xong, dừng poll khi tất cả đã
-// ready/failed — tránh gọi API vô ích khi không có gì đang chờ.
+// server SAU KHI ingest xong — client poll trạng thái tài liệu mỗi 3s (chat
+// trong workspace đã có SSE ở Phase 7, nhưng upload/ingest tài liệu vẫn poll
+// danh sách). Poll CHỈ KHI có tài liệu nào đó chưa xong, dừng poll khi tất
+// cả đã ready/failed — tránh gọi API vô ích khi không có gì đang chờ.
 const NON_TERMINAL_STATUSES = new Set(['pending', 'parsing', 'embedding']);
 const POLL_INTERVAL_MS = 3000;
 

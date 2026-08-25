@@ -234,3 +234,89 @@ async def embed_chunks(chunks: list[str]) -> list[list[float]]:
     response = await retry_async(_call)
     ordered = sorted(response.data, key=lambda item: item.index)
     return [item.embedding for item in ordered]
+
+
+def extract_chunk_bboxes(pdf_bytes: bytes, chunk_rows: list[tuple[int, int, str]]) -> list[dict | None]:
+    """Phase 8.3b: Best-effort extraction of PDF user-space bounding boxes for each chunk.
+    chunk_rows: list of (page_number, chunk_index, content) with 1-based page_number.
+    Returns list of dict (Schema v1: coord='pdf_user_space') or None matching chunk_rows."""
+    results: list[dict | None] = [None] * len(chunk_rows)
+    if not pdf_bytes or not chunk_rows:
+        return results
+
+    try:
+        pdf = pdfium.PdfDocument(pdf_bytes)
+    except Exception:
+        return results
+
+    textpages: dict[int, tuple[pdfium.PdfPage, pdfium.PdfTextPage]] = {}
+    page_sizes: dict[int, tuple[float, float]] = {}
+
+    try:
+        total_pages = len(pdf)
+
+        for idx, (page_number, _chunk_index, content) in enumerate(chunk_rows):
+            p_idx = page_number - 1
+            if p_idx < 0 or p_idx >= total_pages:
+                continue
+
+            if p_idx not in textpages:
+                try:
+                    p = pdf[p_idx]
+                    textpages[p_idx] = (p, p.get_textpage())
+                    page_sizes[p_idx] = p.get_size()
+                except Exception:
+                    continue
+
+            _p, textpage = textpages[p_idx]
+            page_w, page_h = page_sizes[p_idx]
+
+            rects: list[dict] = []
+            lines = [line.strip() for line in content.split("\n") if len(line.strip()) >= 4]
+
+            for line in lines[:5]:
+                q = line[:60].strip()
+                if len(q) < 4:
+                    continue
+                try:
+                    search = textpage.search(q, match_case=False)
+                    match = search.get_next()
+                    if match:
+                        start_idx, count = match
+                        char_boxes = [textpage.get_charbox(i) for i in range(start_idx, start_idx + count)]
+                        if char_boxes:
+                            min_l = min(b[0] for b in char_boxes)
+                            min_b = min(b[1] for b in char_boxes)
+                            max_r = max(b[2] for b in char_boxes)
+                            max_t = max(b[3] for b in char_boxes)
+                            rects.append({
+                                "x": round(min_l, 2),
+                                "y": round(min_b, 2),
+                                "w": round(max_r - min_l, 2),
+                                "h": round(max_t - min_b, 2),
+                            })
+                except Exception:
+                    pass
+
+            if rects:
+                results[idx] = {
+                    "version": 1,
+                    "coord": "pdf_user_space",
+                    "page_width": float(round(page_w, 2)),
+                    "page_height": float(round(page_h, 2)),
+                    "rects": rects,
+                }
+    finally:
+        for p, tp in textpages.values():
+            try:
+                tp.close()
+                p.close()
+            except Exception:
+                pass
+        try:
+            pdf.close()
+        except Exception:
+            pass
+
+    return results
+

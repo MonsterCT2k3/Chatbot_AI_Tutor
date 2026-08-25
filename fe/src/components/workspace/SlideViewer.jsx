@@ -85,6 +85,7 @@ export default function SlideViewer({
   numPages,
   setNumPages,
   highlightedPage = null,
+  highlightedBbox = null,
 }) {
   const [zoom, setZoom] = useState(1);          // mức người dùng thấy — đổi tức thì
   const [pdfProxy, setPdfProxy] = useState(null);
@@ -321,6 +322,31 @@ export default function SlideViewer({
                     />
                   </div>
                 ))}
+
+                {/* Phase 8.3b: Overlay các rects tô vùng trích dẫn */}
+                {highlightedPage != null && highlightedPage === pageNumber && highlightedBbox?.rects?.length > 0 && (
+                  <div className="citation-bbox-container" aria-hidden="true">
+                    {highlightedBbox.rects.map((r, i) => {
+                      const scale = displayWidth / (highlightedBbox.page_width || 1);
+                      const left = r.x * scale;
+                      const top = ((highlightedBbox.page_height || 0) - (r.y + r.h)) * scale;
+                      const width = r.w * scale;
+                      const height = r.h * scale;
+                      return (
+                        <div
+                          key={i}
+                          className="citation-bbox-rect"
+                          style={{
+                            left: `${left}px`,
+                            top: `${top}px`,
+                            width: `${width}px`,
+                            height: `${height}px`,
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>

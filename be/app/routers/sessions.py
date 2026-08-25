@@ -176,7 +176,19 @@ async def post_chat_message(
             detail={"code": "CIRCUIT_BREAKER_OPEN", "message": str(e)},
         )
 
-    return MessageResponse.from_model(message, citations)
+    chunk_ids = [c.chunk_id for c in citations if c.chunk_id]
+    chunk_bboxes = {}
+    if chunk_ids:
+        c_rows = (
+            await db.execute(
+                select(DocumentChunk.id, DocumentChunk.bbox).where(
+                    DocumentChunk.id.in_(chunk_ids)
+                )
+            )
+        ).all()
+        chunk_bboxes = {cid: bbox for cid, bbox in c_rows}
+
+    return MessageResponse.from_model(message, citations, chunk_bboxes=chunk_bboxes)
 
 
 @router.get("/{session_id}/messages", response_model=MessageListResponse)
@@ -191,7 +203,7 @@ async def list_chat_messages(
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        messages, citations, has_more = await list_messages(
+        messages, citations, has_more, chunk_bboxes = await list_messages(
             db, session_id, current_user.id, limit=limit, before=before
         )
     except SessionNotFoundError:
@@ -213,7 +225,10 @@ async def list_chat_messages(
         next_cursor = oldest.isoformat().replace("+00:00", "Z")
 
     return MessageListResponse(
-        messages=[MessageResponse.from_model(m, citations.get(m.id, ())) for m in messages],
+        messages=[
+            MessageResponse.from_model(m, citations.get(m.id, ()), chunk_bboxes=chunk_bboxes)
+            for m in messages
+        ],
         next_cursor=next_cursor,
     )
 

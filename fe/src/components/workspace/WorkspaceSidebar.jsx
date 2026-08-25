@@ -9,12 +9,11 @@ function formatBytes(bytes) {
   return gb >= 0.1 ? `${gb.toFixed(1)} GB` : `${(bytes / (1024 * 1024)).toFixed(0)} MB`;
 }
 
-// Không có khái niệm quota dung lượng thật ở backend (MAX_FILE_SIZE_BYTES chỉ
-// giới hạn 1 file/lần upload, không phải tổng dung lượng tài khoản) — hiển thị
-// TỔNG DUNG LƯỢNG THẬT (cộng từ chính danh sách documents) so với 1 mốc quota
-// MOCK cố định, chỉ để có thanh progress trực quan như mockup, không phải số
-// giả hoàn toàn.
-const MOCK_QUOTA_BYTES = 10 * 1024 * 1024 * 1024;
+// Tổng dung lượng tính từ danh sách tài liệu hiện có (sum file_size_bytes).
+// Mốc 10 GB (UI_STORAGE_CAP_BYTES) chỉ là mốc tham chiếu trực quan cho thanh
+// progress bar của UI, backend không giới hạn tổng quota tài khoản (chỉ giới
+// hạn MAX_FILE_SIZE_BYTES cho từng file khi upload).
+const UI_STORAGE_CAP_BYTES = 10 * 1024 * 1024 * 1024;
 
 export default function WorkspaceSidebar({
   documents,
@@ -31,7 +30,7 @@ export default function WorkspaceSidebar({
 
   const displayName = user?.name || user?.email?.split('@')[0] || '';
   const usedBytes = documents.reduce((sum, d) => sum + (d.file_size_bytes || 0), 0);
-  const usedPct = Math.min(100, Math.round((usedBytes / MOCK_QUOTA_BYTES) * 100));
+  const usedPct = Math.min(100, Math.round((usedBytes / UI_STORAGE_CAP_BYTES) * 100));
 
   async function handleFileChange(e) {
     const file = e.target.files?.[0];
@@ -119,8 +118,12 @@ export default function WorkspaceSidebar({
 
       <div className="sidebar-footer">
         {!collapsed && (
-          <div>
-            <div className="storage-text-title">Dung lượng: {formatBytes(usedBytes)} / 10 GB</div>
+          <div
+            className="storage-meter"
+            title={`Tổng dung lượng tài liệu: ${formatBytes(usedBytes)}. Mốc 10 GB là mốc tham chiếu giao diện, hệ thống chưa giới hạn tổng dung lượng tài khoản.`}
+          >
+            <div className="storage-text-title">Đã dùng: {formatBytes(usedBytes)}</div>
+            <div className="storage-text-sub">Mốc tham chiếu 10 GB (chưa giới hạn tài khoản)</div>
             <div className="storage-track-bar">
               <div className="storage-fill-bar" style={{ width: `${usedPct}%` }} />
             </div>

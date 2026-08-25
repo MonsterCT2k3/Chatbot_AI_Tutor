@@ -178,7 +178,7 @@ Phần này tồn tại để không ai đọc tài liệu rồi tưởng hệ t
 | Gửi/đọc tin nhắn trong phiên | Hội thoại **không được lưu** — tải lại trang là mất | [Phase 6](../development-plan/phase-6-chat-sessions.md) bước 6.3–6.6 |
 | Hiểu ngữ cảnh nhiều lượt | Hỏi nối tiếp *"giải thích rõ hơn"* sẽ tìm sai đoạn | Phase 6 bước 6.7–6.8 |
 | Streaming (SSE) | Người dùng chờ im lặng vài giây rồi mới thấy toàn bộ câu trả lời | [Phase 7](../development-plan/phase-7-streaming.md) |
-| Highlight nguồn trên viewer | Click citation đã nhảy **trang**; chưa auto-jump lúc SSE / chưa overlay trang | [Phase 8](../development-plan/phase-8-citation-highlight.md) — jump + overlay nhẹ; bbox vùng chữ = phụ lục |
+| Highlight nguồn trên viewer | Auto-jump + chip/viền trang; bbox rect khi ingest có `bbox` | [Phase 8](../development-plan/phase-8-citation-highlight.md) ✅ |
 
 ### Cố ý KHÔNG làm (có số liệu chứng minh)
 

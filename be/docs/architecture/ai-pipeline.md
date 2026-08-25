@@ -157,7 +157,7 @@ Phần này quan trọng ngang phần đang chạy — nó cho thấy **kỹ thu
 |---|---|---|
 | **Hiểu ngữ cảnh nhiều lượt** | Hỏi *"giải thích rõ hơn phần đó"* sẽ retrieval sai, vì câu hỏi tự nó không đủ thông tin | [Phase 6](../development-plan/phase-6-chat-sessions.md) bước 6.7 |
 | **Streaming** | Chờ im lặng vài giây rồi mới thấy toàn bộ câu trả lời | [Phase 7](../development-plan/phase-7-streaming.md) |
-| **Highlight nguồn trên viewer** | Click đã nhảy trang; chưa auto-jump SSE / overlay trang (bbox vùng = sau) | [Phase 8](../development-plan/phase-8-citation-highlight.md) |
+| **Highlight nguồn trên viewer** | Auto-jump + chip trang + rect bbox (null → fallback trang) | [Phase 8](../development-plan/phase-8-citation-highlight.md) ✅ |
 | **Fallback nhà cung cấp LLM** | Groq gỡ model là hệ thống đứng — đã xảy ra 2 lần lúc phát triển | Ghi nhận, ưu tiên thấp |
 
 **Không có agent, không có tool calling, không có bộ nhớ dài hạn.** Đây là RAG một lượt, có kiểm chứng. Sự đơn giản đó là cố ý: mỗi chốt trong sơ đồ đều đo được và giải thích được, thứ mà kiến trúc agent nhiều bước rất khó đạt.

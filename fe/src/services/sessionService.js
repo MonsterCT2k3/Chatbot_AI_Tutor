@@ -16,6 +16,11 @@ export async function deleteSession(sessionId) {
   await apiClient.delete(`/sessions/${sessionId}`);
 }
 
+export async function renameSession(sessionId, title) {
+  const { data } = await apiClient.patch(`/sessions/${sessionId}`, { title });
+  return data;
+}
+
 export async function listMessages(sessionId) {
   const { data } = await apiClient.get(`/sessions/${sessionId}/messages`);
   return data;

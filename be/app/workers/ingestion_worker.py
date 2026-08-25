@@ -9,6 +9,7 @@ from app.services.ingestion_service import (
     chunk_text,
     convert_pptx_to_pdf,
     embed_chunks,
+    extract_chunk_bboxes,
     extract_text_hybrid,
     extract_text_mistral_ocr,
     extract_text_pypdf,
@@ -80,7 +81,13 @@ async def run_ingestion(document_id: uuid.UUID) -> None:
 
             if chunk_rows:
                 vectors = await embed_chunks([content for _, _, content in chunk_rows])
-                for (page_number, chunk_index, content), vector in zip(chunk_rows, vectors):
+                try:
+                    bboxes = extract_chunk_bboxes(pdf_bytes, chunk_rows)
+                except Exception:
+                    logger.exception("Failed to extract chunk bboxes for document %s", document.id)
+                    bboxes = [None] * len(chunk_rows)
+
+                for (page_number, chunk_index, content), vector, bbox in zip(chunk_rows, vectors, bboxes):
                     db.add(
                         DocumentChunk(
                             document_id=document.id,
@@ -89,6 +96,7 @@ async def run_ingestion(document_id: uuid.UUID) -> None:
                             chunk_index=chunk_index,
                             content=content,
                             embedding=vector,
+                            bbox=bbox,
                         )
                     )
             await db.commit()

@@ -42,6 +42,7 @@ class MessageCitationResponse(BaseModel):
     # lịch sử cũ, cần xử lý (dùng index làm key, tooltip có fallback).
     chunk_id: uuid.UUID | None = None
     snippet: str | None = None
+    bbox: dict | None = None
 
 
 class MessageResponse(BaseModel):
@@ -60,22 +61,35 @@ class MessageResponse(BaseModel):
     citations: list[MessageCitationResponse] = Field(default_factory=list)
 
     @classmethod
-    def from_model(cls, message, citations=()) -> "MessageResponse":
-        """Dựng response từ ChatMessage + các MessageCitation của nó.
-
-        Có hàm này để việc "answer_id nằm ở đâu trong metadata" chỉ được biết
-        tại ĐÚNG 1 chỗ. Nếu để mỗi nơi tự đọc metadata thì hàm đọc (6.3) và
-        hàm ghi (6.5) rất dễ trôi lệch nhau theo thời gian mà không có test
-        nào bắt được.
-        """
+    def from_model(
+        cls, message, citations=(), chunk_bboxes: dict[uuid.UUID, dict | None] | None = None
+    ) -> "MessageResponse":
+        """Dựng response từ ChatMessage + các MessageCitation của nó."""
         raw = (message.metadata_ or {}).get(ANSWER_ID_METADATA_KEY)
+        citation_models: list[MessageCitationResponse] = []
+        for c in citations:
+            bbox = None
+            if chunk_bboxes and getattr(c, "chunk_id", None):
+                bbox = chunk_bboxes.get(c.chunk_id)
+            elif hasattr(c, "bbox"):
+                bbox = getattr(c, "bbox", None)
+
+            citation_models.append(
+                MessageCitationResponse(
+                    page_number=c.page_number,
+                    chunk_id=c.chunk_id,
+                    snippet=c.snippet,
+                    bbox=bbox,
+                )
+            )
+
         return cls(
             id=message.id,
             role=message.role,
             content=message.content,
             created_at=message.created_at,
             answer_id=uuid.UUID(raw) if isinstance(raw, str) else raw,
-            citations=[MessageCitationResponse.model_validate(c) for c in citations],
+            citations=citation_models,
         )
 
 

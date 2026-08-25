@@ -5,6 +5,7 @@ import uuid
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.chunk import DocumentChunk
 from app.models.message import ChatMessage, MessageCitation
 from app.models.session import ChatSession
 from app.schemas.message import ANSWER_ID_METADATA_KEY
@@ -143,19 +144,33 @@ async def list_messages(
     # hiển thị. Truy vấn buộc phải giảm dần, nên đảo lại ở đây.
     rows.reverse()
 
-    # 1 truy vấn cho TẤT CẢ citations, không phải mỗi tin nhắn một truy vấn.
-    # Lấy từng cái sẽ thành N+1: trang 50 tin nhắn tốn 51 lượt đi DB.
     citations: dict[uuid.UUID, list[MessageCitation]] = {}
+    chunk_bboxes: dict[uuid.UUID, dict | None] = {}
     if rows:
-        found = await db.scalars(
-            select(MessageCitation)
-            .where(MessageCitation.message_id.in_([m.id for m in rows]))
-            .order_by(MessageCitation.page_number)
+        found = list(
+            (
+                await db.scalars(
+                    select(MessageCitation)
+                    .where(MessageCitation.message_id.in_([m.id for m in rows]))
+                    .order_by(MessageCitation.page_number)
+                )
+            ).all()
         )
         for citation in found:
             citations.setdefault(citation.message_id, []).append(citation)
 
-    return rows, citations, has_more
+        chunk_ids = [c.chunk_id for c in found if c.chunk_id]
+        if chunk_ids:
+            chunk_rows = (
+                await db.execute(
+                    select(DocumentChunk.id, DocumentChunk.bbox).where(
+                        DocumentChunk.id.in_(chunk_ids)
+                    )
+                )
+            ).all()
+            chunk_bboxes = {cid: bbox for cid, bbox in chunk_rows}
+
+    return rows, citations, has_more, chunk_bboxes
 
 
 async def save_user_message(db: AsyncSession, session: ChatSession, content: str) -> ChatMessage:
@@ -286,6 +301,7 @@ async def send_message_events(
                         "page_number": c.page_number,
                         "chunk_id": str(c.chunk_id) if c.chunk_id else None,
                         "snippet": c.snippet,
+                        "bbox": c.bbox,
                     },
                 )
         elif event == "result":
@@ -294,11 +310,13 @@ async def send_message_events(
     if result is None:
         raise RuntimeError("ask_events completed without yielding a result")
 
-    def _serialize_citation(c: Citation | MessageCitation) -> dict:
+    def _serialize_citation(c: Citation | MessageCitation, bbox: dict | None = None) -> dict:
+        resolved_bbox = bbox if bbox is not None else getattr(c, "bbox", None)
         return {
             "page_number": c.page_number,
             "chunk_id": str(c.chunk_id) if c.chunk_id else None,
             "snippet": c.snippet,
+            "bbox": resolved_bbox,
         }
 
     # Input moderation flagged: không có event "generated", nên emit token từ chối ở đây
@@ -350,7 +368,19 @@ async def send_message_events(
         ).all()
     )
 
-    final_citations_payload = [_serialize_citation(c) for c in saved_citations]
+    chunk_ids = [c.chunk_id for c in saved_citations if c.chunk_id]
+    chunk_bboxes: dict[uuid.UUID, dict | None] = {}
+    if chunk_ids:
+        chunk_rows = (
+            await db.execute(
+                select(DocumentChunk.id, DocumentChunk.bbox).where(DocumentChunk.id.in_(chunk_ids))
+            )
+        ).all()
+        chunk_bboxes = {cid: bbox for cid, bbox in chunk_rows}
+
+    final_citations_payload = [
+        _serialize_citation(c, bbox=chunk_bboxes.get(c.chunk_id)) for c in saved_citations
+    ]
 
     yield (
         "done",

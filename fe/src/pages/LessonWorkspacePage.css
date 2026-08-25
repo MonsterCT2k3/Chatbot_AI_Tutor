@@ -6,14 +6,14 @@
    - Toàn bộ nội dung "slide" giả (sơ đồ neural network SVG, công thức vàng,
      tooltip pin cố định cho 1 slide ví dụ) → THAY THẾ bằng PDF thật qua
      react-pdf (SlideViewer.jsx) — không mock, vì đã có nội dung thật.
-   - "Study Discussions" (session/thread) → MOCK tĩnh (Phase 6 chưa build,
-     xem WorkspaceSidebar.jsx) theo đúng yêu cầu "chưa có API thì cứ mock".
+   - Session/thread: THẬT — quản lý danh sách/tạo/đổi tên/xoá cuộc trò chuyện
+     và lịch sử hội thoại trong menu ChatPanel (Phase 6 + 9.1).
    - "R2 Storage quota" → dung lượng THẬT (cộng file_size_bytes có sẵn) hiển
-     thị trên 1 mốc quota MOCK cố định (không có quota thật ở backend).
-   - Chat: nội dung tin nhắn/trích dẫn/nút 👍👎 đều THẬT (POST /ask,
-     /ask/{id}/feedback) — mockup không có nút feedback, thêm vào vì backend
-     đã hỗ trợ sẵn (Phase 5.6.12). Gợi ý "Hỏi tiếp" là mock nội dung nhưng bấm
-     vào gửi câu hỏi thật. */
+     thị trên 1 mốc tham chiếu UI 10 GB (chưa giới hạn tổng dung lượng tài khoản).
+   - Chat: SSE streaming THẬT qua POST /sessions/{id}/messages?stream=1;
+     citation nhảy trang + chip nguồn + bbox (Phase 8); nút 👍👎 gửi feedback
+     qua POST /documents/{id}/ask/{answerId}/feedback. Gợi ý "Hỏi tiếp" là nội
+     dung gợi ý cố định nhưng bấm vào gửi câu hỏi thật. */
 
 .workspace-status-page {
   min-height: 100vh;
@@ -375,10 +375,23 @@
   border-top: 1px solid var(--border-inner);
 }
 
+.storage-meter {
+  display: flex;
+  flex-direction: column;
+  cursor: default;
+}
+
 .storage-text-title {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-dark);
+  margin-bottom: 2px;
+}
+
+.storage-text-sub {
+  font-size: 10.5px;
+  color: var(--text-sub);
+  line-height: 1.3;
   margin-bottom: 6px;
 }
 
@@ -648,6 +661,27 @@
   pointer-events: none;
 }
 
+/* Phase 8.3b: Vùng chứa và các rect highlight toạ độ chữ */
+.citation-bbox-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.citation-bbox-rect {
+  position: absolute;
+  background: rgba(245, 158, 11, 0.24);
+  border: 1px solid rgba(217, 119, 6, 0.7);
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.25);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
 /* Nút chuyển trang mờ 2 bên rìa trang — chỉ nổi rõ khi hover, không chiếm
    chỗ/không che nội dung khi không dùng tới. */
 .edge-nav-btn {
@@ -907,19 +941,47 @@
   color: var(--text-sub);
 }
 
-.chat-history-item-delete {
+.chat-history-item-action {
   border: none;
   background: transparent;
   color: var(--text-sub);
   cursor: pointer;
-  padding: 0 6px;
+  padding: 0 4px;
   display: flex;
   align-items: center;
+  justify-content: center;
   opacity: 0.35;
+  border-radius: 4px;
+  transition: opacity 0.15s ease, color 0.15s ease;
 }
 
-.chat-history-list li:hover .chat-history-item-delete {
+.chat-history-item-action:hover {
+  color: var(--text-dark);
   opacity: 1;
+}
+
+.chat-history-list li:hover .chat-history-item-action {
+  opacity: 0.85;
+}
+
+.chat-history-item-editing-row {
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.chat-history-edit-input {
+  width: 100%;
+  font-size: 12.5px;
+  font-family: inherit;
+  color: var(--text-dark);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-focus);
+  border-radius: 6px;
+  padding: 4px 8px;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(184, 58, 9, 0.15);
 }
 
 .chat-status-badges-row {

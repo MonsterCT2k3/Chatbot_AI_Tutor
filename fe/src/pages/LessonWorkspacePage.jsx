@@ -4,7 +4,7 @@ import WorkspaceSidebar from '../components/workspace/WorkspaceSidebar';
 import SlideViewer from '../components/workspace/SlideViewer';
 import ChatPanel from '../components/workspace/ChatPanel';
 import { getDocument, getDocumentFileUrl, listDocuments } from '../services/documentService';
-import { deleteSession, listSessions } from '../services/sessionService';
+import { deleteSession, listSessions, renameSession } from '../services/sessionService';
 import './LessonWorkspacePage.css';
 
 // Dựng từ fe/src/mock_html_ui/detail_screen_lesson/detail_screen_lesson.html.
@@ -23,20 +23,23 @@ export default function LessonWorkspacePage() {
   const [pageNumber, setPageNumber] = useState(1);
   const [numPages, setNumPages] = useState(null);
   const [highlightedPage, setHighlightedPage] = useState(null);
+  const [highlightedBbox, setHighlightedBbox] = useState(null);
   const [error, setError] = useState(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [sessions, setSessions] = useState([]);
 
-  function revealCitationPage(page) {
+  function revealCitationPage(page, bbox = null) {
     const n = Number(page);
     if (!Number.isFinite(n) || n < 1) return;
     const clamped = numPages ? Math.min(numPages, Math.max(1, n)) : n;
     setPageNumber(clamped);
     setHighlightedPage(clamped);
+    setHighlightedBbox(bbox && Array.isArray(bbox.rects) && bbox.rects.length > 0 ? bbox : null);
   }
 
   function clearCitationHighlight() {
     setHighlightedPage(null);
+    setHighlightedBbox(null);
   }
 
   function setSessionParam(id) {
@@ -58,8 +61,8 @@ export default function LessonWorkspacePage() {
     setCurrentDoc(null);
     setFileUrl(null);
     setPageNumber(1);
-    setNumPages(null);
     setHighlightedPage(null);
+    setHighlightedBbox(null);
     setError(null);
 
     getDocument(documentId)
@@ -75,6 +78,7 @@ export default function LessonWorkspacePage() {
 
   useEffect(() => {
     setHighlightedPage(null);
+    setHighlightedBbox(null);
   }, [sessionId]);
 
   useEffect(() => {
@@ -143,6 +147,7 @@ export default function LessonWorkspacePage() {
           numPages={numPages}
           setNumPages={setNumPages}
           highlightedPage={highlightedPage}
+          highlightedBbox={highlightedBbox}
         />
       )}
 
@@ -155,6 +160,11 @@ export default function LessonWorkspacePage() {
         clearCitationHighlight={clearCitationHighlight}
         onSelectSession={setSessionParam}
         onNewSession={() => setSessionParam(null)}
+        onRenameSession={async (id, title) => {
+          const updated = await renameSession(id, title);
+          setSessions((prev) => prev.map((s) => (s.id === id ? { ...s, ...updated } : s)));
+          return updated;
+        }}
         onDeleteSession={async (id) => {
           try {
             await deleteSession(id);

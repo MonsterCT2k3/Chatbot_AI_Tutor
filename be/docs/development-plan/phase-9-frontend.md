@@ -2,48 +2,87 @@
 
 ## Phase 9 — Frontend (React)
 
-**Việc cần làm (tổng quan, có thể tách plan riêng khi tới lúc):**
-- Layout 2 cột: viewer trái dùng `PDF.js`/`react-pdf` load file PDF từ `GET /api/documents/{id}/file` (xem [Phase 4](phase-4-viewer-api.md) — quyết định dùng PDF.js thay vì ảnh tĩnh để vẫn copy/select text được), có `highlightRegion(page)`, chat phải
-- Trang login/signup, lưu JWT (localStorage hoặc httpOnly cookie nếu muốn an toàn hơn), gắn `Authorization: Bearer` cho mọi request qua `axios` interceptor
-- Upload modal → poll `status` hoặc lắng nghe SSE cho tới khi `ready`
-- Session sidebar (list, tạo mới, đổi tên, xóa)
-- Khung chat: gửi câu hỏi → `EventSource`/`fetch` streaming → render token dần, khi nhận `citation` thì gọi `highlightRegion`
-
-**DoD:** luồng end-to-end thật trên browser: đăng ký → đăng nhập → upload PDF → chờ ready → hỏi → thấy trả lời stream + trang tự highlight.
+**Rà lại 2026-08-25.** Phase này **đã dựng sớm** (2026-08-19 → 23), rồi nối tiếp qua Phase 6/7/8. Bản mô tả “còn chờ backend” phía dưới **lạc** — file này thay thế phần đó bằng trạng thái thật + checklist dọn sót.
 
 ---
 
-### Cập nhật (2026-08-23) — đã làm sớm, ngoài thứ tự kế hoạch
+### Mục tiêu (DoD gốc — đã đạt)
 
-Phase này được dựng trong khoảng 2026-08-19 → 23, **trước** Phase 6/7/8. Lý do: đã có sẵn thiết kế HTML tự làm cho các màn hình chính (`fe/src/mock_html_ui/`), và cần 1 giao diện thật để dùng + soi lỗi backend thay vì chỉ `curl`. Phần nào không phụ thuộc Phase 6/7/8 thì làm luôn, phần nào phụ thuộc thì để mock có ghi chú rõ trong code.
+Luồng browser end-to-end:
 
-**Tech stack thực tế:** React 18 + Vite 5 + React Router v7 + axios + `react-pdf` + `lucide-react`. **Không dùng** CSS framework (dùng CSS thuần + custom properties làm design token) và **không dùng** thư viện state management (React Context là đủ cho quy mô này).
+**đăng ký / đăng nhập → upload PDF → chờ `ready` → hỏi trong session → thấy status/stream → citation nhảy trang + chỉ báo nguồn (chip/viền; có bbox thì tô vùng) → F5 còn lịch sử + 👍/👎.**
 
-**Khác kế hoạch:** layout là **3 panel** (sidebar tài liệu + viewer + chat), không phải 2 cột như bản kế hoạch — theo đúng thiết kế đã tự làm.
+---
 
-**Đã xong, đã chạy thật trên browser:**
+### Tech stack (thực tế)
 
-| Màn hình | Nội dung |
+React 18 + Vite 5 + React Router v7 + axios + `react-pdf` + `lucide-react`. CSS thuần + design tokens. Auth state: React Context. **Không** EventSource (chat = POST + JWT → `fetch` SSE).
+
+**Layout:** 3 panel (sidebar tài liệu + viewer + chat) — khác bản kế hoạch 2 cột, theo mock HTML tự làm (`fe/src/mock_html_ui/`).
+
+---
+
+### Bản kế hoạch / ghi chú 2026-08-23 lệch chỗ nào
+
+| Viết năm 2026-08-23 | Hiện tại (sau 6–8) |
 |---|---|
-| Đăng nhập / Đăng ký | JWT lưu `localStorage`, axios interceptor gắn `Authorization` + **tự refresh token 1 lần** khi gặp 401 rồi gọi lại đúng request cũ |
-| Dashboard | Danh sách tài liệu, upload + poll `status` tới khi `ready` (chỉ poll khi thật sự có tài liệu đang xử lý), **ảnh bìa trang 1 thật** |
-| Workspace | Sidebar tài liệu (thu gọn được), **viewer PDF thật** (`react-pdf`: vừa khung, zoom, chuyển trang bằng nút rìa + phím ← →, dải thumbnail), **chat thật** gọi `/api/documents/{id}/ask` có trích dẫn bấm được để nhảy tới đúng trang + 👍/👎 |
+| Chat `POST /documents/{id}/ask` | Session SSE `POST /sessions/{id}/messages?stream=1` (7.5); `/ask` hỏi đã xoá (7.6); feedback URL cũ giữ |
+| Session sidebar mock | Session list / tạo / xoá + lịch sử trong chat header (Phase 6) |
+| Chưa stream | SSE `status` → `token` (+ `citation` / `replace` / `done`); token = full câu tiếng Việt (chốt 7.1 — không typewriter) |
+| Chỉ nhảy trang, chưa highlight vùng | 8.1 auto-jump + 8.2 chip/viền trang + 8.3b rect bbox (null → fallback trang) |
+| `EventSource` trong mô tả gốc | **Không dùng** — đúng quyết định Phase 7 |
 
-**Còn thiếu — chờ backend tương ứng:**
+Giữ nguyên các quyết định đúng từ lúc dựng sớm:
 
-| Phần | Chờ phase | Hiện đang |
+- JWT `localStorage` + axios refresh 1 lần khi 401; `fetch` SSE tự refresh riêng (7.5).
+- Nút chưa có backend → **disabled** + tooltip “Chưa hỗ trợ” (không giả hoạt động).
+- Backend phát sinh lúc làm FE: `GET .../thumbnail` + CORS R2 (đã xử lý).
+
+---
+
+### Đã xong (không làm lại)
+
+| Khu vực | Nội dung |
+|---|---|
+| Auth | Signup / signin / logout / me; interceptor envelope + refresh |
+| Dashboard | List / upload / poll status / thumbnail / xoá |
+| Workspace | Sidebar tài liệu (collapse), `SlideViewer` (zoom, phím, filmstrip), `ChatPanel` |
+| Session | List theo document, tạo mới, chọn, xoá; `?session=`; `listMessages` F5 |
+| Chat | SSE stream, status tiếng Việt, feedback 👍/👎 |
+| Citation UX | Click + auto-jump; chip/viền trang; overlay rect khi có `bbox` |
+
+---
+
+### Còn sót — checklist dọn (không blocker lõi)
+
+Làm khi muốn “đóng” Phase 9 gọn; có thể tách spec ngắn từng mục.
+
+| # | Việc | Ghi chú |
 |---|---|---|
-| Sidebar session (list/tạo/đổi tên/xoá) + lịch sử chat lưu lại | [Phase 6](phase-6-chat-sessions.md) | mock tĩnh, có ghi chú trong `WorkspaceSidebar.jsx` |
-| Hiển thị token dần khi AI trả lời | [Phase 7](phase-7-streaming.md) | chờ trả lời xong rồi hiện 1 lần |
-| Highlight vùng cụ thể trong trang | [Phase 8](phase-8-citation-highlight.md) | chỉ nhảy tới đúng **trang** (`bbox` chưa được điền từ Phase 3) |
+| **[9.1](specification-for-phase-9/9.1-rename-session.md)** | UI **đổi tên session** (inline edit + `PATCH`) | **Xong** (review PASS) |
+| **[9.2](specification-for-phase-9/9.2-stale-comments.md)** | Sửa comment / CSS header còn nói mock session, chat `/ask` | **Xong** (review PASS) |
+| **[9.3](specification-for-phase-9/9.3-quota-label.md)** | Quota sidebar: giữ thanh + copy “mốc UI / chưa giới hạn tài khoản” | **Xong** (review PASS) |
+| **9.4** | Cập nhật overview README / bảng phase | Đồng bộ “Phase 8/9 xong” (làm kèm lần rà này) |
 
-Ngoài ra các nút Google/SSO, quên mật khẩu, đính kèm file, ghi âm, "layout trình chiếu", "tìm trong tài liệu" đều **để disabled kèm tooltip "Chưa hỗ trợ"** — cố ý không giả vờ hoạt động, vì backend không có endpoint tương ứng.
+**Ngoài phạm vi Phase 9** (giữ disabled trừ khi mở product/phase riêng):
 
-**2 việc backend phát sinh, đã làm luôn trong lúc dựng frontend:**
-- Thêm `GET /api/documents/{id}/thumbnail` + sinh sẵn ảnh trang 1 bằng `pypdfium2` ngay lúc ingest. Trước đó frontend phải tải cả file PDF (có file 20MB) chỉ để hiện 1 ảnh bìa nhỏ, và làm lại việc đó mỗi lần mở dashboard.
-- **Bucket R2 thiếu CORS policy** → trình duyệt chặn tải PDF qua presigned URL. Điểm đáng rút kinh nghiệm: `curl` bỏ qua CORS nên test bằng API **không bao giờ lộ ra lỗi này** — chỉ khi có frontend thật mới thấy. Đã áp policy qua Cloudflare dashboard (API token hiện tại chỉ có quyền Object, không có quyền Admin để đặt CORS bằng script); giữ `scripts/setup_r2_cors.py` cho lần sau khi có token đủ quyền.
+- Google / SSO, quên mật khẩu  
+- Đính kèm file / mic trong ô chat  
+- “Layout trình chiếu”, “Tìm trong tài liệu” trên viewer  
+- Stream chữ từng từ tiếng Việt  
+- Backfill bbox mọi document cũ  
 
-**DoD cập nhật:** phần "thấy trả lời stream + trang tự highlight" trong DoD gốc **chưa đạt và chưa thể đạt** ở phase này — nó phụ thuộc Phase 7/8. Sẽ chốt lại DoD gốc sau khi làm xong Phase 6/7/8 và nối frontend vào.
+Vận hành / bảo mật deploy: xem [Phase 10](phase-10-hardening.md).
+
+---
+
+### DoD phase (chốt lại 2026-08-25)
+
+- [x] E2E browser: auth → upload → ready → hỏi session SSE → citation UX (trang ± bbox) → F5 + feedback  
+- [x] Không còn phụ thuộc “chờ Phase 6/7/8” cho các mục trên  
+- [x] Checklist dọn 9.1–9.3 (9.4 README đã sync khi rà Phase 9)
+
+Spec chi tiết: [`specification-for-phase-9/`](specification-for-phase-9/).
 
 ---
 
