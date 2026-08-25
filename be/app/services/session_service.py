@@ -1,5 +1,6 @@
-import uuid
+from collections.abc import AsyncGenerator
 from datetime import datetime, timezone
+import uuid
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,8 +9,13 @@ from app.models.message import ChatMessage, MessageCitation
 from app.models.session import ChatSession
 from app.schemas.message import ANSWER_ID_METADATA_KEY
 from app.services.document_service import DocumentNotFoundError, ensure_document_ready, get_owned_document
-from app.services.rag_service import Citation, ask_for_user, contextualize_question
-from app.services.usage_service import check_circuit_breaker, check_daily_quota
+from app.services.rag_service import AnswerResult, Citation, ask_events, contextualize_question
+from app.services.usage_service import (
+    check_circuit_breaker,
+    check_cost_budget,
+    check_daily_quota,
+    log_ai_usage,
+)
 
 
 class SessionNotFoundError(Exception):
@@ -229,9 +235,9 @@ async def recent_messages_for_contextualize(
     return rows
 
 
-async def send_message(
+async def send_message_events(
     db: AsyncSession, session_id: uuid.UUID, user_id: uuid.UUID, question: str
-) -> tuple[ChatMessage, list[MessageCitation]]:
+) -> AsyncGenerator[tuple[str, dict], None]:
     session = await get_owned_session(db, session_id, user_id)
     document = await get_owned_document(db, session.document_id, user_id)
     ensure_document_ready(document)
@@ -245,24 +251,85 @@ async def send_message(
 
     call_group_id = uuid.uuid4()
     retrieve_question = question
+
+    # Kiểm tra quota & breaker trước khi gọi LLM
+    await check_circuit_breaker(db)
+    await check_daily_quota(db, user_id)
+
     if history:
-        # Tránh trả tiền rewrite khi đã hết quota / breaker đang mở.
-        await check_circuit_breaker(db)
-        await check_daily_quota(db, user_id)
+        yield ("status", {"stage": "contextualize"})
         retrieve_question = await contextualize_question(
             history, question, db=db, call_group_id=call_group_id
         )
 
-    # ask_for_user, không ask(): quota / circuit breaker / ai_usage_log.
-    # Exception sau bước này: tin user đã commit — đúng bất biến 6.4.
-    result = await ask_for_user(
+    draft_answer: str | None = None
+    draft_citations: list[Citation] = []
+    result: AnswerResult | None = None
+
+    async for event, payload in ask_events(
         db,
-        user_id,
         session.document_id,
         question,
         retrieve_question=retrieve_question,
         call_group_id=call_group_id,
+    ):
+        if event == "status":
+            yield (event, payload)
+        elif event == "generated":
+            draft_answer = payload["answer"]
+            draft_citations = payload["citations"]
+            yield ("token", {"delta": draft_answer})
+            for c in draft_citations:
+                yield (
+                    "citation",
+                    {
+                        "page_number": c.page_number,
+                        "chunk_id": str(c.chunk_id) if c.chunk_id else None,
+                        "snippet": c.snippet,
+                    },
+                )
+        elif event == "result":
+            result = payload
+
+    if result is None:
+        raise RuntimeError("ask_events completed without yielding a result")
+
+    def _serialize_citation(c: Citation | MessageCitation) -> dict:
+        return {
+            "page_number": c.page_number,
+            "chunk_id": str(c.chunk_id) if c.chunk_id else None,
+            "snippet": c.snippet,
+        }
+
+    # Input moderation flagged: không có event "generated", nên emit token từ chối ở đây
+    if draft_answer is None:
+        yield ("token", {"delta": result.answer})
+    else:
+        final_answer = result.answer
+        final_citations = result.citations
+        if final_answer != draft_answer:
+            yield (
+                "replace",
+                {
+                    "content": final_answer,
+                    "citations": [_serialize_citation(c) for c in final_citations],
+                },
+            )
+
+    # 5.6.9 / 6.6: Ghi ai_usage_log giống ask_for_user để liên kết answer_id với chi phí/đánh giá
+    await log_ai_usage(
+        db,
+        user_id,
+        id=result.call_group_id,
+        document_id=session.document_id,
+        blocked_reason=result.blocked_reason,
+        grounded=result.grounded,
+        faithfulness_score=result.faithfulness_score,
+        retried=result.retried,
+        total_tokens=result.total_tokens,
+        estimated_cost_usd=result.estimated_cost_usd,
     )
+    await check_cost_budget(db, user_id)
 
     assistant = await save_assistant_message(
         db,
@@ -282,7 +349,42 @@ async def send_message(
             )
         ).all()
     )
-    return assistant, saved_citations
+
+    final_citations_payload = [_serialize_citation(c) for c in saved_citations]
+
+    yield (
+        "done",
+        {
+            "message_id": str(assistant.id),
+            "answer_id": str(result.call_group_id) if result.call_group_id else None,
+            "citations": final_citations_payload,
+        },
+    )
+
+
+async def send_message(
+    db: AsyncSession, session_id: uuid.UUID, user_id: uuid.UUID, question: str
+) -> tuple[ChatMessage, list[MessageCitation]]:
+    done_payload = None
+    async for event, payload in send_message_events(db, session_id, user_id, question):
+        if event == "done":
+            done_payload = payload
+
+    if done_payload is None:
+        raise RuntimeError("send_message_events completed without a 'done' event")
+
+    message_id = uuid.UUID(done_payload["message_id"])
+    assistant = await db.scalar(select(ChatMessage).where(ChatMessage.id == message_id))
+    citations = list(
+        (
+            await db.scalars(
+                select(MessageCitation)
+                .where(MessageCitation.message_id == message_id)
+                .order_by(MessageCitation.page_number)
+            )
+        ).all()
+    )
+    return assistant, citations
 
 
 async def delete_session(db: AsyncSession, session_id: uuid.UUID, user_id: uuid.UUID) -> None:

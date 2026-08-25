@@ -8,15 +8,15 @@
 
 Các phần hạ tầng thuần túy không trực tiếp quyết định chất lượng AI (auth, upload, vận hành...) vẫn áp dụng nguyên tắc "đủ dùng, không over-engineer" như đã làm có chủ đích ở JWT ([Phase 1.5](phase-1.5-jwt-hardening.md) có hẳn 1 bảng ghi lại những gì cố ý KHÔNG làm và lý do) — 2 nguyên tắc này không mâu thuẫn nhau, chỉ khác phạm vi áp dụng.
 
-## Trạng thái hiện tại (2026-08-23)
+## Trạng thái hiện tại (2026-08-25)
 
-**Backend: Phase 0 → Phase 5.6 hoàn thành.** Supabase Postgres (Singapore) + R2 + Alembic đã kết nối và verify thật. Auth đầy đủ (signup/login/refresh/logout/me) với refresh token thu hồi được thật + rate limit `/login`; document upload/list/get/delete/status/file — toàn bộ ingestion pipeline (pypdf/mistral_ocr/hybrid + PPTX→PDF) đã chạy end-to-end với dữ liệu thật. **Phase 5.5 (Advanced RAG)** đã xong toàn bộ 9 bước + 1 bước phát sinh, mỗi bước đều đo bằng dữ liệu thật trước khi quyết định đưa vào production hay không: **đã đưa vào `ask()`** — reranking (cross-encoder đa ngôn ngữ, cải thiện rõ trên tài liệu dài), chuyển sang Groq (miễn phí, chất lượng ngang OpenAI), grounding/faithfulness verification (guardrail thật, có retry + fallback an toàn), phòng vệ prompt injection gián tiếp; **đã thử nhưng KHÔNG đưa vào** (có số liệu chứng minh không đạt) — hybrid search, query transformation, semantic caching. **Phase 5.6 (Guardrails, Safety & Observability)** đã xong 12/12 mục bắt buộc: input/output moderation, phòng vệ jailbreak trực tiếp (2 vòng vá thật), scope enforcement (đo, không đạt), hành vi khi faithfulness fail, quota/budget/circuit breaker theo user và toàn hệ thống, structured logging + prompt versioning có enforcement tự động, structured citation (bỏ regex), feedback loop 👍/👎. Phát hiện phụ đáng chú ý: bug index ivfflat gây mất 14% kết quả retrieval (đã sửa), Groq đổi/gỡ model 2 lần giữa phiên (bằng chứng thật cho rủi ro single-provider).
+**Backend: Phase 0 → Phase 7 hoàn thành.** (Phase 0–5.6 như trước.) **Phase 6** — session CRUD, `send_message`, contextualize multi-turn, `answer_id` / feedback khi F5. **Phase 7** — SSE trên `POST /sessions/{id}/messages` (`status` / `token` / `citation` / `replace` / `done`), judge sau token, FE `fetch` stream, đã xoá `POST /documents/{id}/ask` (giữ feedback URL + `ask()` cho eval).
 
-**Frontend: [Phase 9](phase-9-frontend.md) đã làm sớm, ngoài thứ tự kế hoạch** (2026-08-19 → 23). Lý do: có sẵn thiết kế HTML tự làm cho các màn hình chính, và cần 1 giao diện thật để dùng/kiểm chứng backend thay vì chỉ `curl`. **Đã chạy thật end-to-end trên browser:** đăng ký/đăng nhập (JWT + tự refresh qua axios interceptor), dashboard (danh sách tài liệu, upload + poll tới khi `ready`, ảnh bìa trang 1 thật), màn workspace 3 panel (sidebar tài liệu thu gọn được, viewer PDF thật bằng `react-pdf`, khung chat gọi `/ask` thật có trích dẫn bấm được để nhảy tới đúng trang + 👍/👎). **Còn thiếu, vì phụ thuộc backend chưa làm:** sidebar session (đang mock — cần Phase 6), hiển thị token dần (cần Phase 7), highlight vùng cụ thể trong trang (cần Phase 8; hiện chỉ nhảy tới trang).
+**Frontend:** Phase 9 dựng sớm vẫn là khung chính. Đã nối session picker + chat SSE (7.5). Citation **click → nhảy trang** đã có; **chưa** auto-jump khi SSE `citation` tới, **chưa** overlay nguồn trên viewer — đó là [Phase 8](phase-8-citation-highlight.md) (đã rà lại 2026-08-25: UX trang + overlay nhẹ; bbox vùng chữ = phụ lục, không DoD).
 
-**2 thay đổi backend phát sinh trong lúc làm frontend** (không nằm trong phase nào, đã làm luôn): thêm `GET /api/documents/{id}/thumbnail` + sinh sẵn ảnh trang 1 bằng `pypdfium2` lúc ingest (trước đó frontend phải tự tải cả file PDF chỉ để hiện 1 ảnh nhỏ — chậm và tốn băng thông); và phát hiện **bucket R2 thiếu CORS policy** nên trình duyệt chặn việc tải PDF qua presigned URL (`curl` không bị chặn nên không lộ ra khi test bằng API) — đã áp policy qua Cloudflare dashboard, kèm script `scripts/setup_r2_cors.py` cho lần sau.
+**Ghi chú cũ vẫn đúng:** thumbnail trang 1 + CORS R2 đã xử lý lúc làm FE sớm.
 
-Tiếp theo: **Phase 6 (Chat session CRUD + multi-turn)** — plan của phase này đã được rà lại và cập nhật ngày 2026-08-23 (xem mục "Cập nhật" ở đầu file Phase 6: 6 điểm lạc hậu/thiếu so với code thật, trong đó 2 điểm nghiêm trọng).
+Tiếp theo: **Phase 8 (citation UX trên viewer)** — plan đã viết lại cho khớp code hiện tại; rồi hardening / việc Phase 9 còn sót nếu có.
 
 ## Danh sách các phase
 
@@ -29,10 +29,10 @@ Tiếp theo: **Phase 6 (Chat session CRUD + multi-turn)** — plan của phase n
 - [Phase 5 — RAG orchestrator (baseline)](phase-5-rag-orchestrator.md) ✅ Hoàn thành
 - [Phase 5.5 — Advanced RAG (retrieval quality, faithfulness & evaluation)](phase-5.5-advanced-rag.md) ✅ Hoàn thành
 - [Phase 5.6 — Guardrails, Safety & Observability](phase-5.6-guardrails-observability.md) ✅ Hoàn thành
-- [Phase 6 — Chat session CRUD + multi-turn](phase-6-chat-sessions.md)
-- [Phase 7 — Streaming (SSE)](phase-7-streaming.md)
-- [Phase 8 — Citation resolver + frontend highlight](phase-8-citation-highlight.md)
-- [Phase 9 — Frontend (React)](phase-9-frontend.md) 🚧 Phần lớn đã xong, làm sớm ngoài thứ tự — còn chờ Phase 6/7/8
+- [Phase 6 — Chat session CRUD + multi-turn](phase-6-chat-sessions.md) ✅ Hoàn thành
+- [Phase 7 — Streaming (SSE)](phase-7-streaming.md) ✅ Hoàn thành
+- [Phase 8 — Citation UX trên viewer (jump + overlay trang)](phase-8-citation-highlight.md) ← tiếp theo (plan đã rà 2026-08-25)
+- [Phase 9 — Frontend (React)](phase-9-frontend.md) 🚧 Phần lớn đã xong sớm — session + SSE đã nối; còn overlay citation (Phase 8)
 - [Phase 10 — Hardening & vận hành](phase-10-hardening.md)
 
 ## Thứ tự khuyến nghị tóm tắt

@@ -20,14 +20,8 @@ ANSWER_ID_METADATA_KEY = "ai_usage_log_id"
 
 
 class MessageCreate(BaseModel):
-    # Đặt tên `question` (không phải `content`) để KHỚP với AskRequest của
-    # endpoint /api/documents/{id}/ask đang chạy — trong lúc 2 endpoint còn
-    # sống song song (mục ⑧ phase 6), frontend chuyển sang endpoint mới mà
-    # không phải đổi hình dạng body.
-    #
-    # Chưa đặt max_length, cũng để khớp AskRequest. Giới hạn độ dài câu hỏi là
-    # việc nên làm ở CẢ HAI endpoint cùng lúc (Phase 10 — hardening), đặt lệch
-    # nhau giữa 2 endpoint làm cùng 1 việc sẽ khó hiểu hơn là không đặt.
+    # Đặt tên `question` (không phải `content`) để khớp với trường câu hỏi đầu vào
+    # của người dùng.
     question: str = Field(min_length=1)
 
 
@@ -35,8 +29,7 @@ class MessageCitationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     page_number: int
-    # KHÁC CitationResponse của /ask (ở đó cả 2 trường đều bắt buộc): bảng
-    # message_citations cho phép NULL ở 2 cột này —
+    # Bảng message_citations cho phép NULL ở 2 cột này —
     #   - chunk_id: FK tới document_chunks với ondelete=SET NULL, nên nếu sau
     #     này có tính năng ingest lại tài liệu (xoá chunk cũ, tạo chunk mới),
     #     trích dẫn cũ vẫn còn nhưng mất con trỏ tới chunk.

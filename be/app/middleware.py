@@ -21,6 +21,10 @@ class ResponseEnvelopeMiddleware(BaseHTTPMiddleware):
         if request.url.path in _SKIP_PATHS or response.status_code >= 400:
             return response
 
+        media_type = (response.media_type or "").split(";")[0].strip().lower()
+        if media_type == "text/event-stream":
+            return response
+
         body = b"".join([chunk async for chunk in response.body_iterator])
         try:
             data = json.loads(body) if body else None

@@ -7,3 +7,6 @@ be/pdf_extract/
 fe/node_modules
 fe/dist
 fe/.env
+
+# Local FE SSE test credentials (never commit)
+fe/src/scripts/test_tokens.json

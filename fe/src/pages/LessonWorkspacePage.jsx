@@ -22,9 +22,22 @@ export default function LessonWorkspacePage() {
   const [fileUrl, setFileUrl] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [numPages, setNumPages] = useState(null);
+  const [highlightedPage, setHighlightedPage] = useState(null);
   const [error, setError] = useState(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [sessions, setSessions] = useState([]);
+
+  function revealCitationPage(page) {
+    const n = Number(page);
+    if (!Number.isFinite(n) || n < 1) return;
+    const clamped = numPages ? Math.min(numPages, Math.max(1, n)) : n;
+    setPageNumber(clamped);
+    setHighlightedPage(clamped);
+  }
+
+  function clearCitationHighlight() {
+    setHighlightedPage(null);
+  }
 
   function setSessionParam(id) {
     const next = new URLSearchParams(searchParams);
@@ -46,6 +59,7 @@ export default function LessonWorkspacePage() {
     setFileUrl(null);
     setPageNumber(1);
     setNumPages(null);
+    setHighlightedPage(null);
     setError(null);
 
     getDocument(documentId)
@@ -58,6 +72,10 @@ export default function LessonWorkspacePage() {
         setError(err.response?.status === 404 ? 'Tài liệu không tồn tại hoặc bạn không có quyền xem.' : 'Không tải được tài liệu.');
       });
   }, [documentId]);
+
+  useEffect(() => {
+    setHighlightedPage(null);
+  }, [sessionId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -124,6 +142,7 @@ export default function LessonWorkspacePage() {
           setPageNumber={setPageNumber}
           numPages={numPages}
           setNumPages={setNumPages}
+          highlightedPage={highlightedPage}
         />
       )}
 
@@ -132,6 +151,8 @@ export default function LessonWorkspacePage() {
         sessionId={sessionId}
         sessions={sessions}
         setPageNumber={setPageNumber}
+        revealCitationPage={revealCitationPage}
+        clearCitationHighlight={clearCitationHighlight}
         onSelectSession={setSessionParam}
         onNewSession={() => setSessionParam(null)}
         onDeleteSession={async (id) => {

@@ -77,7 +77,15 @@ const clampZoom = (z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round(z * 10
 //   hy sinh 40px.
 // - Kích thước trang lấy từ pdf proxy (getViewport({scale:1})), không lấy từ
 //   kết quả render, để không tạo phụ thuộc vòng.
-export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumber, numPages, setNumPages }) {
+export default function SlideViewer({
+  filename,
+  fileUrl,
+  pageNumber,
+  setPageNumber,
+  numPages,
+  setNumPages,
+  highlightedPage = null,
+}) {
   const [zoom, setZoom] = useState(1);          // mức người dùng thấy — đổi tức thì
   const [pdfProxy, setPdfProxy] = useState(null);
   const [pageSize, setPageSize] = useState(null); // kích thước THẬT của trang ở scale=1
@@ -280,7 +288,18 @@ export default function SlideViewer({ filename, fileUrl, pageNumber, setPageNumb
         {/* Lớp NGOÀI: được đo, overflow:hidden nên không bao giờ có thanh cuộn
             -> kích thước không bị nội dung PDF tác động ngược. Cũng là nơi neo
             2 nút chuyển trang để chúng đứng yên khi cuộn. */}
-        <div className="slide-canvas-card" ref={measureRef}>
+        <div
+          className={`slide-canvas-card ${highlightedPage != null && highlightedPage === pageNumber ? 'citation-page-active' : ''}`}
+          ref={measureRef}
+          data-citation-highlight={highlightedPage != null && highlightedPage === pageNumber ? '1' : '0'}
+        >
+          {highlightedPage != null && highlightedPage === pageNumber && (
+            <div className="citation-source-chip" aria-live="polite">
+              <span>📖</span>
+              <span>Nguồn · Trang {highlightedPage}</span>
+            </div>
+          )}
+
           {/* Lớp TRONG: nơi thanh cuộn thật sự xuất hiện khi zoom > 1. */}
           <div className="pdf-scroll-area">
             {displayWidth > 0 && (

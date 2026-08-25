@@ -1,7 +1,8 @@
-import uuid
 from datetime import datetime, timezone
+import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -9,7 +10,12 @@ from app.dependencies import get_current_user
 from app.models.user import User
 from app.schemas.message import MessageCreate, MessageListResponse, MessageResponse
 from app.schemas.session import SessionCreate, SessionResponse, SessionUpdate
-from app.services.document_service import DocumentNotFoundError, DocumentNotReadyError
+from app.services.document_service import (
+    DocumentNotFoundError,
+    DocumentNotReadyError,
+    ensure_document_ready,
+    get_owned_document,
+)
 from app.services.session_service import (
     SessionNotFoundError,
     create_session,
@@ -19,10 +25,18 @@ from app.services.session_service import (
     list_sessions,
     rename_session,
     send_message,
+    send_message_events,
 )
 from app.services.usage_service import CircuitBreakerOpenError, QuotaExceededError
+from app.sse import format_sse
 
 router = APIRouter()
+
+def _wants_sse(request: Request, stream: str | None = None) -> bool:
+    if stream and stream.strip().lower() in ("1", "true", "yes"):
+        return True
+    accept = request.headers.get("accept", "")
+    return "text/event-stream" in accept.lower()
 
 # Cùng 1 phản hồi 404 cho MỌI trường hợp không truy cập được — dù session
 # không tồn tại hay là của người khác. Xem get_owned_session để biết vì sao
@@ -82,13 +96,61 @@ async def rename_chat_session(
         raise _NOT_FOUND
 
 
-@router.post("/{session_id}/messages", response_model=MessageResponse)
+@router.post("/{session_id}/messages")
 async def post_chat_message(
+    request: Request,
     session_id: uuid.UUID,
     payload: MessageCreate,
+    stream: str | None = Query(None),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    if _wants_sse(request, stream):
+        # Validate ownership + ready trước khi mở StreamingResponse để
+        # 404/409 trả về HTTP envelope bình thường, không mở SSE rồi lỗi.
+        try:
+            session = await get_owned_session(db, session_id, current_user.id)
+            document = await get_owned_document(db, session.document_id, current_user.id)
+            ensure_document_ready(document)
+        except SessionNotFoundError:
+            raise _NOT_FOUND
+        except DocumentNotFoundError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"code": "DOCUMENT_NOT_FOUND", "message": "Document not found"},
+            )
+        except DocumentNotReadyError:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"code": "DOCUMENT_NOT_READY", "message": "The document isn't fully ingested yet"},
+            )
+
+        async def event_generator():
+            try:
+                async for event, data in send_message_events(
+                    db, session_id, current_user.id, payload.question
+                ):
+                    yield format_sse(event, data)
+            except QuotaExceededError as e:
+                yield format_sse("error", {"code": "QUOTA_EXCEEDED", "message": str(e)})
+            except CircuitBreakerOpenError as e:
+                yield format_sse("error", {"code": "CIRCUIT_BREAKER_OPEN", "message": str(e)})
+            except Exception:
+                yield format_sse(
+                    "error",
+                    {"code": "INTERNAL_ERROR", "message": "Đã có lỗi xảy ra trong quá trình xử lý câu hỏi."},
+                )
+
+        return StreamingResponse(
+            event_generator(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "X-Accel-Buffering": "no",
+                "Connection": "keep-alive",
+            },
+        )
+
     try:
         message, citations = await send_message(db, session_id, current_user.id, payload.question)
     except SessionNotFoundError:

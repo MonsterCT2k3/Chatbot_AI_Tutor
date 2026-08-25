@@ -4,6 +4,7 @@ import threading
 import time
 import uuid
 from collections import deque
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 
 import httpx
@@ -615,21 +616,24 @@ def _store_cached_answer(document_id: uuid.UUID, query_embedding: list[float], r
 async def _generate_structured(
     call_client: AsyncOpenAI, call_model: str, messages: list[dict]
 ) -> tuple[StructuredAnswer, TokenUsage]:
-    # .beta.chat.completions.parse (structured outputs), không phải
-    # .chat.completions.create thường — đã verify TRỰC TIẾP trước khi đổi
-    # (không giả định lại kết luận cũ của 5.5.6): model Groq hiện tại
-    # (openai/gpt-oss-120b) HỖ TRỢ structured outputs, khác hẳn model cũ
-    # (llama-3.3-70b-versatile, đã bị Groq gỡ — xem 5.5.5b) từng bị lỗi 400
-    # "does not support response format json_schema". Nếu sau này đổi
-    # call_model sang 1 model Groq khác không hỗ trợ, lỗi sẽ lộ ra ngay ở đây
-    # (exception thật, không silent fallback) — cần verify lại trước khi đổi.
+    # 7.1/7.3: .beta.chat.completions.stream (structured outputs), lấy parsed
+    # từ stream.get_final_completion(). Bỏ qua mọi delta event trong vòng
+    # async for vì delta Groq là chuỗi JSON thô (không emit trực tiếp ra user).
     async def _call():
-        return await call_client.beta.chat.completions.parse(
-            model=call_model, messages=messages, response_format=StructuredAnswer
-        )
+        async with call_client.beta.chat.completions.stream(
+            model=call_model,
+            messages=messages,
+            response_format=StructuredAnswer,
+        ) as stream:
+            async for _event in stream:
+                pass
+            final = await stream.get_final_completion()
+        parsed = final.choices[0].message.parsed
+        if parsed is None:
+            raise ValueError("Groq structured stream returned empty parsed")
+        return parsed, _usage_from_response(final)
 
-    response = await retry_async(_call)
-    return response.choices[0].message.parsed, _usage_from_response(response)
+    return await retry_async(_call)
 
 
 def render_structured_answer(structured: StructuredAnswer) -> str:
@@ -738,7 +742,7 @@ async def contextualize_question(
     return question if fail_reason is not None else rewritten
 
 
-async def ask(
+async def ask_events(
     db: AsyncSession,
     document_id: uuid.UUID,
     question: str,
@@ -747,21 +751,11 @@ async def ask(
     model: str | None = None,
     retrieve_question: str | None = None,
     call_group_id: uuid.UUID | None = None,
-) -> AnswerResult:
-    # client/model default to Groq (production) — overridable so eval scripts
-    # can run the exact same retrieval + prompt through a different provider
-    # for a fair head-to-head, without duplicating this function.
+) -> AsyncGenerator[tuple[str, dict | AnswerResult], None]:
     call_client = client or _groq_client
     call_model = model or settings.GROQ_CHAT_MODEL
-    # Câu độc lập (6.7) chỉ cho embed/rerank/generate. Moderate vẫn dùng `question`
-    # gốc — đúng chữ học viên gõ. None ⇒ đường cũ (eval, /ask).
     retrieve_q = retrieve_question or question
 
-    # 5.6.9: 1 id chung cho MỌI lệnh gọi AI của riêng lượt ask() này — sinh ra ở
-    # đây (KHÔNG phải khi ai_usage_log được ghi, việc đó xảy ra SAU, trong
-    # ask_for_user) để log được từng lệnh gọi ngay lúc nó xảy ra, không phải
-    # đợi có kết quả cuối cùng. send_message (6.7) có thể truyền sẵn id đã dùng
-    # cho log contextualize, để cả lượt chung 1 UUID.
     if call_group_id is None:
         call_group_id = uuid.uuid4()
 
@@ -781,78 +775,104 @@ async def ask(
             prompt_version=PROMPT_VERSION,
         )
 
-    # 5.6.1: chặn ngay từ đầu, trước cả embed_chunks/retrieval — nếu input vi
-    # phạm, không tốn thêm 1 lệnh gọi LLM sinh câu trả lời nào nữa. Trả về
-    # ĐÚNG câu REFUSAL_SENTENCE như mọi trường hợp từ chối khác (không có
-    # thông báo riêng kiểu "bị chặn vì vi phạm chính sách") — cố ý không tiết
-    # lộ LÝ DO bị chặn cho người dùng, tránh gợi ý cách diễn đạt lại để né.
     t0 = time.monotonic()
     input_flagged = await moderate_text(question)
     await _log_call(
-        "input_moderation", model="omni-moderation-latest", latency_ms=(time.monotonic() - t0) * 1000,
-        prompt=question, response=str(input_flagged),
+        "input_moderation",
+        model="omni-moderation-latest",
+        latency_ms=(time.monotonic() - t0) * 1000,
+        prompt=question,
+        response=str(input_flagged),
     )
     if input_flagged:
-        return AnswerResult(
-            answer=REFUSAL_SENTENCE, chunks=[], grounded=False, blocked_reason="input_moderation",
-            call_group_id=call_group_id,
+        yield (
+            "result",
+            AnswerResult(
+                answer=REFUSAL_SENTENCE,
+                chunks=[],
+                grounded=False,
+                blocked_reason="input_moderation",
+                call_group_id=call_group_id,
+            ),
         )
+        return
+
+    yield ("status", {"stage": "retrieving"})
 
     query_embedding = (await embed_chunks([retrieve_q]))[0]
-
-    # rerank_search (5.5.5), not plain similarity_search — measured improvement
-    # on real data: no regression on easy documents (Recall@6 stayed 1.000,
-    # MRR 0.914→0.921) and a real gain on a harder 83-page document (Recall@6
-    # 0.837→0.953, MRR 0.715→0.900). See explain-logic/phase-5.5-advanced-rag/5.5.5.
     chunks = await rerank_search(db, document_id, query_embedding, retrieve_q)
     context = format_context(chunks)
 
     gen_prompt = build_prompt(chunks, retrieve_q)
+
+    yield ("status", {"stage": "generating"})
+
     t0 = time.monotonic()
     structured, gen_usage = await _generate_structured(call_client, call_model, gen_prompt)
     answer = render_structured_answer(structured)
     gen_cost = estimate_cost_usd(call_model, gen_usage.prompt_tokens, gen_usage.completion_tokens)
     await _log_call(
-        "generation", model=call_model, latency_ms=(time.monotonic() - t0) * 1000,
-        prompt=gen_prompt[-1]["content"], response=answer, usage=gen_usage, cost=gen_cost,
+        "generation",
+        model=call_model,
+        latency_ms=(time.monotonic() - t0) * 1000,
+        prompt=gen_prompt[-1]["content"],
+        response=answer,
+        usage=gen_usage,
+        cost=gen_cost,
+    )
+
+    # 7.4: yield bản draft ngay sau khi generate xong để SSE đẩy token + citation sớm,
+    # trước khi bước vào judge / retry / output moderation (chạy sau).
+    yield (
+        "generated",
+        {
+            "answer": answer,
+            "citations": citations_from_structured_answer(structured, chunks),
+            "call_group_id": call_group_id,
+        },
     )
 
     t0 = time.monotonic()
     faithfulness, judge_usage = await score_faithfulness(answer, context)
     judge_cost = estimate_cost_usd(settings.CHAT_MODEL, judge_usage.prompt_tokens, judge_usage.completion_tokens)
     await _log_call(
-        "judge", model=settings.CHAT_MODEL, latency_ms=(time.monotonic() - t0) * 1000,
-        prompt=f"answer={answer}\ncontext={context}", response=f"score={faithfulness.score} {faithfulness.reasoning}",
-        usage=judge_usage, cost=judge_cost,
+        "judge",
+        model=settings.CHAT_MODEL,
+        latency_ms=(time.monotonic() - t0) * 1000,
+        prompt=f"answer={answer}\ncontext={context}",
+        response=f"score={faithfulness.score} {faithfulness.reasoning}",
+        usage=judge_usage,
+        cost=judge_cost,
     )
 
     grounded = faithfulness.score >= FAITHFULNESS_THRESHOLD
     faithfulness_score = faithfulness.score
     retried = False
 
-    # 5.6.7: cộng dồn chi phí THẬT từ mọi lệnh gọi LLM trong ask() — generation
-    # (giá theo call_model, hiện là Groq free tier nên = $0) + judge (luôn
-    # OpenAI gpt-4o-mini, có phí thật). estimate_cost_usd tra bảng giá theo
-    # ĐÚNG tên model đã gọi, không giả định cố định 1 loại giá.
     cost_usd = gen_cost + judge_cost
     total_tokens = (
-        gen_usage.prompt_tokens + gen_usage.completion_tokens + judge_usage.prompt_tokens + judge_usage.completion_tokens
+        gen_usage.prompt_tokens
+        + gen_usage.completion_tokens
+        + judge_usage.prompt_tokens
+        + judge_usage.completion_tokens
     )
 
     if not grounded:
-        # Lớp phòng vệ thứ 2 (5.5.7): thử lại 1 lần với chỉ dẫn nhấn mạnh hơn —
-        # nếu vẫn không đạt ngưỡng, KHÔNG trả câu trả lời có khả năng bịa đặt
-        # cho người dùng, mà fallback về đúng câu từ chối cố định (an toàn hơn
-        # là đoán). Giám khảo (score_faithfulness) luôn dùng OpenAI, độc lập
-        # với model sinh câu trả lời (Groq) — không tự chấm điểm chính mình.
         retry_prompt = build_prompt(chunks, retrieve_q, extra_instruction=_GROUNDING_RETRY_INSTRUCTION)
         t0 = time.monotonic()
         retry_structured, retry_gen_usage = await _generate_structured(call_client, call_model, retry_prompt)
         retry_answer = render_structured_answer(retry_structured)
-        retry_gen_cost = estimate_cost_usd(call_model, retry_gen_usage.prompt_tokens, retry_gen_usage.completion_tokens)
+        retry_gen_cost = estimate_cost_usd(
+            call_model, retry_gen_usage.prompt_tokens, retry_gen_usage.completion_tokens
+        )
         await _log_call(
-            "generation", model=call_model, latency_ms=(time.monotonic() - t0) * 1000,
-            prompt=retry_prompt[-1]["content"], response=retry_answer, usage=retry_gen_usage, cost=retry_gen_cost,
+            "generation",
+            model=call_model,
+            latency_ms=(time.monotonic() - t0) * 1000,
+            prompt=retry_prompt[-1]["content"],
+            response=retry_answer,
+            usage=retry_gen_usage,
+            cost=retry_gen_cost,
         )
 
         t0 = time.monotonic()
@@ -861,10 +881,13 @@ async def ask(
             settings.CHAT_MODEL, retry_judge_usage.prompt_tokens, retry_judge_usage.completion_tokens
         )
         await _log_call(
-            "judge", model=settings.CHAT_MODEL, latency_ms=(time.monotonic() - t0) * 1000,
+            "judge",
+            model=settings.CHAT_MODEL,
+            latency_ms=(time.monotonic() - t0) * 1000,
             prompt=f"answer={retry_answer}\ncontext={context}",
             response=f"score={retry_faithfulness.score} {retry_faithfulness.reasoning}",
-            usage=retry_judge_usage, cost=retry_judge_cost,
+            usage=retry_judge_usage,
+            cost=retry_judge_cost,
         )
 
         faithfulness_score = retry_faithfulness.score
@@ -886,46 +909,76 @@ async def ask(
             structured = StructuredAnswer(segments=[AnswerSegment(text=REFUSAL_SENTENCE)])
             grounded = False
 
-    # 5.6.4: kiểm duyệt CẢ ĐẦU RA, không chỉ đầu vào — input sạch vẫn có thể
-    # dẫn tới output không phù hợp (model tự sinh, hoặc nội dung tài liệu bị
-    # trích ra ngoài ý muốn). Bỏ qua khi answer đã là REFUSAL_SENTENCE: câu cố
-    # định do chính hệ thống viết, chắc chắn sạch — không việc gì phải trả thêm
-    # 1 lệnh gọi API để kiểm tra chuỗi ký tự mình vừa gán.
     if answer != REFUSAL_SENTENCE:
         t0 = time.monotonic()
         output_flagged = await moderate_text(answer)
         await _log_call(
-            "output_moderation", model="omni-moderation-latest", latency_ms=(time.monotonic() - t0) * 1000,
-            prompt=answer, response=str(output_flagged),
+            "output_moderation",
+            model="omni-moderation-latest",
+            latency_ms=(time.monotonic() - t0) * 1000,
+            prompt=answer,
+            response=str(output_flagged),
         )
         if output_flagged:
-            # answer bị thay hẳn bằng REFUSAL_SENTENCE — citations của structured
-            # GỐC (câu bị chặn) không còn ý nghĩa gì với câu trả lời THẬT SỰ trả
-            # về, nên bỏ trống, không tính từ `structured` cũ.
-            return AnswerResult(
-                answer=REFUSAL_SENTENCE,
-                chunks=chunks,
-                grounded=False,
-                citations=[],
-                blocked_reason="output_moderation",
-                faithfulness_score=faithfulness_score,
-                retried=retried,
-                total_tokens=total_tokens,
-                estimated_cost_usd=cost_usd,
-                call_group_id=call_group_id,
+            yield (
+                "result",
+                AnswerResult(
+                    answer=REFUSAL_SENTENCE,
+                    chunks=chunks,
+                    grounded=False,
+                    citations=[],
+                    blocked_reason="output_moderation",
+                    faithfulness_score=faithfulness_score,
+                    retried=retried,
+                    total_tokens=total_tokens,
+                    estimated_cost_usd=cost_usd,
+                    call_group_id=call_group_id,
+                ),
             )
+            return
 
-    return AnswerResult(
-        answer=answer,
-        chunks=chunks,
-        grounded=grounded,
-        citations=citations_from_structured_answer(structured, chunks),
-        faithfulness_score=faithfulness_score,
-        retried=retried,
-        total_tokens=total_tokens,
-        estimated_cost_usd=cost_usd,
-        call_group_id=call_group_id,
+    yield (
+        "result",
+        AnswerResult(
+            answer=answer,
+            chunks=chunks,
+            grounded=grounded,
+            citations=citations_from_structured_answer(structured, chunks),
+            faithfulness_score=faithfulness_score,
+            retried=retried,
+            total_tokens=total_tokens,
+            estimated_cost_usd=cost_usd,
+            call_group_id=call_group_id,
+        ),
     )
+
+
+async def ask(
+    db: AsyncSession,
+    document_id: uuid.UUID,
+    question: str,
+    *,
+    client: AsyncOpenAI | None = None,
+    model: str | None = None,
+    retrieve_question: str | None = None,
+    call_group_id: uuid.UUID | None = None,
+) -> AnswerResult:
+    result: AnswerResult | None = None
+    async for event, payload in ask_events(
+        db,
+        document_id,
+        question,
+        client=client,
+        model=model,
+        retrieve_question=retrieve_question,
+        call_group_id=call_group_id,
+    ):
+        if event == "result":
+            result = payload
+
+    if result is None:
+        raise RuntimeError("ask_events completed without yielding a result")
+    return result
 
 
 async def ask_for_user(

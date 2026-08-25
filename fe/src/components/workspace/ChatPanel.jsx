@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { BookOpen, Check, History, Mic, Paperclip, Plus, Send, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import { submitFeedback } from '../../services/chatService';
-import { createSession, listMessages, sendSessionMessage } from '../../services/sessionService';
+import { createSession, listMessages, mapStreamStatus, sendSessionMessageStream } from '../../services/sessionService';
 
 const FOLLOWUP_SUGGESTIONS = [
   'Giải thích chi tiết hơn phần vừa rồi',
@@ -21,7 +21,7 @@ function mapServerMessage(m) {
 
 function errorMessage(err) {
   const body = err.response?.data;
-  return body?.message || body?.error?.message || 'Không thể lấy câu trả lời lúc này. Thử lại sau.';
+  return body?.message || body?.error?.message || err.message || 'Không thể lấy câu trả lời lúc này. Thử lại sau.';
 }
 
 function formatSessionTime(iso) {
@@ -46,22 +46,26 @@ export default function ChatPanel({
   onNewSession,
   onDeleteSession,
   setPageNumber,
+  revealCitationPage,
+  clearCitationHighlight,
 }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isAsking, setIsAsking] = useState(false);
+  const [streamStatus, setStreamStatus] = useState(null);
   const [error, setError] = useState(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const scrollRef = useRef(null);
   const skipLoadRef = useRef(false);
   const historyRef = useRef(null);
+  const didAutoJumpRef = useRef(false);
 
   const currentSession = sessions.find((s) => s.id === sessionId);
   const sessionTitle = currentSession?.title || (sessionId ? 'Cuộc trò chuyện' : 'Cuộc trò chuyện mới');
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages, isAsking]);
+  }, [messages, isAsking, streamStatus]);
 
   useEffect(() => {
     if (!historyOpen) return undefined;
@@ -101,10 +105,13 @@ export default function ChatPanel({
 
   async function sendQuestion(question) {
     if (!question.trim() || isAsking) return;
+    clearCitationHighlight?.();
+    didAutoJumpRef.current = false;
     setError(null);
     setMessages((prev) => [...prev, { role: 'user', content: question }]);
     setInput('');
     setIsAsking(true);
+    setStreamStatus('Đang tìm trong tài liệu...');
     try {
       let sid = sessionId;
       if (!sid) {
@@ -113,22 +120,122 @@ export default function ChatPanel({
         skipLoadRef.current = true;
         onSessionEnsured(created);
       }
-      const result = await sendSessionMessage(sid, question);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          answerId: result.answer_id ?? null,
-          content: result.content,
-          citations: result.citations || [],
-          feedback: null,
+
+      await sendSessionMessageStream(sid, question, {
+        onStatus(stage) {
+          setStreamStatus(mapStreamStatus(stage));
         },
-      ]);
-      onSessionEnsured({ id: sid });
+        onToken(delta) {
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === 'assistant' && last._streaming) {
+              return [
+                ...prev.slice(0, -1),
+                { ...last, content: last.content + delta },
+              ];
+            }
+            return [
+              ...prev,
+              {
+                role: 'assistant',
+                content: delta,
+                citations: [],
+                answerId: null,
+                feedback: null,
+                _streaming: true,
+              },
+            ];
+          });
+          setStreamStatus(null);
+        },
+        onCitation(citation) {
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === 'assistant' && last._streaming) {
+              return [
+                ...prev.slice(0, -1),
+                { ...last, citations: [...(last.citations || []), citation] },
+              ];
+            }
+            return prev;
+          });
+
+          if (!didAutoJumpRef.current) {
+            const p = Number(citation?.page_number);
+            if (Number.isFinite(p) && p >= 1) {
+              didAutoJumpRef.current = true;
+              if (revealCitationPage) revealCitationPage(p);
+              else setPageNumber?.(p);
+            }
+          }
+        },
+        onReplace({ content, citations }) {
+          const nextCitations = citations || [];
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === 'assistant' && last._streaming) {
+              return [
+                ...prev.slice(0, -1),
+                { ...last, content, citations: nextCitations },
+              ];
+            }
+            return prev;
+          });
+
+          if (nextCitations.length === 0) {
+            clearCitationHighlight?.();
+          } else {
+            didAutoJumpRef.current = true;
+            const firstPage = Number(nextCitations[0]?.page_number);
+            if (Number.isFinite(firstPage) && firstPage >= 1) {
+              if (revealCitationPage) revealCitationPage(firstPage);
+              else setPageNumber?.(firstPage);
+            }
+          }
+        },
+        onDone(payload) {
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === 'assistant' && last._streaming) {
+              return [
+                ...prev.slice(0, -1),
+                {
+                  ...last,
+                  answerId: payload.answer_id ?? null,
+                  citations: payload.citations || last.citations || [],
+                  _streaming: false,
+                },
+              ];
+            }
+            return prev;
+          });
+          onSessionEnsured({ id: sid });
+        },
+        onError(payload) {
+          clearCitationHighlight?.();
+          setError(payload.message || 'Đã có lỗi xảy ra.');
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === 'assistant' && last._streaming) {
+              return prev.slice(0, -1);
+            }
+            return prev;
+          });
+        },
+      });
     } catch (err) {
-      setError(errorMessage(err));
+      clearCitationHighlight?.();
+      setError(err.message || errorMessage(err));
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last && last.role === 'assistant' && last._streaming) {
+          return prev.slice(0, -1);
+        }
+        return prev;
+      });
     } finally {
       setIsAsking(false);
+      setStreamStatus(null);
     }
   }
 
@@ -241,7 +348,7 @@ export default function ChatPanel({
               <div className="user-bubble-content">{m.content}</div>
             </div>
           ) : (
-            <div className="ai-bubble-container" key={m.answerId || `a-${i}`}>
+            <div className="ai-bubble-container" key={m.answerId || (m._streaming ? 'streaming-msg' : `a-${i}`)}>
               <div className="ai-book-avatar">
                 <BookOpen size={14} color="#92400E" />
               </div>
@@ -261,7 +368,7 @@ export default function ChatPanel({
                         key={c.chunk_id || `${c.page_number}-${ci}`}
                         type="button"
                         className="citation-link-badge"
-                        onClick={() => setPageNumber(c.page_number)}
+                        onClick={() => (revealCitationPage ? revealCitationPage(c.page_number) : setPageNumber?.(c.page_number))}
                         title={c.snippet || ''}
                       >
                         <span>📖</span>
@@ -298,12 +405,12 @@ export default function ChatPanel({
           ),
         )}
 
-        {isAsking && (
+        {isAsking && streamStatus && (
           <div className="ai-bubble-container">
             <div className="ai-book-avatar">
               <BookOpen size={14} color="#92400E" />
             </div>
-            <div className="ai-card-content ai-card-loading">Đang tìm trong tài liệu...</div>
+            <div className="ai-card-content ai-card-loading">{streamStatus}</div>
           </div>
         )}
 
